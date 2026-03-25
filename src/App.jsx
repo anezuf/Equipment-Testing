@@ -88,52 +88,104 @@ export default function App(){
   },[sections,vendors]);
 
   /* Export to Excel (same format as template) */
-  const exportExcelFile=useCallback(()=>{
+  const exportExcelFile=useCallback(async()=>{
     try{
-      const wb=XLSX.utils.book_new();
+      const {default:ExcelJS}=await import("exceljs");
+      const wb=new ExcelJS.Workbook();
+      const ws=wb.addWorksheet("Оценка");
       const colCount=3+vendors.length*2;
-      const rows=[];
 
-      /* Row 1: title — merged across all columns */
-      rows.push(["ЧЕК-ЛИСТ ТЕСТИРОВАНИЯ СТОЕК"]);
+      /* helpers */
+      const argb=hex=>"FF"+hex.replace("#","");
+      const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:argb(hex)}});
+      const fnt=(color,bold=false,size)=>({bold,color:{argb:argb(color)},...(size?{size}:{})});
+      const CENTER={horizontal:"center",vertical:"middle"};
+      const LEFT={horizontal:"left",vertical:"middle"};
 
-      /* Row 2: column headers */
+      /* column widths */
+      ws.getColumn(1).width=5;
+      ws.getColumn(2).width=30;
+      ws.getColumn(3).width=18;
+      vendors.forEach((_,vi)=>{
+        ws.getColumn(4+vi*2).width=12;
+        ws.getColumn(5+vi*2).width=22;
+      });
+
+      /* ROW 1: title */
+      ws.addRow(["ЧЕК-ЛИСТ ТЕСТИРОВАНИЯ СТОЕК"]);
+      ws.mergeCells(1,1,1,colCount);
+      const tc=ws.getCell(1,1);
+      tc.fill=fill("#334155");tc.font=fnt("#FFFFFF",true,13);tc.alignment=CENTER;
+      ws.getRow(1).height=26;
+
+      /* ROW 2: headers */
       const hdr=["#","Параметр","Тип"];
       vendors.forEach((v,n)=>{hdr.push(v.name);hdr.push(`Прим. В${n+1}`);});
-      rows.push(hdr);
+      ws.addRow(hdr);
+      for(let c=1;c<=colCount;c++){
+        const cell=ws.getCell(2,c);
+        cell.fill=fill("#334155");cell.font=fnt("#FFFFFF",true);cell.alignment=CENTER;
+      }
+      ws.getRow(2).height=18;
 
-      /* Data: section header row + item rows */
+      /* data rows */
       let gi=0;
+      let rowNum=3;
       sections.forEach(sec=>{
-        rows.push([sec.n]); /* section name in col A, rest empty */
+        /* section header */
+        ws.addRow([sec.n]);
+        ws.mergeCells(rowNum,1,rowNum,colCount);
+        const sc=ws.getCell(rowNum,1);
+        sc.fill=fill("#2F9AFF");sc.font=fnt("#FFFFFF",true);sc.alignment=CENTER;
+        ws.getRow(rowNum).height=16;
+        rowNum++;
+
         sec.items.forEach(it=>{
-          const row=[gi+1,it.n,it.w===2?"★! Требование":it.w===1?"★ Требование":"☆ Преимущество"];
+          const typeStr=it.w===2?"★! Требование":it.w===1?"★ Требование":"☆ Преимущество";
+          const isReq=it.w>=1;
+          const altBg=gi%2===0?"#F5F8FB":"#FFFFFF";
+
+          const rowData=[gi+1,it.n,typeStr];
           vendors.forEach(v=>{
-            row.push(v.scores[gi]!=null?v.scores[gi]:"");
-            row.push(v.notes[gi]||"");
+            rowData.push(v.scores[gi]!=null?v.scores[gi]:"");
+            rowData.push(v.notes[gi]||"");
           });
-          rows.push(row);
-          gi++;
+          ws.addRow(rowData);
+          ws.getRow(rowNum).height=15;
+
+          /* A: number */
+          const ca=ws.getCell(rowNum,1);
+          ca.font=fnt("#7B97B2");ca.alignment=CENTER;
+
+          /* B: name */
+          const cb=ws.getCell(rowNum,2);
+          cb.font=fnt("#334155");cb.alignment=LEFT;
+
+          /* C: type */
+          const cc=ws.getCell(rowNum,3);
+          cc.fill=isReq?fill("#FEE2E2"):fill("#DBEAFE");
+          cc.font=isReq?fnt("#DC2626",true):fnt("#2F9AFF",true);
+          cc.alignment=CENTER;
+
+          /* score + note cols */
+          vendors.forEach((_,vi)=>{
+            const sc2=ws.getCell(rowNum,4+vi*2);
+            sc2.fill=fill(altBg);sc2.alignment=CENTER;
+            const nc=ws.getCell(rowNum,5+vi*2);
+            nc.fill=fill(altBg);nc.font=fnt("#7B97B2");
+          });
+
+          rowNum++;gi++;
         });
       });
 
-      const ws=XLSX.utils.aoa_to_sheet(rows);
-
-      /* Merges: row 0 = title, then each section header row */
-      const merges=[{s:{r:0,c:0},e:{r:0,c:colCount-1}}];
-      let ri=2; /* first section starts after title(0) and header(1) */
-      sections.forEach(sec=>{
-        merges.push({s:{r:ri,c:0},e:{r:ri,c:colCount-1}});
-        ri+=1+sec.items.length;
-      });
-      ws["!merges"]=merges;
-
-      /* Column widths */
-      ws["!cols"]=[{wch:4},{wch:28},{wch:16}];
-      vendors.forEach(()=>{ws["!cols"].push({wch:12},{wch:20});});
-
-      XLSX.utils.book_append_sheet(wb,ws,"Оценка");
-      XLSX.writeFile(wb,"scoring_export.xlsx");
+      /* download */
+      const buffer=await wb.xlsx.writeBuffer();
+      const blob=new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;a.download="scoring_export.xlsx";a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
     }catch(err){
       console.error(err);
       alert("Ошибка экспорта Excel: "+err.message);
