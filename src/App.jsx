@@ -42,7 +42,7 @@ function loadSaved(){
 
 function HeatmapTh({si,s,active,onSort}){
   const [hov,setHov]=useState(false);
-  return <th onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onSort} style={{textAlign:"center",padding:"4px 2px",fontSize:10,fontWeight:active?800:600,color:active?B.blue:B.steel,borderBottom:`2px solid ${active?B.blue:B.border}`,verticalAlign:"middle",cursor:"pointer",userSelect:"none",transition:"color 0.15s,border-color 0.15s",whiteSpace:"nowrap",position:"relative"}}>{si+1}{hov&&<div style={{position:"absolute",bottom:"calc(100% + 6px)",left:"50%",transform:"translateX(-50%)",background:B.graphite,color:"#fff",fontSize:10,fontWeight:500,padding:"4px 8px",borderRadius:6,whiteSpace:"nowrap",pointerEvents:"none",zIndex:99,boxShadow:"0 2px 8px rgba(0,0,0,0.18)",lineHeight:"1.3"}}>{s.n}<div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:`5px solid ${B.graphite}`}}/></div>}</th>;
+  return <th onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onSort} style={{textAlign:"center",padding:"4px 2px",fontSize:10,fontWeight:active?800:600,color:active?B.blue:B.steel,verticalAlign:"middle",cursor:"pointer",userSelect:"none",transition:"color 0.15s",whiteSpace:"nowrap",position:"relative"}}>{si+1}{hov&&<div style={{position:"absolute",bottom:"calc(100% + 6px)",left:"50%",transform:"translateX(-50%)",background:B.graphite,color:"#fff",fontSize:10,fontWeight:500,padding:"4px 8px",borderRadius:6,whiteSpace:"nowrap",pointerEvents:"none",zIndex:99,boxShadow:"0 2px 8px rgba(0,0,0,0.18)",lineHeight:"1.3"}}>{s.n}<div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:`5px solid ${B.graphite}`}}/></div>}</th>;
 }
 
 function SortableSectionShell({id,children}){
@@ -826,11 +826,9 @@ export default function App(){
 
       {/* Heatmap — full width */}
       <div data-heatmap="" style={{background:"#fff",borderRadius:16,padding:16,border:`1px solid ${B.border}`,marginBottom:24}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",paddingBottom:12,borderBottom:`2px solid ${B.border}`,marginBottom:2,flexWrap:"wrap",gap:8}}>
           <div style={{fontSize:13,fontWeight:700,color:B.graphite}}>Сравнение по разделам</div>
-          <div data-heatmap-section-label="" style={{fontSize:12,fontWeight:600,color:heatmapSort.label?B.blue:B.steel,background:heatmapSort.label?`${B.blue}10`:"#F8FAFC",borderRadius:8,padding:"4px 12px",border:`1px solid ${heatmapSort.label?B.blue:B.border}`,transition:"all 0.2s",minWidth:160,textAlign:"center"}}>
-            {heatmapSort.label||"Выберите раздел"}
-          </div>
+          <div style={{fontSize:11,color:B.steel}}>← нажмите на номер для сортировки</div>
         </div>
         <div data-heatmap-legend="" style={{display:"none",marginBottom:10,fontSize:9,color:B.graphite,columnCount:2,columnGap:16}}>
           {sections.map((s,si)=><div key={si} style={{marginBottom:3}}><span style={{fontWeight:700,color:B.blue}}>{si+1}.</span> {s.n}</div>)}
@@ -838,25 +836,25 @@ export default function App(){
         <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,tableLayout:"fixed"}}>
           <thead>
             <tr>
-              <th style={{textAlign:"left",padding:"6px 8px",fontSize:10,color:B.steel,fontWeight:600,borderBottom:`2px solid ${B.border}`,width:120}}>Вендор</th>
+              <th style={{textAlign:"left",padding:"6px 8px",fontSize:10,color:B.steel,fontWeight:600,width:120}}>Вендор</th>
               {sections.map((s,si)=>{
                 const active=heatmapSort.col===si;
                 return <HeatmapTh key={si} si={si} s={s} active={active} onSort={()=>{const next=active?null:si;setHeatmapSort({col:next,label:next===null?null:s.n});}}/>;
               })}
-              <th onClick={()=>setHeatmapSort({col:null,label:null})} style={{textAlign:"center",padding:"6px 4px",fontSize:10,fontWeight:heatmapSort.col===null?800:700,color:heatmapSort.col===null?B.blue:B.graphite,borderBottom:`2px solid ${heatmapSort.col===null?B.blue:B.border}`,width:50,cursor:"pointer",userSelect:"none",transition:"color 0.15s,border-color 0.15s"}}>Итого</th>
+              <th onClick={()=>setHeatmapSort({col:null,label:null})} style={{textAlign:"center",padding:"6px 4px",fontSize:10,fontWeight:heatmapSort.col===null?800:700,color:heatmapSort.col===null?B.blue:B.graphite,width:50,cursor:"pointer",userSelect:"none",transition:"color 0.15s"}}>Итого</th>
             </tr>
           </thead>
           <tbody>
             {heatmapSortedIdx.map((i,rank)=>{const v=vendors[i];const t=totals[i];
               const rowBg=rank%2?"#fff":"#F8FAFC";
               return <tr key={i} style={{borderBottom:`1px solid #F1F5F9`}}>
-                <td style={{padding:"6px 8px",fontSize:10,fontWeight:600,color:VC[i%VC.length],background:rowBg,borderRight:`1px solid ${B.border}`,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{v.name}</td>
+                <td style={{padding:"6px 8px",fontSize:10,fontWeight:600,color:VC[i%VC.length],background:rowBg,borderLeft:`3px solid ${VC[i%VC.length]}`,borderRight:`1px solid ${B.border}`,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{v.name}</td>
                 {sections.map((s,si)=>{
                   const val=allSec[i]?allSec[i][si]:0;
                   const bg=val>=8?"#D1FAE5":val>=5?"#FEF3C7":val>0?"#FEE2E2":"#F1F5F9";
-                  const tc=val>=8?"#065F46":val>=5?"#92400E":val>0?"#991B1B":B.steel;
+                  const tc=val>=8?"#065F46":val>=5?"#92400E":val>0?"#991B1B":"#CBD5E1";
                   const isActiveCol=heatmapSort.col===si;
-                  return <td key={si} style={{textAlign:"center",padding:"6px 2px",background:bg,fontWeight:isActiveCol?800:700,fontSize:10,color:tc,outline:isActiveCol?`1.5px solid ${B.blue}40`:undefined,outlineOffset:-1}}>{fmt(val)}</td>;
+                  return <td key={si} style={{textAlign:"center",padding:"6px 2px",background:bg,fontWeight:isActiveCol?800:700,fontSize:10,color:tc,outline:isActiveCol?`1.5px solid ${B.blue}40`:undefined,outlineOffset:-1}}>{val===0?"—":fmt(val)}</td>;
                 })}
                 <td style={{textAlign:"center",padding:"6px 4px",fontWeight:800,fontSize:11,color:t!=null&&t>=8?"#065F46":t!=null&&t>=5?"#92400E":t!=null&&t>0?"#991B1B":B.steel,background:t!=null&&t>=8?"#D1FAE5":t!=null&&t>=5?"#FEF3C7":t!=null&&t>0?"#FEE2E2":rowBg,borderLeft:`2px solid ${B.border}`}}>{fmt(t)}</td>
               </tr>;
