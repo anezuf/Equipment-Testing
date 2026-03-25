@@ -23,7 +23,7 @@ function SegBar({scores,notes,images,si,onNoteClick,secs,offs,sortByColor}){
       })}
     </div>
     {/* Bar — overflow hidden keeps corners clean */}
-    <div style={{display:"flex",height:20,borderRadius:6,overflow:"hidden",background:"#F1F5F9",width:"100%"}}>
+    <div style={{display:"flex",height:22,borderRadius:8,overflow:"hidden",background:"#F1F5F9",width:"100%"}}>
       {cells.map((cell,ci)=>{
         const bg=cell.v===2?"#10B981":cell.v===1?"#F59E0B":cell.v===0?"#EF4444":"#E2E8F0";
         const hasNote=!!(cell.nt||(cell.imgs&&cell.imgs.length));
