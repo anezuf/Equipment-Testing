@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 
 function RichNote({value,onChange}){
   const ref=useRef(null);
-  const [fmts,setFmts]=useState({bold:false,italic:false,strike:false,ul:false,ol:false});
+  const [fmts,setFmts]=useState({bold:false,ul:false,ol:false});
   const focused=useRef(false);
   const [isFocused,setIsFocused]=useState(false);
 
@@ -16,20 +16,8 @@ function RichNote({value,onChange}){
   },[value]);
 
   const updateFmts=()=>{
-    /* Detect italic via DOM traversal instead of deprecated queryCommandState */
-    const sel=window.getSelection();
-    let isItalic=false;
-    if(sel&&sel.anchorNode){
-      let node=sel.anchorNode;
-      while(node&&node!==ref.current){
-        if(node.nodeName==="EM"||node.nodeName==="I"){isItalic=true;break;}
-        node=node.parentNode;
-      }
-    }
     setFmts({
       bold:document.queryCommandState("bold"),
-      italic:isItalic,
-      strike:document.queryCommandState("strikeThrough"),
       ul:document.queryCommandState("insertUnorderedList"),
       ol:document.queryCommandState("insertOrderedList"),
     });
@@ -38,42 +26,6 @@ function RichNote({value,onChange}){
   const exec=(c)=>{
     ref.current?.focus();
     document.execCommand(c,false,null);
-    onChange(ref.current?.innerHTML||"");
-    updateFmts();
-  };
-
-  const toggleItalic=()=>{
-    ref.current?.focus();
-    const sel=window.getSelection();
-    if(!sel||sel.rangeCount===0){updateFmts();return;}
-    const range=sel.getRangeAt(0);
-    /* Find italic ancestor of cursor/selection */
-    let node=sel.anchorNode;
-    let italicNode=null;
-    while(node&&node!==ref.current){
-      if(node.nodeName==="EM"||node.nodeName==="I"){italicNode=node;break;}
-      node=node.parentNode;
-    }
-    if(!sel.isCollapsed){
-      if(italicNode){
-        /* Unwrap: hoist all children before the <em>/<i>, then remove it */
-        const parent=italicNode.parentNode;
-        while(italicNode.firstChild)parent.insertBefore(italicNode.firstChild,italicNode);
-        parent.removeChild(italicNode);
-      }else{
-        /* Wrap selection in <em> */
-        try{
-          const em=document.createElement("em");
-          range.surroundContents(em);
-        }catch{
-          /* Selection spans element boundaries — extract and re-wrap */
-          const frag=range.extractContents();
-          const em=document.createElement("em");
-          em.appendChild(frag);
-          range.insertNode(em);
-        }
-      }
-    }
     onChange(ref.current?.innerHTML||"");
     updateFmts();
   };
@@ -121,9 +73,7 @@ function RichNote({value,onChange}){
   return(
     <div style={{border:`${(isFocused||(value&&value!=="<br>"))?"1.5px solid #2F9AFF":"1px solid #E5EAF0"}`,borderRadius:8,background:"#F8FBFF",overflow:"hidden",transition:"border 0.15s"}}>
       <div style={{display:"flex",gap:3,padding:"4px 8px",borderBottom:"1px solid #E5EAF0",background:"#fff",flexWrap:"wrap",alignItems:"center"}}>
-        <Btn onMD={()=>exec("bold")}         active={fmts.bold}   title="Жирный (Ctrl+B)"><b>B</b></Btn>
-        <Btn onMD={()=>toggleItalic()}       active={fmts.italic} title="Курсив (Ctrl+I)"><i style={{fontStyle:"italic"}}>I</i></Btn>
-        <Btn onMD={()=>exec("strikeThrough")}active={fmts.strike} title="Зачёркнутый"><span style={{textDecoration:"line-through"}}>S</span></Btn>
+        <Btn onMD={()=>exec("bold")} active={fmts.bold} title="Жирный (Ctrl+B)"><b>B</b></Btn>
         <div style={{width:1,height:16,background:"#E5EAF0",margin:"0 2px"}}/>
         <Btn onMD={()=>toggleList("UL")} active={fmts.ul} title="Маркированный список">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="2.5" cy="4" r="1.5" fill="currentColor"/><circle cx="2.5" cy="8" r="1.5" fill="currentColor"/><circle cx="2.5" cy="12" r="1.5" fill="currentColor"/><line x1="6" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><line x1="6" y1="8" x2="14" y2="8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><line x1="6" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>

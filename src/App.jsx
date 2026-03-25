@@ -701,7 +701,7 @@ export default function App(){
         return <div key={si} style={{marginBottom:12}}>
           <div style={{padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",fontSize:12,fontWeight:700,color:"#fff",borderLeft:`3px solid ${VC[si%VC.length]}`}}>{sec.n}</div>
           <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
-            {sec.items.map((it,ii)=>{const idx=off+ii;const v=vendors[act]?.scores[idx];const nt=vendors[act]?.notes[idx]||"";const imgs=vendors[act]?.images?.[idx]||null;const hasImgs=imgs&&imgs.length>0;const isExp=noteOpen===idx||noteOpen===-999;const isReq=it.w>=1;
+            {sec.items.map((it,ii)=>{const idx=off+ii;const v=vendors[act]?.scores[idx];const nt=vendors[act]?.notes[idx]||"";const imgs=vendors[act]?.images?.[idx]||null;const hasImgs=imgs&&imgs.length>0;const isExp=noteOpen===idx||noteOpen===-999;const isReq=it.w>=1;const hasNote=nt&&nt.trim()!==""&&nt.trim()!=="<br>"&&nt.trim()!=="<div><br></div>";
               return <div key={ii} style={{borderTop:ii?`1px solid #F1F5F9`:"none"}}>
                 <div style={{display:"flex",alignItems:"center",padding:"8px 16px",gap:10,flexWrap:"wrap"}}>
                   <div style={{flex:"1 1 150px",display:"flex",alignItems:"center",gap:6,minWidth:0}}><span style={{fontSize:12,color:B.graphite,overflow:"hidden",textOverflow:"ellipsis"}}>{it.n}</span><span style={wbBadge(it.w)}>{it.w===2?"★!":it.w===1?"★":"☆"}</span></div>
@@ -711,7 +711,7 @@ export default function App(){
                       :
                       [{sc:0,Ic:IconNo,sm:SM[0]},{sc:2,Ic:IconYes,sm:SM[2]}].map(({sc:sv,Ic,sm})=>{const on=v===sv;return <button className="btn-score" key={sv} onClick={()=>setScore(idx,sv)} style={{width:38,height:38,borderRadius:10,border:on?`2px solid ${sm.c}`:`1.5px solid ${B.border}`,background:on?sm.bg:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",boxShadow:on?`0 2px 8px ${sm.c}22`:"none"}}><Ic c={on?sm.c:"#B0BEC5"} s={16}/></button>;})
                     }
-                    <button className="btn-score" onClick={()=>setNoteOpen(isExp&&noteOpen!==-999?null:idx)} style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${(isExp||nt||hasImgs)?B.blue:B.border}`,background:(isExp||nt||hasImgs)?B.blue+"10":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:(isExp||nt||hasImgs)?B.blue:B.steel,marginLeft:4,flexShrink:0}} title="Примечание">
+                    <button className="btn-score" onClick={()=>setNoteOpen(isExp&&noteOpen!==-999?null:idx)} style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${(isExp||hasNote||hasImgs)?B.blue:B.border}`,background:(isExp||hasNote||hasImgs)?B.blue+"10":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:(isExp||hasNote||hasImgs)?B.blue:B.steel,marginLeft:4,flexShrink:0}} title="Примечание">
                       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
                   </div>
