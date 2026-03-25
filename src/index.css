@@ -134,39 +134,47 @@ body { background: #F5F8FB; }
 .rich-note s { text-decoration: line-through; }
 
 /* ── Button hover effects ─────────────────────────────────────────── */
+/* No filter: brightness — it creates a stacking context that washes out thin borders.
+   Only transform, box-shadow, and background-color are used so borders are never disturbed. */
 button {
-  transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transform-origin: center center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Primary: solid colored background (blue, gradient, red) */
 .btn-primary:hover {
-  filter: brightness(0.87);
   transform: scale(1.02);
-  box-shadow: 0 6px 20px rgba(47,154,255,0.32) !important;
+  box-shadow: 0 6px 22px rgba(47,154,255,0.45) !important;
 }
-.btn-primary:active { transform: scale(0.97) !important; filter: brightness(0.82) !important; }
+.btn-primary:active { transform: scale(0.97) !important; box-shadow: 0 2px 8px rgba(47,154,255,0.3) !important; }
 
-/* Secondary: white background with border */
+/* Secondary: white/outline buttons — tint background, reinforce border via inset shadow */
 .btn-secondary:hover {
-  background: #f0f5ff !important;
-  filter: brightness(0.97);
+  background-color: #eef5ff !important;
   transform: scale(1.01);
+  box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.13) !important;
 }
 .btn-secondary:active { transform: scale(0.97) !important; }
 
 /* Nav tab buttons */
-.btn-nav:hover { filter: brightness(0.88); transform: scale(1.02); }
+.btn-nav:hover { transform: scale(1.02); }
 .btn-nav:active { transform: scale(0.96) !important; }
 
 /* Score / weight toggle buttons */
-.btn-score:hover { filter: brightness(1.09); transform: scale(1.04); }
-.btn-score:active { transform: scale(0.96) !important; filter: brightness(0.92) !important; }
+.btn-score:hover {
+  transform: scale(1.04);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15) !important;
+}
+.btn-score:active { transform: scale(0.96) !important; }
 
 /* Icon buttons: ×, note, small controls */
 .btn-icon:hover {
-  background: rgba(0,0,0,0.07) !important;
-  filter: brightness(0.72);
+  background-color: rgba(0,0,0,0.07) !important;
   border-radius: 6px !important;
+  transform: scale(1.08);
 }
 .btn-icon:active { transform: scale(0.88) !important; }
 
