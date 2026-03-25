@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 
 import { B, VC, ICO, SM, WL, WC } from "./constants";
 import { DEF_SECTIONS, mkAll, mkOff } from "./sections";
+import { coeff, calcTotal, calcSec, hasFail } from "./scoring";
 
 const IconNo=({c="#EF4444",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="4" y1="4" x2="12" y2="12" stroke={c} strokeWidth="2.2" strokeLinecap="round"/><line x1="12" y1="4" x2="4" y2="12" stroke={c} strokeWidth="2.2" strokeLinecap="round"/></svg>;
 const IconMid=({c="#F59E0B",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="3" y1="8" x2="13" y2="8" stroke={c} strokeWidth="2.4" strokeLinecap="round"/></svg>;
@@ -22,29 +23,6 @@ const fmt=(v)=>{if(v==null)return "—";return v%1===0?v.toFixed(0):v.toFixed(1)
   - sum_max_ALL = sum of base points for ALL Требования items (not just scored)
   - hasFail: any Требование (w>=1) with score===0
 */
-const coeff=[0,0.5,1]; // score 0,1,2 → coefficient
-function calcTotal(sc,all){
-  let earned=0,maxPts=0;
-  all.forEach((it,i)=>{
-    if(it.w<1)return; // skip Преимущества
-    maxPts+=it.w; // always count towards max
-    if(sc[i]==null)return; // unfilled = 0 earned
-    earned+=it.w*coeff[sc[i]];
-  });
-  if(maxPts===0)return null;
-  return earned/maxPts*10;
-}
-function calcSec(sc,si,secs,offs){
-  const off=offs[si];let earned=0,maxPts=0;
-  secs[si].items.forEach((it,ii)=>{const v=sc[off+ii];
-    if(it.w<1)return;
-    maxPts+=it.w; // always count towards max
-    if(v==null)return;
-    earned+=it.w*coeff[v];
-  });
-  return maxPts===0?0:earned/maxPts*10;
-}
-function hasFail(sc,all){return all.some((it,i)=>it.w>=1&&sc[i]===0);}
 
 const Logo=({h=28})=><svg height={h} viewBox="195 230 1530 600" xmlns="http://www.w3.org/2000/svg" style={{display:"block",flexShrink:0}}>
   <path fill="#2F9AFF" d="M416.3,825.4c-114.3,0-207.3-93-207.3-207.3S301.9,411,416.1,410.9C446.5,300.5,560.7,235.7,671,266.1c70.4,19.4,125.4,74.4,144.8,144.9c45.4-9,145-17,238.8,53.3c10.2,7.6,12.2,22.1,4.6,32.2c-7.6,10.2-22.1,12.2-32.2,4.6l0,0c-43.4-32.6-93.6-49.3-149.2-49.7c-42.3-0.3-71.9,9.4-72.2,9.5c-12.1,4-25.2-2.5-29.2-14.6c-0.4-1.3-0.7-2.6-0.9-3.9c-11.4-78.5-80-137.7-159.5-137.7c-78.6-0.2-145.8,56.5-158.9,134c-2,11.9-12.9,20.2-24.9,19.1c-5.3-0.5-10.6-0.8-15.9-0.8c-88.9,0-161.2,72.3-161.2,161.2s72.3,161.2,161.2,161.2c29.3,0,58.1-8,83.2-23.1c10.9-6.6,25-3.1,31.6,7.8s3.1,25-7.8,31.6C491,815.1,454,825.4,416.3,825.4z"/>
