@@ -828,9 +828,11 @@ export default function App(){
       <div data-heatmap="" style={{background:"#F5F8FB",borderRadius:16,padding:16,marginBottom:24}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
           <div style={{fontSize:13,fontWeight:700,color:B.graphite}}>Сравнение по разделам</div>
-          {heatmapSort.col===null
-            ?<span data-no-print="" style={{fontSize:11,color:B.steel}}>← нажмите на номер для сортировки</span>
-            :<span onClick={()=>setHeatmapSort({col:null,label:null})} style={{fontSize:11,fontWeight:700,color:B.blue,background:"#EFF6FF",padding:"4px 14px",borderRadius:20,border:"1px solid #BFDBFE",cursor:"pointer"}}>{heatmapSort.label}</span>}
+          <div style={{height:28,display:"flex",alignItems:"center",justifyContent:"flex-end"}}>
+            {heatmapSort.col===null
+              ?<span data-no-print="" style={{fontSize:11,color:B.steel}}>← нажмите на номер для сортировки</span>
+              :<span onClick={()=>setHeatmapSort({col:null,label:null})} style={{fontSize:11,fontWeight:700,color:B.blue,background:"#EFF6FF",padding:"4px 14px",borderRadius:20,border:"1px solid #BFDBFE",cursor:"pointer"}}>{heatmapSort.label}</span>}
+          </div>
         </div>
         <div data-heatmap-legend="" style={{display:"none",marginBottom:10,fontSize:9,color:B.graphite,columnCount:2,columnGap:16}}>
           {sections.map((s,si)=><div key={si} style={{marginBottom:3}}><span style={{fontWeight:700,color:B.blue}}>{si+1}.</span> {s.n}</div>)}
