@@ -183,7 +183,7 @@ button {
 
 /* Inline × close/remove icons — just turn red, no background fill */
 .btn-icon-close { transition: color 0.15s ease !important; }
-.btn-icon-close:hover { color: #EF4444 !important; font-weight: 700 !important; }
+.btn-icon-close:hover { color: #EF4444 !important; text-shadow: 0 0 0.6px #EF4444 !important; }
 .btn-icon-close:active { color: #DC2626 !important; }
 
 /* × delete attachment row — red bg + white icon */
