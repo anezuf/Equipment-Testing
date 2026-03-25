@@ -109,3 +109,41 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* ── rack-audit app styles ── */
+html, body, #root, #app { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #F5F8FB; }
+
+.rich-note { outline: none; text-align: left; }
+.rich-note p { margin: 0 0 4px; }
+.rich-note p:last-child { margin-bottom: 0; }
+.rich-note ul { list-style-type: disc; padding-left: 20px; margin: 4px 0; }
+.rich-note ol { list-style-type: decimal; padding-left: 20px; margin: 4px 0; }
+.rich-note li { margin: 2px 0; display: list-item; }
+.rich-note strong { font-weight: 700; }
+.rich-note em { font-style: italic; }
+.rich-note s { text-decoration: line-through; }
+
+@media print {
+  [data-nav] { display: none !important; }
+  body, html { background: #fff !important; margin: 0 auto !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; max-width: 100%; }
+  #root, #app { margin: 0 auto !important; }
+  button { display: none !important; }
+  [data-dash] { padding: 8px !important; max-width: 100% !important; margin: 0 auto !important; }
+  [data-gauges] { gap: 8px !important; margin-bottom: 12px !important; justify-content: center !important; }
+  [data-gauges] > div { padding: 8px !important; min-width: 90px !important; }
+  [data-heatmap] { break-inside: avoid; }
+  [data-heatmap] table { font-size: 9px !important; }
+  [data-heatmap-section-label] { display: none !important; }
+  [data-heatmap-legend] { display: block !important; }
+  [data-vendor-bars] { break-inside: avoid; padding: 8px !important; margin-bottom: 8px !important; }
+  [data-bottom-cards] { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+  [data-bottom-cards] > div { break-inside: avoid; flex: none !important; min-width: 0 !important; padding: 10px !important; font-size: 10px !important; }
+  [data-bottom-cards] > div > div:first-child { font-size: 11px !important; white-space: normal !important; overflow: visible !important; }
+  [data-bottom-cards] span { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+  textarea { border: none !important; background: none !important; resize: none !important; }
+  img { max-height: 200px !important; }
+  label { display: none !important; }
+  [data-footer] { display: none !important; }
+}
