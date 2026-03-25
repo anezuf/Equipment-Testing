@@ -346,14 +346,14 @@ export default function App(){
     w.document.close();
   },[sections,vendors]);
 
-  const resizeVendors=(newSecs)=>{
+  const resizeVendors=useCallback((newSecs)=>{
     const newLen=mkAll(newSecs).length;
     setVendors(prev=>prev.map(v=>{
       const sc=[...v.scores];const nt=[...v.notes];const im=[...(v.images||[])];
       while(sc.length<newLen){sc.push(null);nt.push("");im.push(null);}
       return {...v,scores:sc.slice(0,newLen),notes:nt.slice(0,newLen),images:im.slice(0,newLen)};
     }));
-  };
+  },[]);
 
   const setSectionName=(si,name)=>{const n=sections.map((s,i)=>i===si?{...s,n:name}:s);setSections(n);};
   const addSection=()=>{const n=[...sections,{n:"Новый раздел",items:[{n:"Параметр 1",w:2}]}];setSections(n);resizeVendors(n);};
@@ -365,10 +365,10 @@ export default function App(){
 
   const addV=()=>{if(vendors.length>=25)return;setVendors(p=>[...p,{name:`Вендор ${p.length+1}`,scores:Array(itemCount).fill(null),notes:Array(itemCount).fill(""),images:Array(itemCount).fill(null)}]);};
   const rmV=i=>{if(vendors.length<=1)return;setVendors(p=>p.filter((_,j)=>j!==i));if(act>=vendors.length-1)setAct(Math.max(0,vendors.length-2));};
-  const setScore=(idx,val)=>{setVendors(p=>{const n=[...p];const v={...n[act],scores:[...n[act].scores]};v.scores[idx]=v.scores[idx]===val?null:val;n[act]=v;return n;});};
-  const setNote=(idx,txt)=>{setVendors(p=>{const n=[...p];const v={...n[act],notes:[...n[act].notes]};v.notes[idx]=txt;n[act]=v;return n;});};
-  const addImage=(idx,name,dataUrl,isFile=false,isImg=false,isVid=false)=>{setVendors(p=>{const n=[...p];const v={...n[act],images:[...(n[act].images||[])]};const arr=v.images[idx]||[];v.images[idx]=[...arr,{name,data:dataUrl,isFile,isImg,isVid}];n[act]=v;return n;});};
-  const rmImage=(idx,imgIdx)=>{setVendors(p=>{const n=[...p];const v={...n[act],images:[...(n[act].images||[])]};const arr=[...(v.images[idx]||[])];arr.splice(imgIdx,1);v.images[idx]=arr.length?arr:null;n[act]=v;return n;});};
+  const setScore=useCallback((idx,val)=>{setVendors(p=>{const n=[...p];const v={...n[act],scores:[...n[act].scores]};v.scores[idx]=v.scores[idx]===val?null:val;n[act]=v;return n;});},[act]);
+  const setNote=useCallback((idx,txt)=>{setVendors(p=>{const n=[...p];const v={...n[act],notes:[...n[act].notes]};v.notes[idx]=txt;n[act]=v;return n;});},[act]);
+  const addImage=useCallback((idx,name,dataUrl,isFile=false,isImg=false,isVid=false)=>{setVendors(p=>{const n=[...p];const v={...n[act],images:[...(n[act].images||[])]};const arr=v.images[idx]||[];v.images[idx]=[...arr,{name,data:dataUrl,isFile,isImg,isVid}];n[act]=v;return n;});},[act]);
+  const rmImage=useCallback((idx,imgIdx)=>{setVendors(p=>{const n=[...p];const v={...n[act],images:[...(n[act].images||[])]};const arr=[...(v.images[idx]||[])];arr.splice(imgIdx,1);v.images[idx]=arr.length?arr:null;n[act]=v;return n;});},[act]);
   const setName=(i,nm)=>{setVendors(p=>{const n=[...p];n[i]={...n[i],name:nm};return n;});};
 
   const totals=useMemo(()=>vendors.map(v=>calcTotal(v.scores,ALL)),[vendors,ALL]);
