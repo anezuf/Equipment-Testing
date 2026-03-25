@@ -620,7 +620,7 @@ export default function App(){
         </div>
       </div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,alignItems:"center"}}>
-        {vendors.length<25&&<button className="btn-secondary" onClick={addV} style={{padding:"6px 14px",borderRadius:12,border:"2px dashed #CBD5E1",background:"none",color:B.steel,cursor:"pointer",fontSize:12,whiteSpace:"nowrap"}}>+ Добавить вендора</button>}
+        {vendors.length<25&&<button className="btn-add-vendor" onClick={addV} style={{padding:"6px 14px",borderRadius:12,border:"2px dashed #CBD5E1",background:"none",color:B.steel,cursor:"pointer",fontSize:12,whiteSpace:"nowrap"}}>+ Добавить вендора</button>}
         <div style={{marginLeft:"auto",display:"flex",gap:6}}>
           <button className="btn-secondary" onClick={()=>exportVendorPDF(act)} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid ${B.blue}`,background:"#fff",color:B.blue,cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 1h5l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V2a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2"/><path d="M9 1v4h4" stroke="currentColor" strokeWidth="1.2"/></svg>
