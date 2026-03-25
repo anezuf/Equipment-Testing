@@ -825,14 +825,15 @@ export default function App(){
       </div>
 
       {/* Heatmap — full width */}
-      <div data-heatmap="" style={{background:"#fff",borderRadius:16,padding:16,border:`1px solid ${B.border}`,marginBottom:24}}>
+      <div data-heatmap="" style={{background:"#fff",borderRadius:16,padding:16,marginBottom:24}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",paddingBottom:12,borderBottom:`2px solid ${B.border}`,marginBottom:2,flexWrap:"wrap",gap:8}}>
           <div style={{fontSize:13,fontWeight:700,color:B.graphite}}>Сравнение по разделам</div>
-          <div style={{fontSize:11,color:B.steel}}>← нажмите на номер для сортировки</div>
+          {heatmapSort.col===null&&<div data-no-print="" style={{fontSize:11,color:B.steel}}>← нажмите на номер для сортировки</div>}
         </div>
         <div data-heatmap-legend="" style={{display:"none",marginBottom:10,fontSize:9,color:B.graphite,columnCount:2,columnGap:16}}>
           {sections.map((s,si)=><div key={si} style={{marginBottom:3}}><span style={{fontWeight:700,color:B.blue}}>{si+1}.</span> {s.n}</div>)}
         </div>
+        <div style={{borderRadius:12,overflow:"hidden",border:`1px solid #E5EAF0`}}>
         <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,tableLayout:"fixed"}}>
           <thead>
             <tr>
@@ -861,6 +862,7 @@ export default function App(){
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Vendor bars */}

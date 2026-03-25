@@ -236,6 +236,7 @@ button {
   [data-heatmap] { break-inside: avoid; }
   [data-heatmap] table { font-size: 9px !important; }
   [data-heatmap-section-label] { display: none !important; }
+  [data-no-print] { display: none !important; }
   [data-heatmap-legend] { display: block !important; }
   [data-vendor-bars] { break-inside: avoid; padding: 8px !important; margin-bottom: 8px !important; }
   [data-bottom-cards] { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
