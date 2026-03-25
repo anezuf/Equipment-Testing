@@ -151,12 +151,20 @@ button {
   box-shadow: inset 0 0 0 100vw rgba(0,0,0,0.17) !important;
 }
 
-/* Secondary: white/outline — light blue tint + subtle border reinforcement */
+/* Secondary: white/outline — neutral gray tint, never blue */
 .btn-secondary:hover {
-  background-color: #eef5ff !important;
-  box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.06) !important;
+  background-color: #F1F5F9 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.13), 0 2px 6px rgba(0,0,0,0.05) !important;
 }
-.btn-secondary:active { background-color: #dbeafe !important; }
+.btn-secondary:active { background-color: #E2E8F0 !important; }
+
+/* Danger: red-themed outline buttons (Сбросить, etc.) */
+.btn-danger:hover {
+  border-color: #DC2626 !important;
+  background-color: #FEF2F2 !important;
+  color: #DC2626 !important;
+}
+.btn-danger:active { background-color: #FEE2E2 !important; }
 
 /* Nav tab buttons */
 .btn-nav:hover { box-shadow: inset 0 0 0 100vw rgba(0,0,0,0.08) !important; }
