@@ -174,12 +174,31 @@ button {
 .btn-score:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.14) !important; }
 .btn-score:active { box-shadow: none !important; }
 
-/* Icon buttons: ×, note, media controls */
+/* Icon buttons: expand/collapse, media controls (neutral dark tint) */
 .btn-icon:hover {
   background-color: rgba(0,0,0,0.07) !important;
   border-radius: 6px !important;
 }
 .btn-icon:active { background-color: rgba(0,0,0,0.13) !important; }
+
+/* Inline × close/remove icons — just turn red, no background fill */
+.btn-icon-close { transition: color 0.15s ease !important; }
+.btn-icon-close:hover { color: #EF4444 !important; font-weight: 700 !important; }
+.btn-icon-close:active { color: #DC2626 !important; }
+
+/* × delete attachment row — red bg + white icon */
+.btn-icon-rm { transition: all 0.15s ease !important; }
+.btn-icon-rm:hover { background-color: #EF4444 !important; color: #fff !important; }
+.btn-icon-rm:active { background-color: #DC2626 !important; }
+
+/* "+ Файл" upload label — dashed border → solid blue on hover */
+.btn-file-upload { transition: all 0.2s ease; }
+.btn-file-upload:hover {
+  border: 1.5px solid #2F9AFF !important;
+  background-color: #EFF6FF !important;
+  color: #2F9AFF !important;
+}
+.btn-file-upload:active { background-color: #dbeafe !important; }
 
 /* "Добавить вендора" — dashed border becomes solid blue on hover */
 .btn-add-vendor:hover {
