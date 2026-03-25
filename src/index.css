@@ -133,6 +133,43 @@ body { background: #F5F8FB; }
 .rich-note em { font-style: italic; }
 .rich-note s { text-decoration: line-through; }
 
+/* ── Button hover effects ─────────────────────────────────────────── */
+button {
+  transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Primary: solid colored background (blue, gradient, red) */
+.btn-primary:hover {
+  filter: brightness(0.87);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(47,154,255,0.32) !important;
+}
+.btn-primary:active { transform: scale(0.97) !important; filter: brightness(0.82) !important; }
+
+/* Secondary: white background with border */
+.btn-secondary:hover {
+  background: #f0f5ff !important;
+  filter: brightness(0.97);
+  transform: scale(1.01);
+}
+.btn-secondary:active { transform: scale(0.97) !important; }
+
+/* Nav tab buttons */
+.btn-nav:hover { filter: brightness(0.88); transform: scale(1.02); }
+.btn-nav:active { transform: scale(0.96) !important; }
+
+/* Score / weight toggle buttons */
+.btn-score:hover { filter: brightness(1.09); transform: scale(1.04); }
+.btn-score:active { transform: scale(0.96) !important; filter: brightness(0.92) !important; }
+
+/* Icon buttons: ×, note, small controls */
+.btn-icon:hover {
+  background: rgba(0,0,0,0.07) !important;
+  filter: brightness(0.72);
+  border-radius: 6px !important;
+}
+.btn-icon:active { transform: scale(0.88) !important; }
+
 @media print {
   [data-nav] { display: none !important; }
   body, html { background: #fff !important; margin: 0 auto !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; max-width: 100%; }

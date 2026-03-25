@@ -450,7 +450,7 @@ export default function App(){
   const exportPDF=useCallback(()=>{window.print();},[]);
 
   const wbBadge=(w)=>{const wc=WC[w]||WC[1];return{fontSize:11,fontWeight:700,color:wc.c,whiteSpace:"nowrap",flexShrink:0,lineHeight:1};};
-  const navBtn=(label,v)=><button onClick={()=>setView(v)} style={{padding:"6px 16px",borderRadius:20,border:"none",cursor:"pointer",background:view===v?B.blue:"transparent",color:view===v?"#fff":B.steel,fontSize:12,fontWeight:600,transition:"all 0.2s",whiteSpace:"nowrap"}}>{label}</button>;
+  const navBtn=(label,v)=><button className="btn-nav" onClick={()=>setView(v)} style={{padding:"6px 16px",borderRadius:20,border:"none",cursor:"pointer",background:view===v?B.blue:"transparent",color:view===v?"#fff":B.steel,fontSize:12,fontWeight:600,transition:"all 0.2s",whiteSpace:"nowrap"}}>{label}</button>;
 
   return <div style={{minHeight:"100vh",background:B.bg,fontFamily:"Inter, system-ui, sans-serif",position:"relative",overflowX:"hidden"}}>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -468,8 +468,8 @@ export default function App(){
         <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Сбросить всё?</div>
         <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Все вендоры, оценки и примечания будут удалены. Останется один пустой «Вендор 1». Структура разделов сохранится.</div>
         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-          <button onClick={()=>setShowReset(false)} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer"}}>Отмена</button>
-          <button onClick={doReset} style={{padding:"10px 28px",borderRadius:12,border:"none",background:"#EF4444",color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer"}}>Да, сбросить</button>
+          <button className="btn-secondary" onClick={()=>setShowReset(false)} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer"}}>Отмена</button>
+          <button className="btn-primary" onClick={doReset} style={{padding:"10px 28px",borderRadius:12,border:"none",background:"#EF4444",color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer"}}>Да, сбросить</button>
         </div>
       </div>
     </div>}
@@ -485,7 +485,7 @@ export default function App(){
         <div style={{display:"flex",gap:3,background:"#F1F5F9",borderRadius:20,padding:2}}>{navBtn("Редактор","editor")}{navBtn("Тех. условия","techspecs")}{navBtn("Оценка","input")}{navBtn("Дашборд","dashboard")}</div>
       </div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
-        {view==="dashboard"&&<button onClick={exportPDF} style={{padding:"5px 12px",borderRadius:20,border:`1.5px solid ${B.blue}`,background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>PDF</button>}
+        {view==="dashboard"&&<button className="btn-primary" onClick={exportPDF} style={{padding:"5px 12px",borderRadius:20,border:`1.5px solid ${B.blue}`,background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>PDF</button>}
       </div>
     </div>
 
@@ -497,15 +497,15 @@ export default function App(){
           <div style={{fontSize:12,color:B.steel,marginTop:2}}>Настройте разделы, параметры и веса перед оценкой</div>
         </div>
         <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-          <button onClick={importFile} style={{padding:"6px 14px",borderRadius:10,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
+          <button className="btn-secondary" onClick={importFile} style={{padding:"6px 14px",borderRadius:10,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             Загрузить
           </button>
-          <button onClick={exportExcelFile} style={{padding:"6px 14px",borderRadius:10,border:`1.5px solid ${B.blue}`,background:"#fff",color:B.blue,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
+          <button className="btn-secondary" onClick={exportExcelFile} style={{padding:"6px 14px",borderRadius:10,border:`1.5px solid ${B.blue}`,background:"#fff",color:B.blue,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 10V2M5 5l3-3 3 3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             Сохранить
           </button>
-          <button onClick={addSection} style={{padding:"6px 14px",borderRadius:10,border:"none",background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
+          <button className="btn-primary" onClick={addSection} style={{padding:"6px 14px",borderRadius:10,border:"none",background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
         </div>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveSectionId(active.id)} onDragEnd={handleSectionDragEnd} onDragCancel={()=>setActiveSectionId(null)}>
@@ -516,7 +516,7 @@ export default function App(){
                 <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`}}>
                   <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.4,touchAction:"none"}} {...secDrag} {...secAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill="#fff"/><circle cx="8" cy="3" r="1.2" fill="#fff"/><circle cx="4" cy="6" r="1.2" fill="#fff"/><circle cx="8" cy="6" r="1.2" fill="#fff"/><circle cx="4" cy="9" r="1.2" fill="#fff"/><circle cx="8" cy="9" r="1.2" fill="#fff"/></svg></span>
                   <input value={sec.n} onChange={e=>setSectionName(si,e.target.value)} style={{flex:1,background:"transparent",border:"none",color:"#fff",fontSize:13,fontWeight:700,outline:"none",minWidth:0}}/>
-                  {sections.length>1&&<button onClick={()=>rmSection(si)} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
+                  {sections.length>1&&<button className="btn-icon" onClick={()=>rmSection(si)} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
                 </div>
                 <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveItemId(active.id)} onDragEnd={e=>{setActiveItemId(null);makeItemDragEnd(si)(e);}} onDragCancel={()=>setActiveItemId(null)}>
@@ -528,10 +528,10 @@ export default function App(){
                               <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none"}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
                               <textarea value={it.n} onChange={e=>{setItemName(si,ii,e.target.value);e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",minWidth:0,resize:"none",overflow:"hidden",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0}} placeholder="Название параметра"/>
                               <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-                                <button onClick={()=>setItemWeight(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
-                                {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <button key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap"}}>{l}</button>;})}
+                                <button className="btn-score" onClick={()=>setItemWeight(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
+                                {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <button className="btn-score" key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap"}}>{l}</button>;})}
                               </div>
-                              {sec.items.length>1&&<button onClick={()=>rmItem(si,ii)} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
+                              {sec.items.length>1&&<button className="btn-icon" onClick={()=>rmItem(si,ii)} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
                             </div>
                           }
                         </SortableItemRow>
@@ -556,7 +556,7 @@ export default function App(){
                       })()}
                     </DragOverlay>
                   </DndContext>
-                  <button onClick={()=>addItem(si)} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить параметр</button>
+                  <button className="btn-secondary" onClick={()=>addItem(si)} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить параметр</button>
                 </div>
               </>}
             </SortableSectionShell>
@@ -575,7 +575,7 @@ export default function App(){
         </DragOverlay>
       </DndContext>
       <div style={{textAlign:"center",padding:20}}>
-        <button onClick={()=>setView("input")} style={{padding:"10px 32px",borderRadius:20,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${B.blue}44`}}>Перейти к оценке →</button>
+        <button className="btn-primary" onClick={()=>setView("input")} style={{padding:"10px 32px",borderRadius:20,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${B.blue}44`}}>Перейти к оценке →</button>
       </div>
     </div>}
 
@@ -586,21 +586,21 @@ export default function App(){
           <div style={{fontSize:16,fontWeight:700,color:B.graphite}}>Технические условия</div>
           <div style={{fontSize:12,color:B.steel,marginTop:2}}>Критерии подбора оборудования — только для справки, не влияет на расчёты</div>
         </div>
-        <button onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новое условие"}]}])} style={{padding:"6px 14px",borderRadius:10,border:"none",background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
+        <button className="btn-primary" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новое условие"}]}])} style={{padding:"6px 14px",borderRadius:10,border:"none",background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
       </div>
       {techSpecs.map((sec,si)=><div key={si} style={{marginBottom:12}}>
         <div draggable onDragStart={e=>{e.dataTransfer.setData("text",JSON.stringify({type:"ts-sec",si}));e.dataTransfer.effectAllowed="move";}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect="move";}} onDrop={e=>{e.preventDefault();try{const d=JSON.parse(e.dataTransfer.getData("text"));if(d.type==="ts-sec"&&d.si!==si){const n=[...techSpecs];const [m]=n.splice(d.si,1);n.splice(si,0,m);setTechSpecs(n);}}catch{}}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`,cursor:"grab"}}>
           <svg width="12" height="12" viewBox="0 0 12 12" style={{flexShrink:0,opacity:0.4}}><circle cx="4" cy="3" r="1.2" fill="#fff"/><circle cx="8" cy="3" r="1.2" fill="#fff"/><circle cx="4" cy="6" r="1.2" fill="#fff"/><circle cx="8" cy="6" r="1.2" fill="#fff"/><circle cx="4" cy="9" r="1.2" fill="#fff"/><circle cx="8" cy="9" r="1.2" fill="#fff"/></svg>
           <input value={sec.n} onChange={e=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,n:e.target.value}:s))} style={{flex:1,background:"transparent",border:"none",color:"#fff",fontSize:13,fontWeight:700,outline:"none",minWidth:0}}/>
-          {techSpecs.length>1&&<button onClick={()=>setTechSpecs(p=>p.filter((_,i)=>i!==si))} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
+          {techSpecs.length>1&&<button className="btn-icon" onClick={()=>setTechSpecs(p=>p.filter((_,i)=>i!==si))} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
         </div>
         <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
           {sec.items.map((it,ii)=><div key={ii} draggable onDragStart={e=>{e.stopPropagation();e.dataTransfer.setData("text",JSON.stringify({type:"ts-item",si,ii}));}} onDragOver={e=>{e.preventDefault();e.stopPropagation();}} onDrop={e=>{e.preventDefault();e.stopPropagation();try{const d=JSON.parse(e.dataTransfer.getData("text"));if(d.type==="ts-item"&&d.si===si&&d.ii!==ii){const n=[...techSpecs];const s={...n[si],items:[...n[si].items]};const [m]=s.items.splice(d.ii,1);s.items.splice(ii,0,m);n[si]=s;setTechSpecs(n);}}catch{}}} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none",cursor:"grab"}}>
             <svg width="12" height="12" viewBox="0 0 12 12" style={{flexShrink:0,opacity:0.3,marginTop:3}}><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg>
             <textarea value={it.n} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter,system-ui,sans-serif",lineHeight:"1.4",padding:0}}/>
-            {sec.items.length>1&&<button onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
+            {sec.items.length>1&&<button className="btn-icon" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
           </div>)}
-          <button onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие"}]}:s))} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить условие</button>
+          <button className="btn-secondary" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие"}]}:s))} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить условие</button>
         </div>
       </div>)}
     </div>}
@@ -620,13 +620,17 @@ export default function App(){
         </div>
       </div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,alignItems:"center"}}>
-        {vendors.length<25&&<button onClick={addV} style={{padding:"6px 14px",borderRadius:12,border:"2px dashed #CBD5E1",background:"none",color:B.steel,cursor:"pointer",fontSize:12,whiteSpace:"nowrap"}}>+ Добавить вендора</button>}
+        {vendors.length<25&&<button className="btn-secondary" onClick={addV} style={{padding:"6px 14px",borderRadius:12,border:"2px dashed #CBD5E1",background:"none",color:B.steel,cursor:"pointer",fontSize:12,whiteSpace:"nowrap"}}>+ Добавить вендора</button>}
         <div style={{marginLeft:"auto",display:"flex",gap:6}}>
-          <button onClick={()=>exportVendorPDF(act)} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid ${B.blue}`,background:"#fff",color:B.blue,cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
+          <button className="btn-secondary" onClick={()=>exportVendorPDF(act)} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid ${B.blue}`,background:"#fff",color:B.blue,cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 1h5l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V2a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2"/><path d="M9 1v4h4" stroke="currentColor" strokeWidth="1.2"/></svg>
             Отчёт
           </button>
-          <button onClick={()=>setShowReset(true)} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid #EF4444`,background:"#fff",color:"#EF4444",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>Сбросить</button>
+          <button className="btn-secondary" onClick={importFile} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Загрузить
+          </button>
+          <button className="btn-secondary" onClick={()=>setShowReset(true)} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid #EF4444`,background:"#fff",color:"#EF4444",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>Сбросить</button>
         </div>
       </div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
@@ -645,11 +649,11 @@ export default function App(){
                   <div style={{flex:"1 1 150px",display:"flex",alignItems:"center",gap:6,minWidth:0}}><span style={{fontSize:12,color:B.graphite,overflow:"hidden",textOverflow:"ellipsis"}}>{it.n}</span><span style={wbBadge(it.w)}>{it.w===2?"★!":it.w===1?"★":"☆"}</span></div>
                   <div style={{display:"flex",gap:10,alignItems:"center",flexShrink:0}}>
                     {isReq?
-                      [0,1,2].map(n2=>{const Ic=ICO[n2];const on=v===n2;return <button key={n2} onClick={()=>setScore(idx,n2)} style={{width:38,height:38,borderRadius:10,border:on?`2px solid ${SM[n2].c}`:`1.5px solid ${B.border}`,background:on?SM[n2].bg:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",boxShadow:on?`0 2px 8px ${SM[n2].c}22`:"none"}}><Ic c={on?SM[n2].c:"#B0BEC5"} s={16}/></button>;})
+                      [0,1,2].map(n2=>{const Ic=ICO[n2];const on=v===n2;return <button className="btn-score" key={n2} onClick={()=>setScore(idx,n2)} style={{width:38,height:38,borderRadius:10,border:on?`2px solid ${SM[n2].c}`:`1.5px solid ${B.border}`,background:on?SM[n2].bg:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",boxShadow:on?`0 2px 8px ${SM[n2].c}22`:"none"}}><Ic c={on?SM[n2].c:"#B0BEC5"} s={16}/></button>;})
                       :
-                      [{sc:0,Ic:IconNo,sm:SM[0]},{sc:2,Ic:IconYes,sm:SM[2]}].map(({sc:sv,Ic,sm})=>{const on=v===sv;return <button key={sv} onClick={()=>setScore(idx,sv)} style={{width:38,height:38,borderRadius:10,border:on?`2px solid ${sm.c}`:`1.5px solid ${B.border}`,background:on?sm.bg:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",boxShadow:on?`0 2px 8px ${sm.c}22`:"none"}}><Ic c={on?sm.c:"#B0BEC5"} s={16}/></button>;})
+                      [{sc:0,Ic:IconNo,sm:SM[0]},{sc:2,Ic:IconYes,sm:SM[2]}].map(({sc:sv,Ic,sm})=>{const on=v===sv;return <button className="btn-score" key={sv} onClick={()=>setScore(idx,sv)} style={{width:38,height:38,borderRadius:10,border:on?`2px solid ${sm.c}`:`1.5px solid ${B.border}`,background:on?sm.bg:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",boxShadow:on?`0 2px 8px ${sm.c}22`:"none"}}><Ic c={on?sm.c:"#B0BEC5"} s={16}/></button>;})
                     }
-                    <button onClick={()=>setNoteOpen(isExp&&noteOpen!==-999?null:idx)} style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${(isExp||nt||hasImgs)?B.blue:B.border}`,background:(isExp||nt||hasImgs)?B.blue+"10":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:(isExp||nt||hasImgs)?B.blue:B.steel,marginLeft:4,flexShrink:0}} title="Примечание">
+                    <button className="btn-score" onClick={()=>setNoteOpen(isExp&&noteOpen!==-999?null:idx)} style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${(isExp||nt||hasImgs)?B.blue:B.border}`,background:(isExp||nt||hasImgs)?B.blue+"10":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:(isExp||nt||hasImgs)?B.blue:B.steel,marginLeft:4,flexShrink:0}} title="Примечание">
                       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
                   </div>
@@ -664,7 +668,7 @@ export default function App(){
                       const isMedia=isImg||isVid;
                       return <div key={imIdx} style={{display:"inline-flex",alignItems:"center",borderRadius:8,border:`1.5px solid ${open&&isMedia?B.blue:B.border}`,background:open&&isMedia?B.blue+"08":"#fff",overflow:"hidden",transition:"all 0.15s"}}>
                         {isMedia
-                          ? <button onClick={()=>setExpImgs(p=>({...p,[key]:!p[key]}))} style={{padding:"4px 8px",background:"none",border:"none",cursor:"pointer",fontSize:11,color:open?B.blue:B.steel,fontWeight:600,display:"flex",alignItems:"center",gap:4,maxWidth:160,overflow:"hidden"}}>
+                          ? <button className="btn-icon" onClick={()=>setExpImgs(p=>({...p,[key]:!p[key]}))} style={{padding:"4px 8px",background:"none",border:"none",cursor:"pointer",fontSize:11,color:open?B.blue:B.steel,fontWeight:600,display:"flex",alignItems:"center",gap:4,maxWidth:160,overflow:"hidden"}}>
                               {isVid
                                 ? <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{flexShrink:0}}><rect x="1" y="2" width="10" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M11 6l4-2v8l-4-2V6z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>
                                 : <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style={{flexShrink:0}}><rect x="1" y="2" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.3"/><circle cx="5.5" cy="6.5" r="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M1 12l3.5-4 2.5 2.5L11 6l4 6" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>
@@ -679,7 +683,7 @@ export default function App(){
                         <a href={im.data} download={im.name} title="Скачать" style={{padding:"4px 6px",background:"none",border:"none",borderLeft:`1px solid ${B.border}`,cursor:"pointer",color:B.blue,display:"flex",alignItems:"center",textDecoration:"none"}}>
                           <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 8l3 3 3-3M2 13h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                         </a>
-                        <button onClick={()=>{rmImage(idx,imIdx);setExpImgs(p=>{const n={...p};delete n[key];return n;});}} style={{padding:"4px 6px",background:"none",border:"none",borderLeft:`1px solid ${B.border}`,cursor:"pointer",color:"#EF4444",fontSize:13,lineHeight:1,display:"flex",alignItems:"center"}} title="Удалить">×</button>
+                        <button className="btn-icon" onClick={()=>{rmImage(idx,imIdx);setExpImgs(p=>{const n={...p};delete n[key];return n;});}} style={{padding:"4px 6px",background:"none",border:"none",borderLeft:`1px solid ${B.border}`,cursor:"pointer",color:"#EF4444",fontSize:13,lineHeight:1,display:"flex",alignItems:"center"}} title="Удалить">×</button>
                       </div>;
                     })}
                     <label style={{padding:"4px 10px",borderRadius:8,border:`1.5px dashed ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4}}>
@@ -750,7 +754,7 @@ export default function App(){
         </div>;
       })}
       <div style={{display:"flex",justifyContent:"center",gap:12,padding:20}}>
-        <button onClick={()=>setView("dashboard")} style={{padding:"10px 32px",borderRadius:20,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${B.blue}44`}}>Дашборд →</button>
+        <button className="btn-primary" onClick={()=>setView("dashboard")} style={{padding:"10px 32px",borderRadius:20,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${B.blue}44`}}>Дашборд →</button>
       </div>
     </div>}
 
