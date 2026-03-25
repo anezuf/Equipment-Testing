@@ -60,8 +60,7 @@ export default function App(){
   const [notePopup,setNotePopup]=useState(null);
   const [showReset,setShowReset]=useState(false);
   const [expImgs,setExpImgs]=useState({});
-  const [heatmapSortCol,setHeatmapSortCol]=useState(null);
-  const [heatmapActiveLabel,setHeatmapActiveLabel]=useState(null);
+  const [heatmapSort,setHeatmapSort]=useState({col:null,label:null});
   const [techSpecs,setTechSpecs]=useState(()=>{
     try{const s=localStorage.getItem("rack_tech_specs");return s?JSON.parse(s):[{n:"Общие требования",items:[{n:"Введите техническое условие"}]}];}catch{return [{n:"Общие требования",items:[{n:"Введите техническое условие"}]}];}
   });
@@ -398,14 +397,14 @@ export default function App(){
   const heatmapSortedIdx=useMemo(()=>{
     const arr=vendors.map((_,i)=>i);
     arr.sort((a,b)=>{
-      const va=heatmapSortCol===null?totals[a]:(allSec[a]?allSec[a][heatmapSortCol]:0);
-      const vb=heatmapSortCol===null?totals[b]:(allSec[b]?allSec[b][heatmapSortCol]:0);
+      const va=heatmapSort.col===null?totals[a]:(allSec[a]?allSec[a][heatmapSort.col]:0);
+      const vb=heatmapSort.col===null?totals[b]:(allSec[b]?allSec[b][heatmapSort.col]:0);
       const na=va==null?-1:va,nb=vb==null?-1:vb;
       if(nb!==na)return nb-na;
       return a-b;
     });
     return arr;
-  },[vendors,totals,allSec,heatmapSortCol]);
+  },[vendors,totals,allSec,heatmapSort]);
 
   const getAdvantages=(sc)=>ALL.flatMap((it,i)=>it.w===0&&sc[i]!=null&&sc[i]>0?[{...it,idx:i}]:[]);
   const filled=sc=>sc.filter(x=>x!=null).length;
@@ -681,8 +680,8 @@ export default function App(){
       <div data-heatmap="" style={{background:"#fff",borderRadius:16,padding:16,border:`1px solid ${B.border}`,marginBottom:24}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
           <div style={{fontSize:13,fontWeight:700,color:B.graphite}}>Сравнение по разделам</div>
-          <div data-heatmap-section-label="" style={{fontSize:12,fontWeight:600,color:heatmapActiveLabel?B.blue:B.steel,background:heatmapActiveLabel?`${B.blue}10`:"#F8FAFC",borderRadius:8,padding:"4px 12px",border:`1px solid ${heatmapActiveLabel?B.blue:B.border}`,transition:"all 0.2s",minWidth:160,textAlign:"center"}}>
-            {heatmapActiveLabel||"Выберите раздел"}
+          <div data-heatmap-section-label="" style={{fontSize:12,fontWeight:600,color:heatmapSort.label?B.blue:B.steel,background:heatmapSort.label?`${B.blue}10`:"#F8FAFC",borderRadius:8,padding:"4px 12px",border:`1px solid ${heatmapSort.label?B.blue:B.border}`,transition:"all 0.2s",minWidth:160,textAlign:"center"}}>
+            {heatmapSort.label||"Выберите раздел"}
           </div>
         </div>
         <div data-heatmap-legend="" style={{display:"none",marginBottom:10,fontSize:9,color:B.graphite,columnCount:2,columnGap:16}}>
@@ -693,10 +692,10 @@ export default function App(){
             <tr>
               <th style={{textAlign:"left",padding:"6px 8px",fontSize:10,color:B.steel,fontWeight:600,borderBottom:`2px solid ${B.border}`,width:120}}>Вендор</th>
               {sections.map((s,si)=>{
-                const active=heatmapSortCol===si;
-                return <HeatmapTh key={si} si={si} s={s} active={active} onSort={()=>{const next=active?null:si;setHeatmapSortCol(next);setHeatmapActiveLabel(next===null?null:s.n);}}/>;
+                const active=heatmapSort.col===si;
+                return <HeatmapTh key={si} si={si} s={s} active={active} onSort={()=>{const next=active?null:si;setHeatmapSort({col:next,label:next===null?null:s.n});}}/>;
               })}
-              <th onClick={()=>{setHeatmapSortCol(null);setHeatmapActiveLabel(null);}} style={{textAlign:"center",padding:"6px 4px",fontSize:10,fontWeight:heatmapSortCol===null?800:700,color:heatmapSortCol===null?B.blue:B.graphite,borderBottom:`2px solid ${heatmapSortCol===null?B.blue:B.border}`,width:50,cursor:"pointer",userSelect:"none",transition:"color 0.15s,border-color 0.15s"}}>Итого</th>
+              <th onClick={()=>setHeatmapSort({col:null,label:null})} style={{textAlign:"center",padding:"6px 4px",fontSize:10,fontWeight:heatmapSort.col===null?800:700,color:heatmapSort.col===null?B.blue:B.graphite,borderBottom:`2px solid ${heatmapSort.col===null?B.blue:B.border}`,width:50,cursor:"pointer",userSelect:"none",transition:"color 0.15s,border-color 0.15s"}}>Итого</th>
             </tr>
           </thead>
           <tbody>
@@ -708,7 +707,7 @@ export default function App(){
                   const val=allSec[i]?allSec[i][si]:0;
                   const bg=val>=8?"#D1FAE5":val>=5?"#FEF3C7":val>0?"#FEE2E2":"#F1F5F9";
                   const tc=val>=8?"#065F46":val>=5?"#92400E":val>0?"#991B1B":B.steel;
-                  const isActiveCol=heatmapSortCol===si;
+                  const isActiveCol=heatmapSort.col===si;
                   return <td key={si} style={{textAlign:"center",padding:"6px 2px",background:bg,fontWeight:isActiveCol?800:700,fontSize:10,color:tc,outline:isActiveCol?`1.5px solid ${B.blue}40`:undefined,outlineOffset:-1}}>{fmt(val)}</td>;
                 })}
                 <td style={{textAlign:"center",padding:"6px 4px",fontWeight:800,fontSize:11,color:t!=null&&t>=8?"#065F46":t!=null&&t>=5?"#92400E":t!=null&&t>0?"#991B1B":B.steel,background:t!=null&&t>=8?"#D1FAE5":t!=null&&t>=5?"#FEF3C7":t!=null&&t>0?"#FEE2E2":rowBg,borderLeft:`2px solid ${B.border}`}}>{fmt(t)}</td>
