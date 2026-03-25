@@ -3,6 +3,8 @@ import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { B, VC, ICO, SM, WL, WC } from "./constants";
 import { DEF_SECTIONS, mkAll, mkOff } from "./sections";
 import { coeff, calcTotal, calcSec, hasFail } from "./scoring";
+import Logo from "./components/Logo";
+import Gauge from "./components/Gauge";
 
 const IconNo=({c="#EF4444",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="4" y1="4" x2="12" y2="12" stroke={c} strokeWidth="2.2" strokeLinecap="round"/><line x1="12" y1="4" x2="4" y2="12" stroke={c} strokeWidth="2.2" strokeLinecap="round"/></svg>;
 const IconMid=({c="#F59E0B",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="3" y1="8" x2="13" y2="8" stroke={c} strokeWidth="2.4" strokeLinecap="round"/></svg>;
@@ -23,30 +25,6 @@ const fmt=(v)=>{if(v==null)return "—";return v%1===0?v.toFixed(0):v.toFixed(1)
   - sum_max_ALL = sum of base points for ALL Требования items (not just scored)
   - hasFail: any Требование (w>=1) with score===0
 */
-
-const Logo=({h=28})=><svg height={h} viewBox="195 230 1530 600" xmlns="http://www.w3.org/2000/svg" style={{display:"block",flexShrink:0}}>
-  <path fill="#2F9AFF" d="M416.3,825.4c-114.3,0-207.3-93-207.3-207.3S301.9,411,416.1,410.9C446.5,300.5,560.7,235.7,671,266.1c70.4,19.4,125.4,74.4,144.8,144.9c45.4-9,145-17,238.8,53.3c10.2,7.6,12.2,22.1,4.6,32.2c-7.6,10.2-22.1,12.2-32.2,4.6l0,0c-43.4-32.6-93.6-49.3-149.2-49.7c-42.3-0.3-71.9,9.4-72.2,9.5c-12.1,4-25.2-2.5-29.2-14.6c-0.4-1.3-0.7-2.6-0.9-3.9c-11.4-78.5-80-137.7-159.5-137.7c-78.6-0.2-145.8,56.5-158.9,134c-2,11.9-12.9,20.2-24.9,19.1c-5.3-0.5-10.6-0.8-15.9-0.8c-88.9,0-161.2,72.3-161.2,161.2s72.3,161.2,161.2,161.2c29.3,0,58.1-8,83.2-23.1c10.9-6.6,25-3.1,31.6,7.8s3.1,25-7.8,31.6C491,815.1,454,825.4,416.3,825.4z"/>
-  <path fill="#1E1E1E" d="M580.1,654.2v53.3h-37.8V530.3H612c24.5,0,42.5,5.8,54.1,17.4c11.6,11.6,17.4,26.7,17.4,45.4c0,14.8-3.6,27.1-10.8,37s-16,16.8-26.5,20.7c-10.5,3.9-22.2,5.9-35.3,5.9S587.6,655.9,580.1,654.2z M580.1,563.4v59.7c5.4,1.1,13.9,1.7,25.5,1.7c25.6,0,38.4-10.8,38.4-32.5c0-19.2-11.4-28.9-34.2-28.9H580.1z"/><path fill="#1E1E1E" d="M689.1,563.4v-33.1h148.5v33.1h-56v144.1h-36.5V563.4H689.1z"/><path fill="#1E1E1E" d="M859,707.4V530.3h37.8V604h8.7l61.7-73.7h44.3l-73.2,85.5l81.8,91.7h-49.4L906,632.9h-9.3v74.5H859z"/><path fill="#1E1E1E" d="M1093,655.9h-86.6v-35.6h86.6V655.9z"/><path fill="#1E1E1E" d="M1237.6,673.8V530.3h37.8v143.5h26.6v66.7h-36.4v-33.1h-140.1V530.3h37.8v143.5H1237.6z"/><path fill="#1E1E1E" d="M1414.4,712.5c-27.8,0-50.4-8.6-67.7-25.8s-26.1-39.5-26.5-67c0.4-27.5,9.2-49.7,26.5-66.8s39.8-25.6,67.7-25.7c28,0,50.6,8.5,67.7,25.5c17.1,17,25.9,39.3,26.2,67c-0.4,27.5-9.1,49.8-26.2,67C1465,703.9,1442.5,712.5,1414.4,712.5z M1375.4,661.6c10.1,10.4,23.1,15.6,39,15.6c15.9,0,28.9-5.2,39.1-15.6c10.2-10.4,15.3-24.3,15.3-41.9s-5.1-31.6-15.3-42c-10.2-10.5-23.2-15.7-39.1-15.7s-28.9,5.2-39,15.7c-10.1,10.5-15.1,24.5-15.1,42C1360.3,637.2,1365.4,651.2,1375.4,661.6z"/><path fill="#1E1E1E" d="M1523.7,740.5v-66.7h16.5c7.2-16.7,12.3-34.1,15.4-52c3.2-18.2,4.8-42,4.8-71.3v-20.2h127.8v143.5h20.7v66.7h-35.6v-33.1h-114.1v33.1H1523.7z M1650.7,563.9h-54.4V583c0,33.6-5.6,63.9-16.8,90.8h71.2V563.9z"/>
-  <path fill="#7B98B3" d="M336.9,552.5c0-12.7,10.3-23,23-23h113.4c12.7,0,23,10.3,23,23c0,12.7-10.3,23-23,23H359.9C347.2,575.5,336.9,565.2,336.9,552.5z"/><path fill="#7B98B3" d="M336.9,685.1c0-12.7,10.3-23,23-23h113.4c12.7,0,23,10.3,23,23c0,12.7-10.3,23-23,23H359.9C347.2,708.2,336.9,697.9,336.9,685.1z"/><path fill="#7B98B3" d="M336.9,618.9c0-12.7,10.3-23,23-23h113.4c12.7,0,23,10.3,23,23c0,12.7-10.3,23-23,23H359.9C347.2,641.9,336.9,631.6,336.9,618.9z"/>
-</svg>;
-
-function Gauge({value,color,label,rank,fail,size=90}){
-  const r=(size-8)/2,circ=2*Math.PI*r,dash=circ*0.75,off=dash*(1-(value!=null?value/10:0));
-  return <div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:"12px 12px 10px",background:fail?"#FEF2F2":"#fff",borderRadius:14,border:fail?"2px solid #EF4444":`1px solid ${B.border}`,flex:"1 1 120px",maxWidth:160,minWidth:110,position:"relative",borderTop:fail?"3px solid #EF4444":`3px solid ${color}`}}>
-    {rank!=null&&<div style={{position:"absolute",top:6,right:6,width:20,height:20,borderRadius:"50%",background:rank===1?"#10B981":rank===2?"#F59E0B":rank===3?"#EF4444":B.steel,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800}}>{rank}</div>}
-    <div style={{fontSize:11,fontWeight:600,color:B.graphite,marginBottom:6,textAlign:"center",lineHeight:"1.3",wordBreak:"break-word",paddingRight:rank!=null?16:0}}>{label}</div>
-    <div style={{position:"relative",width:size,height:size}}>
-      <svg width={size} height={size}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F1F5F9" strokeWidth="5" strokeDasharray={`${dash} ${circ}`} transform={`rotate(135 ${size/2} ${size/2})`}/>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth="5" strokeDasharray={`${dash} ${circ}`} strokeDashoffset={off} strokeLinecap="round" transform={`rotate(135 ${size/2} ${size/2})`} style={{transition:"all 0.6s"}}/>
-        <text x={size/2} y={size/2} textAnchor="middle" dominantBaseline="central" fill={B.graphite} fontSize="20" fontWeight="800" fontFamily="Inter">{fmt(value)}</text>
-      </svg>
-      <div style={{position:"absolute",bottom:4,left:"50%",transform:"translateX(-50%)",fontSize:9,color:B.steel,fontWeight:500,letterSpacing:"0.5px",whiteSpace:"nowrap"}}>из 10</div>
-    </div>
-    {fail&&<div style={{height:0}}/>}
-  </div>;
-}
-
 
 /* ─── Rich text note editor (contentEditable, zero deps) ─── */
 function RichNote({value,onChange}){
