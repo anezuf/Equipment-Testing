@@ -9,7 +9,7 @@ import Gauge from "./components/Gauge";
 import RichNote from "./components/RichNote";
 import SegBar from "./components/SegBar";
 import NotePopup from "./components/NotePopup";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -377,9 +377,13 @@ export default function App(){
   const addItem=(si)=>{const n=sections.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новый параметр",w:2}]}:s);setSections(n);resizeVendors(n);};
   const rmItem=(si,ii)=>{if(sections[si].items.length<=1)return;const n=sections.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s);setSections(n);resizeVendors(n);};
 
+  const [activeSectionId,setActiveSectionId]=useState(null);
+  const [activeItemId,setActiveItemId]=useState(null);
+
   const sensors=useSensors(useSensor(PointerSensor,{activationConstraint:{distance:5}}));
 
   const handleSectionDragEnd=useCallback(({active,over})=>{
+    setActiveSectionId(null);
     if(!over||active.id===over.id)return;
     const oldIdx=sections.findIndex((_,i)=>`sec-${i}`===active.id);
     const newIdx=sections.findIndex((_,i)=>`sec-${i}`===over.id);
@@ -523,7 +527,7 @@ export default function App(){
           <button onClick={addSection} style={{padding:"6px 14px",borderRadius:10,border:"none",background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
         </div>
       </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSectionDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveSectionId(active.id)} onDragEnd={handleSectionDragEnd} onDragCancel={()=>setActiveSectionId(null)}>
         <SortableContext items={sections.map((_,si)=>`sec-${si}`)} strategy={verticalListSortingStrategy}>
           {sections.map((sec,si)=>
             <SortableSectionShell key={si} id={`sec-${si}`}>
@@ -534,7 +538,7 @@ export default function App(){
                   {sections.length>1&&<button onClick={()=>rmSection(si)} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
                 </div>
                 <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeItemDragEnd(si)}>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveItemId(active.id)} onDragEnd={e=>{setActiveItemId(null);makeItemDragEnd(si)(e);}} onDragCancel={()=>setActiveItemId(null)}>
                     <SortableContext items={sec.items.map((_,ii)=>`item-${si}-${ii}`)} strategy={verticalListSortingStrategy}>
                       {sec.items.map((it,ii)=>
                         <SortableItemRow key={ii} id={`item-${si}-${ii}`}>
@@ -552,6 +556,24 @@ export default function App(){
                         </SortableItemRow>
                       )}
                     </SortableContext>
+                    <DragOverlay>
+                      {activeItemId&&(()=>{
+                        const parts=activeItemId.split('-');
+                        const dragSi=parseInt(parts[1]);
+                        const dragIi=parseInt(parts[2]);
+                        if(dragSi!==si)return null;
+                        const it=sections[dragSi]?.items[dragIi];
+                        if(!it)return null;
+                        return <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:"#fff",boxShadow:"0 8px 24px rgba(0,0,0,0.13)",cursor:"grabbing",borderRadius:8,border:`1px solid ${B.border}`}}>
+                          <span style={{display:"flex",flexShrink:0,opacity:0.3}}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
+                          <div style={{flex:1,fontSize:12,color:B.graphite,lineHeight:"1.4",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{it.n}</div>
+                          <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
+                            <div style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",visibility:it.w>=1?"visible":"hidden"}}>!</div>
+                            {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <div key={wv} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,whiteSpace:"nowrap"}}>{l}</div>;})}
+                          </div>
+                        </div>;
+                      })()}
+                    </DragOverlay>
                   </DndContext>
                   <button onClick={()=>addItem(si)} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить параметр</button>
                 </div>
@@ -559,6 +581,17 @@ export default function App(){
             </SortableSectionShell>
           )}
         </SortableContext>
+        <DragOverlay>
+          {activeSectionId&&(()=>{
+            const si=sections.findIndex((_,i)=>`sec-${i}`===activeSectionId);
+            if(si<0)return null;
+            const sec=sections[si];
+            return <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`,boxShadow:"0 12px 32px rgba(0,0,0,0.28)",cursor:"grabbing"}}>
+              <span style={{display:"flex",flexShrink:0,opacity:0.4}}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill="#fff"/><circle cx="8" cy="3" r="1.2" fill="#fff"/><circle cx="4" cy="6" r="1.2" fill="#fff"/><circle cx="8" cy="6" r="1.2" fill="#fff"/><circle cx="4" cy="9" r="1.2" fill="#fff"/><circle cx="8" cy="9" r="1.2" fill="#fff"/></svg></span>
+              <div style={{flex:1,color:"#fff",fontSize:13,fontWeight:700,overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{sec.n}</div>
+            </div>;
+          })()}
+        </DragOverlay>
       </DndContext>
       <div style={{textAlign:"center",padding:20}}>
         <button onClick={()=>setView("input")} style={{padding:"10px 32px",borderRadius:20,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${B.blue}44`}}>Перейти к оценке →</button>
