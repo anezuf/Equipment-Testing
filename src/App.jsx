@@ -12,6 +12,7 @@ import NotePopup from "./components/NotePopup";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import * as XLSX from "xlsx";
 
 const [IconNo,IconMid,IconYes]=ICO;
 
@@ -87,9 +88,8 @@ export default function App(){
   },[sections,vendors]);
 
   /* Export to Excel (same format as template) */
-  const exportExcelFile=useCallback(async()=>{
+  const exportExcelFile=useCallback(()=>{
     try{
-      const XLSX=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
       const wb=XLSX.utils.book_new();
       const colCount=3+vendors.length*2;
       const rows=[];
@@ -136,12 +136,7 @@ export default function App(){
       XLSX.writeFile(wb,"scoring_export.xlsx");
     }catch(err){
       console.error(err);
-      const data=JSON.stringify({sections,vendors},null,2);
-      const blob=new Blob([data],{type:"application/json"});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");
-      a.href=url;a.download="scoring_data.json";a.click();
-      URL.revokeObjectURL(url);
+      alert("Ошибка экспорта Excel: "+err.message);
     }
   },[sections,vendors]);
 
@@ -169,7 +164,6 @@ export default function App(){
 
       /* XLSX parsing with SheetJS */
       try{
-        const XLSX=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
         const buf=await file.arrayBuffer();
         const wb=XLSX.read(buf,{type:"array"});
         const wsName=wb.SheetNames.find(n=>n==="Оценка")||wb.SheetNames[0];
