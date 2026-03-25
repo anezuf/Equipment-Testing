@@ -9,6 +9,9 @@ import Gauge from "./components/Gauge";
 import RichNote from "./components/RichNote";
 import SegBar from "./components/SegBar";
 import NotePopup from "./components/NotePopup";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const [IconNo,IconMid,IconYes]=ICO;
 
@@ -39,6 +42,20 @@ function loadSaved(){
 function HeatmapTh({si,s,active,onSort}){
   const [hov,setHov]=useState(false);
   return <th onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onSort} style={{textAlign:"center",padding:"4px 2px",fontSize:10,fontWeight:active?800:600,color:active?B.blue:B.steel,borderBottom:`2px solid ${active?B.blue:B.border}`,verticalAlign:"middle",cursor:"pointer",userSelect:"none",transition:"color 0.15s,border-color 0.15s",whiteSpace:"nowrap",position:"relative"}}>{si+1}{hov&&<div style={{position:"absolute",bottom:"calc(100% + 6px)",left:"50%",transform:"translateX(-50%)",background:B.graphite,color:"#fff",fontSize:10,fontWeight:500,padding:"4px 8px",borderRadius:6,whiteSpace:"nowrap",pointerEvents:"none",zIndex:99,boxShadow:"0 2px 8px rgba(0,0,0,0.18)",lineHeight:"1.3"}}>{s.n}<div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:`5px solid ${B.graphite}`}}/></div>}</th>;
+}
+
+function SortableSectionShell({id,children}){
+  const{attributes,listeners,setNodeRef,transform,transition,isDragging}=useSortable({id});
+  return <div ref={setNodeRef} style={{transform:CSS.Transform.toString(transform),transition,opacity:isDragging?0.5:1,marginBottom:12}}>
+    {children(listeners,attributes)}
+  </div>;
+}
+
+function SortableItemRow({id,children}){
+  const{attributes,listeners,setNodeRef,transform,transition,isDragging}=useSortable({id});
+  return <div ref={setNodeRef} style={{transform:CSS.Transform.toString(transform),transition,opacity:isDragging?0.4:1}}>
+    {children(listeners,attributes)}
+  </div>;
 }
 
 export default function App(){
@@ -360,6 +377,44 @@ export default function App(){
   const addItem=(si)=>{const n=sections.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новый параметр",w:2}]}:s);setSections(n);resizeVendors(n);};
   const rmItem=(si,ii)=>{if(sections[si].items.length<=1)return;const n=sections.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s);setSections(n);resizeVendors(n);};
 
+  const sensors=useSensors(useSensor(PointerSensor,{activationConstraint:{distance:5}}));
+
+  const handleSectionDragEnd=useCallback(({active,over})=>{
+    if(!over||active.id===over.id)return;
+    const oldIdx=sections.findIndex((_,i)=>`sec-${i}`===active.id);
+    const newIdx=sections.findIndex((_,i)=>`sec-${i}`===over.id);
+    if(oldIdx<0||newIdx<0)return;
+    const newSections=arrayMove(sections,oldIdx,newIdx);
+    const oldOffs=mkOff(sections);
+    setSections(newSections);
+    setVendors(prev=>prev.map(v=>{
+      const sc=[],nt=[],im=[];
+      newSections.forEach(sec=>{
+        const origIdx=sections.indexOf(sec);
+        const off=oldOffs[origIdx];
+        for(let i=0;i<sec.items.length;i++){sc.push(v.scores[off+i]??null);nt.push(v.notes[off+i]??"");im.push(v.images?.[off+i]??null);}
+      });
+      return{...v,scores:sc,notes:nt,images:im};
+    }));
+  },[sections]);
+
+  const makeItemDragEnd=(si)=>({active,over})=>{
+    if(!over||active.id===over.id)return;
+    const items=sections[si].items;
+    const oldIdx=items.findIndex((_,i)=>`item-${si}-${i}`===active.id);
+    const newIdx=items.findIndex((_,i)=>`item-${si}-${i}`===over.id);
+    if(oldIdx<0||newIdx<0)return;
+    const newSecs=sections.map((s,i)=>i===si?{...s,items:arrayMove(s.items,oldIdx,newIdx)}:s);
+    setSections(newSecs);
+    const off=SEC_OFF[si];
+    setVendors(prev=>prev.map(v=>{
+      const sc=[...v.scores];const nt=[...v.notes];const im=[...(v.images||[])];
+      const[ms]=sc.splice(off+oldIdx,1);const[mn]=nt.splice(off+oldIdx,1);const[mi]=im.splice(off+oldIdx,1);
+      sc.splice(off+newIdx,0,ms);nt.splice(off+newIdx,0,mn);im.splice(off+newIdx,0,mi??null);
+      return{...v,scores:sc,notes:nt,images:im};
+    }));
+  };
+
   const addV=()=>{if(vendors.length>=25)return;setVendors(p=>[...p,{name:`Вендор ${p.length+1}`,scores:Array(itemCount).fill(null),notes:Array(itemCount).fill(""),images:Array(itemCount).fill(null)}]);};
   const rmV=i=>{if(vendors.length<=1)return;setVendors(p=>p.filter((_,j)=>j!==i));if(act>=vendors.length-1)setAct(Math.max(0,vendors.length-2));};
   const setScore=useCallback((idx,val)=>{setVendors(p=>{const n=[...p];const v={...n[act],scores:[...n[act].scores]};v.scores[idx]=v.scores[idx]===val?null:val;n[act]=v;return n;});},[act]);
@@ -468,25 +523,43 @@ export default function App(){
           <button onClick={addSection} style={{padding:"6px 14px",borderRadius:10,border:"none",background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
         </div>
       </div>
-      {sections.map((sec,si)=><div key={si} style={{marginBottom:12}}>
-        <div draggable onDragStart={e=>{e.dataTransfer.setData("text",JSON.stringify({type:"section",si}));e.dataTransfer.effectAllowed="move";}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect="move";}} onDrop={e=>{e.preventDefault();try{const d=JSON.parse(e.dataTransfer.getData("text"));if(d.type==="section"&&d.si!==si){const n=[...sections];const [moved]=n.splice(d.si,1);n.splice(si,0,moved);setSections(n);resizeVendors(n);}}catch{}}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`,cursor:"grab"}}>
-          <svg width="12" height="12" viewBox="0 0 12 12" style={{flexShrink:0,opacity:0.4}}><circle cx="4" cy="3" r="1.2" fill="#fff"/><circle cx="8" cy="3" r="1.2" fill="#fff"/><circle cx="4" cy="6" r="1.2" fill="#fff"/><circle cx="8" cy="6" r="1.2" fill="#fff"/><circle cx="4" cy="9" r="1.2" fill="#fff"/><circle cx="8" cy="9" r="1.2" fill="#fff"/></svg>
-          <input value={sec.n} onChange={e=>setSectionName(si,e.target.value)} style={{flex:1,background:"transparent",border:"none",color:"#fff",fontSize:13,fontWeight:700,outline:"none",minWidth:0}}/>
-          {sections.length>1&&<button onClick={()=>rmSection(si)} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
-        </div>
-        <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
-          {sec.items.map((it,ii)=><div key={ii} draggable onDragStart={e=>{e.stopPropagation();e.dataTransfer.setData("text",JSON.stringify({type:"item",si,ii}));e.dataTransfer.effectAllowed="move";}} onDragOver={e=>{e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect="move";}} onDrop={e=>{e.preventDefault();e.stopPropagation();try{const d=JSON.parse(e.dataTransfer.getData("text"));if(d.type==="item"){if(d.si===si&&d.ii!==ii){const n=[...sections];const s={...n[si],items:[...n[si].items]};const [moved]=s.items.splice(d.ii,1);s.items.splice(ii,0,moved);n[si]=s;setSections(n);setVendors(prev=>prev.map(v=>{const sc=[...v.scores];const nt=[...v.notes];const off=SEC_OFF[si];const ms=sc.splice(off+d.ii,1)[0];const mn=nt.splice(off+d.ii,1)[0];sc.splice(off+(d.ii<ii?ii-1:ii),0,ms);nt.splice(off+(d.ii<ii?ii-1:ii),0,mn);return{...v,scores:sc,notes:nt};}));}else if(d.si!==si){const n=sections.map(s=>({...s,items:[...s.items]}));const [moved]=n[d.si].items.splice(d.ii,1);n[si].items.splice(ii,0,moved);if(n[d.si].items.length===0)n[d.si].items.push({n:"Параметр",w:2});setSections(n);setVendors(prev=>prev.map(v=>{const sc=[...v.scores];const nt=[...v.notes];const srcOff=SEC_OFF[d.si];const ms=sc.splice(srcOff+d.ii,1)[0];const mn=nt.splice(srcOff+d.ii,1)[0];const newOffs=mkOff(n);const dstOff=newOffs[si];sc.splice(dstOff+ii,0,ms);nt.splice(dstOff+ii,0,mn);return{...v,scores:sc,notes:nt};}));}}}catch{}}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none",cursor:"grab"}}>
-            <svg width="12" height="12" viewBox="0 0 12 12" style={{flexShrink:0,opacity:0.3}}><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg>
-            <textarea value={it.n} onChange={e=>{setItemName(si,ii,e.target.value);e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",minWidth:0,resize:"none",overflow:"hidden",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0}} placeholder="Название параметра"/>
-            <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-              <button onClick={()=>setItemWeight(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
-              {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <button key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap"}}>{l}</button>;})}
-            </div>
-            {sec.items.length>1&&<button onClick={()=>rmItem(si,ii)} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
-          </div>)}
-          <button onClick={()=>addItem(si)} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить параметр</button>
-        </div>
-      </div>)}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSectionDragEnd}>
+        <SortableContext items={sections.map((_,si)=>`sec-${si}`)} strategy={verticalListSortingStrategy}>
+          {sections.map((sec,si)=>
+            <SortableSectionShell key={si} id={`sec-${si}`}>
+              {(secDrag,secAttrs)=><>
+                <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`}}>
+                  <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.4,touchAction:"none"}} {...secDrag} {...secAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill="#fff"/><circle cx="8" cy="3" r="1.2" fill="#fff"/><circle cx="4" cy="6" r="1.2" fill="#fff"/><circle cx="8" cy="6" r="1.2" fill="#fff"/><circle cx="4" cy="9" r="1.2" fill="#fff"/><circle cx="8" cy="9" r="1.2" fill="#fff"/></svg></span>
+                  <input value={sec.n} onChange={e=>setSectionName(si,e.target.value)} style={{flex:1,background:"transparent",border:"none",color:"#fff",fontSize:13,fontWeight:700,outline:"none",minWidth:0}}/>
+                  {sections.length>1&&<button onClick={()=>rmSection(si)} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
+                </div>
+                <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={makeItemDragEnd(si)}>
+                    <SortableContext items={sec.items.map((_,ii)=>`item-${si}-${ii}`)} strategy={verticalListSortingStrategy}>
+                      {sec.items.map((it,ii)=>
+                        <SortableItemRow key={ii} id={`item-${si}-${ii}`}>
+                          {(itemDrag,itemAttrs)=>
+                            <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
+                              <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none"}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
+                              <textarea value={it.n} onChange={e=>{setItemName(si,ii,e.target.value);e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",minWidth:0,resize:"none",overflow:"hidden",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0}} placeholder="Название параметра"/>
+                              <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
+                                <button onClick={()=>setItemWeight(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
+                                {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <button key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap"}}>{l}</button>;})}
+                              </div>
+                              {sec.items.length>1&&<button onClick={()=>rmItem(si,ii)} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
+                            </div>
+                          }
+                        </SortableItemRow>
+                      )}
+                    </SortableContext>
+                  </DndContext>
+                  <button onClick={()=>addItem(si)} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить параметр</button>
+                </div>
+              </>}
+            </SortableSectionShell>
+          )}
+        </SortableContext>
+      </DndContext>
       <div style={{textAlign:"center",padding:20}}>
         <button onClick={()=>setView("input")} style={{padding:"10px 32px",borderRadius:20,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${B.blue}44`}}>Перейти к оценке →</button>
       </div>
