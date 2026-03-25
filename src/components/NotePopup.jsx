@@ -18,7 +18,6 @@ function NotePopup({note,onClose}){
       </div>
       <div style={{padding:"14px 16px",overflowY:"auto",flex:1}}>
         {note.text&&note.text.trim()&&note.text!=="<br>"&&<>
-          <style>{".npop ul{list-style:disc;padding-left:18px;margin:4px 0}.npop ol{list-style:decimal;padding-left:18px;margin:4px 0}.npop li{margin:2px 0}.npop strong{font-weight:700}.npop em{font-style:italic}.npop p{margin:0 0 4px}.npop p:last-child{margin:0}"}</style>
           <div className="npop" dangerouslySetInnerHTML={{__html:note.text}} style={{fontSize:12,color:B.graphite,lineHeight:"1.6",wordBreak:"break-word",background:"#F8FAFC",borderRadius:8,padding:"10px 12px",marginBottom:total>0?12:0,border:`1px solid ${B.border}`,textAlign:"left"}}/>
         </>}
         {total>0&&<div style={{position:"relative",borderRadius:8,overflow:"hidden",background:"#F1F5F9"}}>

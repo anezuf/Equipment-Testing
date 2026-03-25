@@ -111,6 +111,14 @@ code {
 }
 
 /* ── rack-audit app styles ── */
+.npop ul { list-style: disc; padding-left: 18px; margin: 4px 0; }
+.npop ol { list-style: decimal; padding-left: 18px; margin: 4px 0; }
+.npop li { margin: 2px 0; }
+.npop strong { font-weight: 700; }
+.npop em { font-style: italic; }
+.npop p { margin: 0 0 4px; }
+.npop p:last-child { margin: 0; }
+
 html, body, #root, #app { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #F5F8FB; }
