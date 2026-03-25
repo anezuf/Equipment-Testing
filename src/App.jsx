@@ -91,28 +91,25 @@ export default function App(){
     try{
       const XLSX=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
       const wb=XLSX.utils.book_new();
-
-      const sl=["Нет","Частично","Да"];
-      const allItems=mkAll(sections);
-      const offs=mkOff(sections);
+      const colCount=3+vendors.length*2;
       const rows=[];
 
-      /* Header row */
+      /* Row 1: title — merged across all columns */
+      rows.push(["ЧЕК-ЛИСТ ТЕСТИРОВАНИЯ СТОЕК"]);
+
+      /* Row 2: column headers */
       const hdr=["#","Параметр","Тип"];
-      vendors.forEach(v=>{hdr.push(v.name);hdr.push("Прим. "+v.name);});
+      vendors.forEach((v,n)=>{hdr.push(v.name);hdr.push(`Прим. В${n+1}`);});
       rows.push(hdr);
 
-      /* Data */
+      /* Data: section header row + item rows */
       let gi=0;
-      sections.forEach((sec)=>{
-        /* Section header */
-        const secRow=[sec.n];
-        rows.push(secRow);
-        sec.items.forEach((it,ii)=>{
-          const row=[gi+1,it.n,it.w===2?"★! Требование":it.w>=1?"★ Требование":"☆ Преимущество"];
+      sections.forEach(sec=>{
+        rows.push([sec.n]); /* section name in col A, rest empty */
+        sec.items.forEach(it=>{
+          const row=[gi+1,it.n,it.w===2?"★! Требование":it.w===1?"★ Требование":"☆ Преимущество"];
           vendors.forEach(v=>{
-            const sc=v.scores[gi];
-            row.push(sc!=null?sc:"");
+            row.push(v.scores[gi]!=null?v.scores[gi]:"");
             row.push(v.notes[gi]||"");
           });
           rows.push(row);
@@ -122,25 +119,23 @@ export default function App(){
 
       const ws=XLSX.utils.aoa_to_sheet(rows);
 
-      /* Column widths */
-      ws["!cols"]=[{wch:4},{wch:28},{wch:16}];
-      vendors.forEach(()=>{ws["!cols"].push({wch:12},{wch:20});});
-
-      /* Merge section header rows */
-      const merges=[];
-      let ri=1;
+      /* Merges: row 0 = title, then each section header row */
+      const merges=[{s:{r:0,c:0},e:{r:0,c:colCount-1}}];
+      let ri=2; /* first section starts after title(0) and header(1) */
       sections.forEach(sec=>{
-        const colCount=3+vendors.length*2;
         merges.push({s:{r:ri,c:0},e:{r:ri,c:colCount-1}});
         ri+=1+sec.items.length;
       });
       ws["!merges"]=merges;
 
+      /* Column widths */
+      ws["!cols"]=[{wch:4},{wch:28},{wch:16}];
+      vendors.forEach(()=>{ws["!cols"].push({wch:12},{wch:20});});
+
       XLSX.utils.book_append_sheet(wb,ws,"Оценка");
       XLSX.writeFile(wb,"scoring_export.xlsx");
     }catch(err){
       console.error(err);
-      /* Fallback to JSON */
       const data=JSON.stringify({sections,vendors},null,2);
       const blob=new Blob([data],{type:"application/json"});
       const url=URL.createObjectURL(blob);
@@ -181,46 +176,40 @@ export default function App(){
         const ws=wb.Sheets[wsName];
         const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
 
-        /* Parse structure: find header row, sections, items */
-        let headerRow=-1;
-        for(let r=0;r<Math.min(data.length,5);r++){
-          const row=data[r];
-          if(row&&String(row[0]||"").includes("#")&&String(row[1]||"").includes("Параметр")){headerRow=r;break;}
-          if(row&&String(row[1]||"").includes("Параметр")){headerRow=r;break;}
-        }
-        if(headerRow<0)headerRow=1; /* default: row index 1 (row 2 in excel) */
+        /* Row 0 = title (skip), Row 1 = headers */
+        const hdr=data[1]||[];
 
-        /* Detect vendor columns: pairs of score+note starting from col D (index 3) */
-        const hdr=data[headerRow]||[];
-        const vendorNames=[];
+        /* Vendor columns: vendor name at col 3, 5, 7... note at col+1 */
+        const vendorCols=[];
         for(let c=3;c<hdr.length;c+=2){
           const name=String(hdr[c]||"").trim();
-          if(name&&!name.startsWith("Прим"))vendorNames.push({name,scoreCol:c,noteCol:c+1});
+          if(name)vendorCols.push({name,scoreCol:c,noteCol:c+1});
         }
-        if(vendorNames.length===0){alert("Не найдены колонки вендоров");return;}
+        if(vendorCols.length===0){alert("Не найдены колонки вендоров");return;}
 
-        /* Parse sections and items */
+        /* Parse sections and items from row 2 onward */
         const newSections=[];
         let curSec=null;
-        for(let r=headerRow+1;r<data.length;r++){
+        for(let r=2;r<data.length;r++){
           const row=data[r];
           if(!row||row.every(c=>c===""||c==null))continue;
-          const colA=row[0];const colB=row[1];const colC=String(row[2]||"");
-
-          /* Section header: col A has text (not a number), col B is empty or merged */
+          const colA=row[0];
+          const colB=String(row[1]||"").trim();
           const aNum=Number(colA);
-          if(colA&&isNaN(aNum)&&!colC.includes("★")&&!colC.includes("☆")){
-            /* It's a section header */
+
+          /* Section header: col A is non-empty non-number, col B is empty */
+          if(colA&&isNaN(aNum)&&colB===""){
             curSec={n:String(colA).trim(),items:[]};
             newSections.push(curSec);
             continue;
           }
 
-          /* Item row: has a number in A or has type in C */
-          if(colB&&(colC.includes("★")||colC.includes("☆")||!isNaN(aNum))){
-            const w=colC.includes("★!")? 2 : (colC.includes("★")||colC.includes("Требование"))? 1 : 0;
+          /* Item row: col A is a positive integer */
+          if(!isNaN(aNum)&&aNum>0){
+            const colC=String(row[2]||"");
+            const w=colC.includes("!")?2:colC.includes("★")?1:0;
             if(!curSec){curSec={n:"Раздел",items:[]};newSections.push(curSec);}
-            curSec.items.push({n:String(colB).trim(),w});
+            curSec.items.push({n:String(row[1]||"").trim(),w});
           }
         }
 
@@ -228,20 +217,18 @@ export default function App(){
           alert("Не удалось распознать структуру файла");return;
         }
 
-        /* Build vendor data */
+        /* Build vendor score/note arrays */
         const totalItems=newSections.reduce((a,s)=>a+s.items.length,0);
-        const newVendors=vendorNames.map(vn=>{
+        const newVendors=vendorCols.map(vn=>{
           const scores=Array(totalItems).fill(null);
           const notes=Array(totalItems).fill("");
           const images=Array(totalItems).fill(null);
           let idx=0;
-          for(let r=headerRow+1;r<data.length;r++){
+          for(let r=2;r<data.length;r++){
             const row=data[r];
             if(!row)continue;
-            const colC=String(row[2]||"");
             const aNum=Number(row[0]);
-            const isItem=row[1]&&(colC.includes("★")||colC.includes("☆")||!isNaN(aNum));
-            if(!isItem)continue;
+            if(isNaN(aNum)||aNum<=0)continue; /* skip title, header, section rows */
             if(idx>=totalItems)break;
             const rawScore=row[vn.scoreCol];
             if(rawScore!=null&&rawScore!==""){
@@ -252,7 +239,7 @@ export default function App(){
             if(rawNote)notes[idx]=rawNote;
             idx++;
           }
-          return {name:vn.name,scores,notes,images};
+          return{name:vn.name,scores,notes,images};
         });
 
         setSections(newSections);
