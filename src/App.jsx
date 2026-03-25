@@ -38,6 +38,11 @@ function loadSaved(){
   }catch{return null;}
 }
 
+function HeatmapTh({si,s,active,onSort}){
+  const [hov,setHov]=useState(false);
+  return <th onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onSort} style={{textAlign:"center",padding:"4px 2px",fontSize:10,fontWeight:active?800:600,color:active?B.blue:B.steel,borderBottom:`2px solid ${active?B.blue:B.border}`,verticalAlign:"middle",cursor:"pointer",userSelect:"none",transition:"color 0.15s,border-color 0.15s",whiteSpace:"nowrap",position:"relative"}}>{si+1}{hov&&<div style={{position:"absolute",bottom:"calc(100% + 6px)",left:"50%",transform:"translateX(-50%)",background:B.graphite,color:"#fff",fontSize:10,fontWeight:500,padding:"4px 8px",borderRadius:6,whiteSpace:"nowrap",pointerEvents:"none",zIndex:99,boxShadow:"0 2px 8px rgba(0,0,0,0.18)",lineHeight:"1.3"}}>{s.n}<div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:`5px solid ${B.graphite}`}}/></div>}</th>;
+}
+
 export default function App(){
   const saved=useRef(loadSaved());
   const [sections,setSections]=useState(()=>saved.current?.sections||DEF_SECTIONS);
@@ -57,7 +62,6 @@ export default function App(){
   const [expImgs,setExpImgs]=useState({});
   const [heatmapSortCol,setHeatmapSortCol]=useState(null);
   const [heatmapActiveLabel,setHeatmapActiveLabel]=useState(null);
-  const [heatmapHoverCol,setHeatmapHoverCol]=useState(null);
   const [techSpecs,setTechSpecs]=useState(()=>{
     try{const s=localStorage.getItem("rack_tech_specs");return s?JSON.parse(s):[{n:"Общие требования",items:[{n:"Введите техническое условие"}]}];}catch{return [{n:"Общие требования",items:[{n:"Введите техническое условие"}]}];}
   });
@@ -403,7 +407,7 @@ export default function App(){
     return arr;
   },[vendors,totals,allSec,heatmapSortCol]);
 
-  const getAdvantages=(sc)=>ALL.filter((it,i)=>it.w===0&&sc[i]!=null&&sc[i]>0).map((it,i)=>({...it,idx:ALL.indexOf(it)}));
+  const getAdvantages=(sc)=>ALL.flatMap((it,i)=>it.w===0&&sc[i]!=null&&sc[i]>0?[{...it,idx:i}]:[]);
   const filled=sc=>sc.filter(x=>x!=null).length;
 
   const exportPDF=useCallback(()=>{window.print();},[]);
@@ -514,8 +518,8 @@ export default function App(){
             <svg width="12" height="12" viewBox="0 0 12 12" style={{flexShrink:0,opacity:0.3}}><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg>
             <textarea value={it.n} onChange={e=>{setItemName(si,ii,e.target.value);e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",minWidth:0,resize:"none",overflow:"hidden",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0}} placeholder="Название параметра"/>
             <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-              {it.w>=1&&<button onClick={()=>setItemWeight(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`1.5px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}} title="Критичный параметр (×2)">!</button>}
-              {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <button key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`1.5px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap"}}>{l}</button>;})}
+              <button onClick={()=>setItemWeight(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
+              {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <button key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap"}}>{l}</button>;})}
             </div>
             {sec.items.length>1&&<button onClick={()=>rmItem(si,ii)} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
           </div>)}
@@ -726,7 +730,7 @@ export default function App(){
               <th style={{textAlign:"left",padding:"6px 8px",fontSize:10,color:B.steel,fontWeight:600,borderBottom:`2px solid ${B.border}`,width:120}}>Вендор</th>
               {sections.map((s,si)=>{
                 const active=heatmapSortCol===si;
-                return <th key={si} onMouseEnter={()=>setHeatmapHoverCol(si)} onMouseLeave={()=>setHeatmapHoverCol(null)} onClick={()=>{const next=active?null:si;setHeatmapSortCol(next);setHeatmapActiveLabel(next===null?null:s.n);}} style={{textAlign:"center",padding:"4px 2px",fontSize:10,fontWeight:active?800:600,color:active?B.blue:B.steel,borderBottom:`2px solid ${active?B.blue:B.border}`,verticalAlign:"middle",cursor:"pointer",userSelect:"none",transition:"color 0.15s,border-color 0.15s",whiteSpace:"nowrap",position:"relative"}}>{si+1}{heatmapHoverCol===si&&<div style={{position:"absolute",bottom:"calc(100% + 6px)",left:"50%",transform:"translateX(-50%)",background:B.graphite,color:"#fff",fontSize:10,fontWeight:500,padding:"4px 8px",borderRadius:6,whiteSpace:"nowrap",pointerEvents:"none",zIndex:99,boxShadow:"0 2px 8px rgba(0,0,0,0.18)",lineHeight:"1.3"}}>{s.n}<div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:`5px solid ${B.graphite}`}}/></div>}</th>;
+                return <HeatmapTh key={si} si={si} s={s} active={active} onSort={()=>{const next=active?null:si;setHeatmapSortCol(next);setHeatmapActiveLabel(next===null?null:s.n);}}/>;
               })}
               <th onClick={()=>{setHeatmapSortCol(null);setHeatmapActiveLabel(null);}} style={{textAlign:"center",padding:"6px 4px",fontSize:10,fontWeight:heatmapSortCol===null?800:700,color:heatmapSortCol===null?B.blue:B.graphite,borderBottom:`2px solid ${heatmapSortCol===null?B.blue:B.border}`,width:50,cursor:"pointer",userSelect:"none",transition:"color 0.15s,border-color 0.15s"}}>Итого</th>
             </tr>
