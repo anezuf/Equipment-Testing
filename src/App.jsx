@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 
 import { B, VC, ICO, SM, WL, WC } from "./constants";
+import { DEF_SECTIONS, mkAll, mkOff } from "./sections";
 
 const IconNo=({c="#EF4444",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="4" y1="4" x2="12" y2="12" stroke={c} strokeWidth="2.2" strokeLinecap="round"/><line x1="12" y1="4" x2="4" y2="12" stroke={c} strokeWidth="2.2" strokeLinecap="round"/></svg>;
 const IconMid=({c="#F59E0B",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="3" y1="8" x2="13" y2="8" stroke={c} strokeWidth="2.4" strokeLinecap="round"/></svg>;
@@ -10,22 +11,6 @@ const IconYes=({c="#10B981",s=14})=><svg width={s} height={s} viewBox="0 0 16 16
 const fmt=(v)=>{if(v==null)return "—";return v%1===0?v.toFixed(0):v.toFixed(1);};
 
 /* Weight: 0=Преимущество (excluded from score), 1=Требование, 2=Требование(!) critical */
-
-const DEF_SECTIONS=[
-  {n:"Поставщик",items:[{n:"Производственная мощность",w:1}]},
-  {n:"Транспортировка",items:[{n:"Упаковка",w:1},{n:"ЗИП-комплект",w:1},{n:"Готовность к эксплуатации",w:1}]},
-  {n:"Габариты и конструктив",items:[{n:"Соответствие габаритов",w:2},{n:"Допустимая высота",w:1},{n:"Направляющие для PDU",w:1},{n:"Кабель PDU vs рама",w:0},{n:"Сдвиг направляющих",w:1},{n:"Разметка направляющих",w:0},{n:"Стандарт EIA-310-D",w:2},{n:"Глубина монтажа",w:1},{n:"Совместимость рельсов",w:0},{n:"Нумерация юнитов",w:0}]},
-  {n:"Покраска и маркировка",items:[{n:"Качество покраски",w:1},{n:"Маркировка юнитов",w:1}]},
-  {n:"Колёсики и ножки",items:[{n:"Наличие колёсиков",w:1},{n:"Качество колёсиков",w:1},{n:"Регулировка ножек",w:0}]},
-  {n:"Ручки и двери",items:[{n:"Ручки",w:1},{n:"Угол открытия",w:1},{n:"Перфорация дверей",w:1},{n:"Петли",w:0},{n:"Замки",w:1},{n:"Съёмность панелей",w:0}]},
-  {n:"Кабельные вводы",items:[{n:"Щёточные вводы",w:1},{n:"Заземление",w:2}]},
-  {n:"Нагрузка и прочность",items:[{n:"Стат. грузоподъёмность",w:2},{n:"Дин. грузоподъёмность",w:2},{n:"Устойчивость",w:1},{n:"Жёсткость каркаса",w:0}]},
-  {n:"Крыша и основание",items:[{n:"Кабельные вырезы",w:1},{n:"Основание",w:0},{n:"Крепление к полу",w:0}]},
-  {n:"Кабельная организация",items:[{n:"Органайзеры",w:1},{n:"Кабельные проходы",w:0}]},
-  {n:"Документация",items:[{n:"Паспорт",w:1},{n:"Сертификаты",w:2},{n:"Гарантия",w:0}]},
-];
-const mkAll=secs=>secs.flatMap(s=>s.items.map(it=>({...it,sec:s.n})));
-const mkOff=secs=>secs.map((_,i)=>secs.slice(0,i).reduce((a,s)=>a+s.items.length,0));
 
 /*
   Scoring logic:
