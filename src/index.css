@@ -181,6 +181,22 @@ button {
 }
 .btn-add-vendor:active { background-color: #dbeafe !important; }
 
+/* Action buttons (Отчёт / Загрузить): gray base → solid blue on hover */
+.btn-action { transition: all 0.2s ease; }
+.btn-action:hover {
+  border-color: #2F9AFF !important;
+  background-color: #EFF6FF !important;
+  color: #2F9AFF !important;
+}
+.btn-action:active { background-color: #dbeafe !important; }
+
+/* Vendor pill × zone */
+.vendor-rm:hover {
+  background-color: #EF4444 !important;
+  color: #fff !important;
+  border-left-color: transparent !important;
+}
+
 @media print {
   [data-nav] { display: none !important; }
   body, html { background: #fff !important; margin: 0 auto !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; max-width: 100%; }
