@@ -6,5 +6,4 @@ export const B={blue:"#2F9AFF",steel:"#7B97B2",graphite:"#334155",neon:"#3045E6"
 export const VC=[B.blue,B.neon,B.sea,B.amethyst,B.raspberry,B.pumpkin,B.lilac,B.steel,B.graphite,"#1ABC9C"];
 export const ICO=[IconNo,IconMid,IconYes];
 export const SM=[{v:0,l:"Нет",c:"#EF4444",bg:"#FEE2E2",d:"Не соответствует"},{v:1,l:"Частично",c:"#F59E0B",bg:"#FEF3C7",d:"Есть замечания"},{v:2,l:"Да",c:"#10B981",bg:"#D1FAE5",d:"Полностью ОК"}];
-export const WL={0:"Преимущество",1:"Требование",2:"Требование"};
 export const WC={0:{bg:"#DBEAFE",c:B.blue,bc:B.blue},1:{bg:"#FEE2E2",c:"#DC2626",bc:"#DC2626"},2:{bg:"#FEE2E2",c:"#DC2626",bc:"#DC2626"}};
