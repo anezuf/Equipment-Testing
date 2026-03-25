@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 
-import { B, VC, ICO, SM, WL, WC } from "./constants";
+import { B, VC, ICO, SM, WC } from "./constants";
 import { DEF_SECTIONS, mkAll, mkOff } from "./sections";
-import { coeff, calcTotal, calcSec, hasFail } from "./scoring";
+import { calcTotal, calcSec, hasFail } from "./scoring";
+import { fmt } from "./utils";
 import Logo from "./components/Logo";
 import Gauge from "./components/Gauge";
 import RichNote from "./components/RichNote";
@@ -13,8 +14,6 @@ const IconNo=({c="#EF4444",s=14})=><svg width={s} height={s} viewBox="0 0 16 16"
 const IconMid=({c="#F59E0B",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="3" y1="8" x2="13" y2="8" stroke={c} strokeWidth="2.4" strokeLinecap="round"/></svg>;
 const IconYes=({c="#10B981",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><polyline points="3,8.5 6.5,12 13,4.5" stroke={c} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>;
 
-/* Smart number: 10 → "10", 6.7 → "6.7" */
-const fmt=(v)=>{if(v==null)return "—";return v%1===0?v.toFixed(0):v.toFixed(1);};
 
 /* Weight: 0=Преимущество (excluded from score), 1=Требование, 2=Требование(!) critical */
 
@@ -404,7 +403,6 @@ export default function App(){
     return arr;
   },[vendors,totals,allSec,heatmapSortCol]);
 
-  const getTop=(sc,best)=>{const s=ALL.filter(it=>it.w>=1).map((it,i)=>{const gi=ALL.indexOf(it);return{...it,idx:gi,score:sc[gi]};}).filter(x=>x.score!=null);s.sort((a,b2)=>best?(b2.score*b2.w)-(a.score*a.w):(a.score*a.w)-(b2.score*b2.w));return s.slice(0,5);};
   const getAdvantages=(sc)=>ALL.filter((it,i)=>it.w===0&&sc[i]!=null&&sc[i]>0).map((it,i)=>({...it,idx:ALL.indexOf(it)}));
   const filled=sc=>sc.filter(x=>x!=null).length;
 

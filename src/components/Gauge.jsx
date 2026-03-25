@@ -1,6 +1,5 @@
 import { B } from "../constants";
-
-const fmt=(v)=>{if(v==null)return "—";return v%1===0?v.toFixed(0):v.toFixed(1);};
+import { fmt } from "../utils";
 
 function Gauge({value,color,label,rank,fail,size=90}){
   const r=(size-8)/2,circ=2*Math.PI*r,dash=circ*0.75,off=dash*(1-(value!=null?value/10:0));
