@@ -200,6 +200,7 @@ button {
 }
 .btn-file-upload:active { background-color: #dbeafe !important; }
 
+
 /* "Добавить вендора" — dashed border becomes solid blue on hover */
 .btn-add-vendor:hover {
   border: 2px solid #2F9AFF !important;

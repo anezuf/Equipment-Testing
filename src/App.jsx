@@ -340,8 +340,8 @@ export default function App(){
       .srow{display:flex;justify-content:space-between;padding:6px 14px;font-size:12px}
       .srow:nth-child(even){background:#F5F8FB}
       .sn{color:#7B97B2}.sv{font-weight:700}
-      .pdf-btn{display:block;margin:0 auto 24px;padding:10px 32px;border-radius:20px;border:none;background:#2F9AFF;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,system-ui,sans-serif}
-      .pdf-btn:hover{background:#1a7de6}
+      .pdf-btn{display:block;margin:0 auto 24px;padding:10px 20px;border-radius:12px;border:1.5px dashed #CBD5E1;background:#F8FAFC;color:#7B97B2;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,system-ui,sans-serif;transition:all 0.2s ease}
+      .pdf-btn:hover{border:1.5px solid #2F9AFF;background:#EFF6FF;color:#2F9AFF}
       .sec-block{break-inside:avoid}
       .row{break-inside:avoid}
       @media print{body{padding:16px}.pdf-btn{display:none!important}}
@@ -537,7 +537,7 @@ export default function App(){
         <div style={{display:"flex",gap:3,background:"#F1F5F9",borderRadius:20,padding:2}}>{navBtn("Редактор","editor")}{navBtn("Тех. условия","techspecs")}{navBtn("Оценка","input")}{navBtn("Дашборд","dashboard")}</div>
       </div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
-        {view==="dashboard"&&<button className="btn-primary" onClick={exportPDF} style={{padding:"5px 12px",borderRadius:20,border:`1.5px solid ${B.blue}`,background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>PDF</button>}
+        {view==="dashboard"&&<button className="btn-add-vendor" onClick={exportPDF} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>PDF</button>}
       </div>
     </div>
 
@@ -557,9 +557,9 @@ export default function App(){
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 10V2M5 5l3-3 3 3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             Сохранить
           </button>
-          <button className="btn-primary" onClick={addSection} style={{padding:"6px 14px",borderRadius:10,border:"none",background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
         </div>
       </div>
+      <button className="btn-add-vendor" onClick={addSection} style={{padding:"10px 20px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:13,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",marginBottom:12}}>+ Раздел</button>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveSectionId(active.id)} onDragEnd={handleSectionDragEnd} onDragCancel={()=>setActiveSectionId(null)}>
         <SortableContext items={sections.map((_,si)=>`sec-${si}`)} strategy={verticalListSortingStrategy}>
           {sections.map((sec,si)=>
@@ -638,8 +638,8 @@ export default function App(){
           <div style={{fontSize:16,fontWeight:700,color:B.graphite}}>Технические условия</div>
           <div style={{fontSize:12,color:B.steel,marginTop:2}}>Критерии подбора оборудования — только для справки, не влияет на расчёты</div>
         </div>
-        <button className="btn-primary" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новое условие"}]}])} style={{padding:"6px 14px",borderRadius:10,border:"none",background:B.blue,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
       </div>
+      <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новое условие"}]}])} style={{padding:"10px 20px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:13,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",marginBottom:12}}>+ Раздел</button>
       {techSpecs.map((sec,si)=><div key={si} style={{marginBottom:12}}>
         <div draggable onDragStart={e=>{e.dataTransfer.setData("text",JSON.stringify({type:"ts-sec",si}));e.dataTransfer.effectAllowed="move";}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect="move";}} onDrop={e=>{e.preventDefault();try{const d=JSON.parse(e.dataTransfer.getData("text"));if(d.type==="ts-sec"&&d.si!==si){const n=[...techSpecs];const [m]=n.splice(d.si,1);n.splice(si,0,m);setTechSpecs(n);}}catch{}}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`,cursor:"grab"}}>
           <svg width="12" height="12" viewBox="0 0 12 12" style={{flexShrink:0,opacity:0.4}}><circle cx="4" cy="3" r="1.2" fill="#fff"/><circle cx="8" cy="3" r="1.2" fill="#fff"/><circle cx="4" cy="6" r="1.2" fill="#fff"/><circle cx="8" cy="6" r="1.2" fill="#fff"/><circle cx="4" cy="9" r="1.2" fill="#fff"/><circle cx="8" cy="9" r="1.2" fill="#fff"/></svg>
@@ -652,7 +652,7 @@ export default function App(){
             <textarea value={it.n} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter,system-ui,sans-serif",lineHeight:"1.4",padding:0}}/>
             {sec.items.length>1&&<button className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
           </div>)}
-          <button className="btn-secondary" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие"}]}:s))} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить условие</button>
+          <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие"}]}:s))} style={{width:"100%",padding:"10px",border:"none",borderTop:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:13,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить условие</button>
         </div>
       </div>)}
     </div>}
