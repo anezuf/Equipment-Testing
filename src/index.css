@@ -336,9 +336,7 @@ button {
 
 /* Hide НИТС label on very small screens */
 @media (max-width: 480px) {
-  .nav-nits {
-    display: none !important;
-  }
+  /* .nav-nits { display: none !important; } */
 }
 
 /* Landscape phones: also remove indent */
