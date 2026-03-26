@@ -123,6 +123,14 @@ html, body { overflow-x: hidden; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #F5F8FB; }
 
+.vendor-legend-row {
+  padding-left: 130px;
+}
+
+.vendor-legend-center {
+  justify-content: center;
+}
+
 .rich-note { outline: none; text-align: left; }
 .rich-note p { margin: 0 0 4px; }
 .rich-note p:last-child { margin-bottom: 0; }
@@ -312,6 +320,11 @@ button {
   max-width: 100% !important;
   }
 
+  /* Vendor bars legend: remove left indent on mobile */
+  .vendor-legend-row {
+    padding-left: 0 !important;
+  }
+
   /* Section label inside vendor bars */
   .sec-bar-label {
   width: 100px !important;
@@ -329,6 +342,13 @@ button {
 @media (max-width: 480px) {
   .nav-nits {
     display: none !important;
+  }
+}
+
+/* Landscape phones: also remove indent */
+@media (max-height: 420px) and (orientation: landscape) {
+  .vendor-legend-row {
+    padding-left: 0 !important;
   }
 }
 

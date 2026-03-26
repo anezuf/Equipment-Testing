@@ -980,12 +980,14 @@ export default function App(){
                 <div style={{width:36,height:20,borderRadius:6,fontSize:11,fontWeight:700,background:valBg,color:valC,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{fmt(val)}</div>
               </div>;
             })}
-            <div style={{display:"flex",gap:8,marginTop:6,marginLeft:0,paddingTop:6,paddingLeft:130,borderTop:"1px solid #F1F5F9",flexWrap:"wrap"}}>
-              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#10B981"}}><div style={{width:8,height:8,borderRadius:2,background:"#10B981"}}/>Да</div>
-              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#F59E0B"}}><div style={{width:8,height:8,borderRadius:2,background:"#F59E0B"}}/>Частично</div>
-              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#EF4444"}}><div style={{width:8,height:8,borderRadius:2,background:"#EF4444"}}/>Нет</div>
-              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:B.steel}}><div style={{width:8,height:8,borderRadius:2,background:"#E2E8F0"}}/>Нет оценки</div>
-              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:B.steel}}><div style={{width:6,height:6,borderRadius:"50%",background:"#fff",border:"1px solid #999"}}/>Примечание</div>
+            <div className="vendor-legend-row" style={{display:"flex",gap:8,marginTop:6,marginLeft:0,paddingTop:6,borderTop:"1px solid #F1F5F9",flexWrap:"wrap",justifyContent:"center"}}>
+              <div className="vendor-legend-center" style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#10B981"}}><div style={{width:8,height:8,borderRadius:2,background:"#10B981"}}/>Да</div>
+                <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#F59E0B"}}><div style={{width:8,height:8,borderRadius:2,background:"#F59E0B"}}/>Частично</div>
+                <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#EF4444"}}><div style={{width:8,height:8,borderRadius:2,background:"#EF4444"}}/>Нет</div>
+                <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:B.steel}}><div style={{width:8,height:8,borderRadius:2,background:"#E2E8F0"}}/>Нет оценки</div>
+                <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:B.steel}}><div style={{width:6,height:6,borderRadius:"50%",background:"#fff",border:"1px solid #999"}}/>Примечание</div>
+              </div>
             </div>
           </div>;})}
         </div>
