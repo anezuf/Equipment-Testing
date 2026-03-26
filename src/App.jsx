@@ -925,7 +925,7 @@ export default function App(){
             {heatmapSortedIdx.map((i,rank)=>{const v=vendors[i];const t=totals[i];const isLastRow=rank===heatmapSortedIdx.length-1;
               const rowBg=rank%2?"#fff":"#F8FAFC";
               return <tr key={i} onClick={() => setHeatmapSelectedVendor(prev => prev === i ? null : i)} style={{borderBottom:isLastRow?"none":`1px solid #F1F5F9`,cursor:"pointer",opacity:heatmapSelectedVendor !== null && heatmapSelectedVendor !== i ? 0.4 : 1,transition:"opacity 0.2s"}}>
-                <td style={{padding:"6px 8px",fontSize:10,fontWeight:600,color:VC[i%VC.length],textAlign:"center",background:`linear-gradient(to right, ${VC[i%VC.length]} 0 3px, ${rowBg} 3px)`,borderRight:`1px solid ${B.border}`,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderRadius:isLastRow?"0 0 0 12px":undefined,backgroundClip:"padding-box"}}>{v.name}</td>
+                <td title={v.name} style={{padding:"6px 8px",fontSize:10,fontWeight:600,color:VC[i%VC.length],textAlign:"center",background:`linear-gradient(to right, ${VC[i%VC.length]} 0 3px, ${rowBg} 3px)`,borderRight:`1px solid ${B.border}`,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderRadius:isLastRow?"0 0 0 12px":undefined,backgroundClip:"padding-box"}}>{v.name}</td>
                 {sections.map((s,si)=>{
                   const val=allSec[i]?allSec[i][si]:0;
                   const bg=val>=8?"#D1FAE5":val>=5?"#FEF3C7":val>0?"#FEE2E2":"#F1F5F9";
