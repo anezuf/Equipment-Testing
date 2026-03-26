@@ -912,7 +912,7 @@ export default function App(){
         <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,tableLayout:"fixed"}}>
           <thead>
             <tr>
-              <th style={{textAlign:"left",padding:"6px 8px",fontSize:10,color:B.steel,fontWeight:600,width:120}}>Вендор</th>
+              <th style={{textAlign:"center",padding:"6px 8px",fontSize:10,color:B.steel,fontWeight:600,width:120}}>Вендор</th>
               {sections.map((s,si)=>{
                 const active=heatmapSort.col===si;
                 return <HeatmapTh key={si} si={si} s={s} active={active} onSort={()=>{const next=active?null:si;setHeatmapSort({col:next,label:next===null?null:s.n});}}/>;
@@ -923,8 +923,8 @@ export default function App(){
           <tbody>
             {heatmapSortedIdx.map((i,rank)=>{const v=vendors[i];const t=totals[i];const isLastRow=rank===heatmapSortedIdx.length-1;
               const rowBg=rank%2?"#fff":"#F8FAFC";
-              return <tr key={i} style={{borderBottom:`1px solid #F1F5F9`}}>
-                <td style={{padding:"6px 8px",fontSize:10,fontWeight:600,color:VC[i%VC.length],background:rowBg,borderLeft:`3px solid ${VC[i%VC.length]}`,borderRight:`1px solid ${B.border}`,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderRadius:isLastRow?"0 0 0 12px":undefined}}>{v.name}</td>
+              return <tr key={i} style={{borderBottom:isLastRow?"none":`1px solid #F1F5F9`}}>
+                <td style={{padding:"6px 8px",fontSize:10,fontWeight:600,color:VC[i%VC.length],textAlign:"center",background:`linear-gradient(to right, ${VC[i%VC.length]} 0 3px, ${rowBg} 3px)`,borderRight:`1px solid ${B.border}`,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderRadius:isLastRow?"0 0 0 12px":undefined,backgroundClip:"padding-box"}}>{v.name}</td>
                 {sections.map((s,si)=>{
                   const val=allSec[i]?allSec[i][si]:0;
                   const bg=val>=8?"#D1FAE5":val>=5?"#FEF3C7":val>0?"#FEE2E2":"#F1F5F9";
@@ -932,7 +932,7 @@ export default function App(){
                   const isActiveCol=heatmapSort.col===si;
                   return <td key={si} style={{textAlign:"center",padding:"6px 2px",background:bg,fontWeight:isActiveCol?800:700,fontSize:10,color:tc,outline:isActiveCol?`1.5px solid ${B.blue}40`:undefined,outlineOffset:-1}}>{val===0?"—":fmt(val)}</td>;
                 })}
-                <td style={{textAlign:"center",padding:"6px 4px",fontWeight:800,fontSize:11,color:t!=null&&t>=8?"#065F46":t!=null&&t>=5?"#92400E":t!=null&&t>0?"#991B1B":B.steel,background:t!=null&&t>=8?"#D1FAE5":t!=null&&t>=5?"#FEF3C7":t!=null&&t>0?"#FEE2E2":rowBg,borderLeft:`2px solid ${B.border}`}}>{fmt(t)}</td>
+                <td style={{textAlign:"center",padding:"6px 4px",fontWeight:800,fontSize:11,color:t!=null&&t>=8?"#065F46":t!=null&&t>=5?"#92400E":t!=null&&t>0?"#991B1B":B.steel,background:t!=null&&t>=8?"#D1FAE5":t!=null&&t>=5?"#FEF3C7":t!=null&&t>0?"#FEE2E2":rowBg,borderLeft:`2px solid ${B.border}`,borderRadius:isLastRow?"0 0 12px 0":undefined,clipPath:isLastRow?"inset(0 round 0 0 12px 0)":undefined}}>{fmt(t)}</td>
               </tr>;
             })}
           </tbody>
