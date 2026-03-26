@@ -38,6 +38,17 @@ function loadSaved(storageKey){
   }catch{return null;}
 }
 
+const PDU_DEFAULT_SECTIONS=[{n:"Новый раздел",items:[{n:"Новый параметр",w:1}]}];
+
+function getSectionsByEqType(eqType,savedData){
+  if(eqType==="pdu"){
+    const savedSections=savedData?.sections;
+    if(Array.isArray(savedSections)&&savedSections.length===1)return savedSections;
+    return PDU_DEFAULT_SECTIONS;
+  }
+  return savedData?.sections||DEF_SECTIONS;
+}
+
 function HeatmapTh({si,s,active,onSort}){
   const [hov,setHov]=useState(false);
   return <th onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onSort} style={{textAlign:"center",padding:"4px 2px",fontSize:10,fontWeight:active?800:600,color:active?B.blue:B.steel,verticalAlign:"middle",cursor:"pointer",userSelect:"none",transition:"color 0.15s",whiteSpace:"nowrap",position:"relative"}}>{si+1}{hov===true&&<div style={{position:"absolute",bottom:"calc(100% + 6px)",left:"50%",transform:"translateX(-50%)",background:"#334155",color:"#fff",fontSize:10,padding:"4px 8px",borderRadius:6,whiteSpace:"nowrap",pointerEvents:"none",zIndex:99}}>{s.n}<div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:"5px solid #334155"}}/></div>}</th>;
@@ -62,14 +73,21 @@ export default function App(){
   const STORAGE_KEY=`rack_scoring_data_${eqType}`;
   const saved=useRef(loadSaved(`rack_scoring_data_${localStorage.getItem("rack_eq_type")||"стойка"}`));
   const skipNextSaveRef=useRef(false);
-  const [sections,setSections]=useState(()=>saved.current?.sections||DEF_SECTIONS);
+  const [sections,setSections]=useState(()=>getSectionsByEqType(eqType,saved.current));
   const ALL=useMemo(()=>mkAll(sections),[sections]);
   const SEC_OFF=useMemo(()=>mkOff(sections),[sections]);
   const itemCount=ALL.length;
 
   const [vendors,setVendors]=useState(()=>{
-    if(saved.current?.vendors)return saved.current.vendors.map(v=>({...v,images:v.images||Array(mkAll(saved.current?.sections||DEF_SECTIONS).length).fill(null)}));
-    return [{name:"Вендор 1",scores:Array(mkAll(DEF_SECTIONS).length).fill(null),notes:Array(mkAll(DEF_SECTIONS).length).fill(""),images:Array(mkAll(DEF_SECTIONS).length).fill(null)}];
+    const initialSections=getSectionsByEqType(eqType,saved.current);
+    const initialItemCount=mkAll(initialSections).length;
+    const hasValidSavedForType=eqType==="pdu"
+      ? Array.isArray(saved.current?.sections)&&saved.current.sections.length===1
+      : !!saved.current?.sections;
+    if(hasValidSavedForType&&saved.current?.vendors){
+      return saved.current.vendors.map(v=>({...v,images:v.images||Array(initialItemCount).fill(null)}));
+    }
+    return [{name:"Вендор 1",scores:Array(initialItemCount).fill(null),notes:Array(initialItemCount).fill(""),images:Array(initialItemCount).fill(null)}];
   });
   const [act,setAct]=useState(0);
   const [view,setView]=useState("editor");
@@ -106,16 +124,19 @@ export default function App(){
 
   useEffect(()=>{
     const savedData=loadSaved(STORAGE_KEY);
-    const nextSections=savedData?.sections||DEF_SECTIONS;
+    const nextSections=getSectionsByEqType(eqType,savedData);
     const nextItemCount=mkAll(nextSections).length;
-    const nextVendors=savedData?.vendors
+    const hasValidSavedForType=eqType==="pdu"
+      ? Array.isArray(savedData?.sections)&&savedData.sections.length===1
+      : !!savedData?.sections;
+    const nextVendors=hasValidSavedForType&&savedData?.vendors
       ? savedData.vendors.map(v=>({...v,images:v.images||Array(nextItemCount).fill(null)}))
       : [{name:"Вендор 1",scores:Array(nextItemCount).fill(null),notes:Array(nextItemCount).fill(""),images:Array(nextItemCount).fill(null)}];
     skipNextSaveRef.current=true;
     setSections(nextSections);
     setVendors(nextVendors);
     setAct(0);
-  },[STORAGE_KEY]);
+  },[STORAGE_KEY,eqType]);
 
   /* Auto-save to localStorage on every change */
   useEffect(()=>{
@@ -685,8 +706,17 @@ export default function App(){
       </div>
       <div style={{display:"flex",justifyContent:"flex-start",marginBottom:10,gap:8,flexWrap:"wrap"}}>
         {["стойка","pdu"].map(type=>
-          <button key={type} onClick={()=>{localStorage.setItem("rack_eq_type",type);setEqType(type);}} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===type?B.blue:B.border}`,background:eqType===type?"#EFF6FF":"#fff",color:eqType===type?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
-            {type==="стойка"?"🗄 Стойка":"⚡ PDU"}
+          <button key={type} onClick={()=>{
+            if(type==="pdu"){
+              const pduSaved=loadSaved("rack_scoring_data_pdu");
+              if(Array.isArray(pduSaved?.sections)&&pduSaved.sections.length>1){
+                try{localStorage.removeItem("rack_scoring_data_pdu");}catch{}
+              }
+            }
+            localStorage.setItem("rack_eq_type",type);
+            setEqType(type);
+          }} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===type?B.blue:B.border}`,background:eqType===type?"#EFF6FF":"#fff",color:eqType===type?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+            {type==="стойка"?"Стойка":"PDU"}
           </button>
         )}
       </div>
