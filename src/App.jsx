@@ -30,11 +30,9 @@ const [IconNo,IconMid,IconYes]=ICO;
   - hasFail: any Требование (w>=1) with score===0
 */
 
-const STORAGE_KEY="rack_scoring_data";
-
-function loadSaved(){
+function loadSaved(storageKey){
   try{
-    const raw=localStorage.getItem(STORAGE_KEY);
+    const raw=localStorage.getItem(storageKey);
     if(!raw)return null;
     return JSON.parse(raw);
   }catch{return null;}
@@ -60,7 +58,10 @@ function SortableItemRow({id,children}){
 }
 
 export default function App(){
-  const saved=useRef(loadSaved());
+  const [eqType,setEqType]=useState(()=>localStorage.getItem("rack_eq_type")||"стойка");
+  const STORAGE_KEY=`rack_scoring_data_${eqType}`;
+  const saved=useRef(loadSaved(`rack_scoring_data_${localStorage.getItem("rack_eq_type")||"стойка"}`));
+  const skipNextSaveRef=useRef(false);
   const [sections,setSections]=useState(()=>saved.current?.sections||DEF_SECTIONS);
   const ALL=useMemo(()=>mkAll(sections),[sections]);
   const SEC_OFF=useMemo(()=>mkOff(sections),[sections]);
@@ -99,10 +100,31 @@ export default function App(){
     return () => { window.removeEventListener('resize', handler); window.removeEventListener('orientationchange', handler); };
   }, []);
 
+  useEffect(()=>{
+    try{localStorage.setItem("rack_eq_type",eqType);}catch{}
+  },[eqType]);
+
+  useEffect(()=>{
+    const savedData=loadSaved(STORAGE_KEY);
+    const nextSections=savedData?.sections||DEF_SECTIONS;
+    const nextItemCount=mkAll(nextSections).length;
+    const nextVendors=savedData?.vendors
+      ? savedData.vendors.map(v=>({...v,images:v.images||Array(nextItemCount).fill(null)}))
+      : [{name:"Вендор 1",scores:Array(nextItemCount).fill(null),notes:Array(nextItemCount).fill(""),images:Array(nextItemCount).fill(null)}];
+    skipNextSaveRef.current=true;
+    setSections(nextSections);
+    setVendors(nextVendors);
+    setAct(0);
+  },[STORAGE_KEY]);
+
   /* Auto-save to localStorage on every change */
   useEffect(()=>{
+    if(skipNextSaveRef.current){
+      skipNextSaveRef.current=false;
+      return;
+    }
     try{localStorage.setItem(STORAGE_KEY,JSON.stringify({sections,vendors}));}catch{}
-  },[sections,vendors]);
+  },[STORAGE_KEY,sections,vendors]);
 
   /* Export to Excel (same format as template) */
   const exportExcelFile=useCallback(async()=>{
@@ -660,6 +682,13 @@ export default function App(){
             Сохранить
           </button>
         </div>
+      </div>
+      <div style={{display:"flex",justifyContent:"flex-start",marginBottom:10,gap:8,flexWrap:"wrap"}}>
+        {["стойка","pdu"].map(type=>
+          <button key={type} onClick={()=>{localStorage.setItem("rack_eq_type",type);setEqType(type);}} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===type?B.blue:B.border}`,background:eqType===type?"#EFF6FF":"#fff",color:eqType===type?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+            {type==="стойка"?"🗄 Стойка":"⚡ PDU"}
+          </button>
+        )}
       </div>
       <div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
         <button className="btn-add-vendor" onClick={addSection} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
