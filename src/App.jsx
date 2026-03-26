@@ -571,7 +571,21 @@ export default function App(){
   const getAdvantages=(sc)=>ALL.flatMap((it,i)=>it.w===0&&sc[i]!=null&&sc[i]>0?[{...it,idx:i}]:[]);
   const filled=sc=>sc.filter(x=>x!=null).length;
 
-  const exportPDF=useCallback(()=>{window.print();},[]);
+  const resetHeatmapPrintScroll=useCallback(()=>{
+    if(typeof document==="undefined")return;
+    document.querySelectorAll(".heatmap-table-wrap").forEach((el)=>{el.scrollLeft=0;});
+  },[]);
+
+  useEffect(()=>{
+    const handleBeforePrint=()=>{resetHeatmapPrintScroll();};
+    window.addEventListener("beforeprint",handleBeforePrint);
+    return ()=>window.removeEventListener("beforeprint",handleBeforePrint);
+  },[resetHeatmapPrintScroll]);
+
+  const exportPDF=useCallback(()=>{
+    resetHeatmapPrintScroll();
+    window.print();
+  },[resetHeatmapPrintScroll]);
 
   const wbBadge=(w)=>{const wc=WC[w]||WC[1];return{fontSize:11,fontWeight:700,color:wc.c,whiteSpace:"nowrap",flexShrink:0,lineHeight:1};};
   const navBtn=(label,v)=><button className="btn-nav" onClick={()=>setView(v)} style={{padding:"6px 16px",borderRadius:20,border:"none",cursor:"pointer",background:view===v?B.blue:"transparent",color:view===v?"#fff":B.steel,fontSize:12,fontWeight:600,transition:"all 0.2s",whiteSpace:"nowrap"}}>{label}</button>;
@@ -958,12 +972,12 @@ export default function App(){
                 <div style={{width:36,height:20,borderRadius:6,fontSize:11,fontWeight:700,background:valBg,color:valC,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{fmt(val)}</div>
               </div>;
             })}
-            <div style={{display:"flex",gap:8,marginTop:6,paddingTop:6,borderTop:"1px solid #F1F5F9",flexWrap:"wrap"}}>
-              <div style={{display:"flex",alignItems:"center",gap:3,fontSize:9,color:"#10B981"}}><div style={{width:8,height:8,borderRadius:2,background:"#10B981"}}/>Да</div>
-              <div style={{display:"flex",alignItems:"center",gap:3,fontSize:9,color:"#F59E0B"}}><div style={{width:8,height:8,borderRadius:2,background:"#F59E0B"}}/>Частично</div>
-              <div style={{display:"flex",alignItems:"center",gap:3,fontSize:9,color:"#EF4444"}}><div style={{width:8,height:8,borderRadius:2,background:"#EF4444"}}/>Нет</div>
-              <div style={{display:"flex",alignItems:"center",gap:3,fontSize:9,color:B.steel}}><div style={{width:8,height:8,borderRadius:2,background:"#E2E8F0"}}/>Нет оценки</div>
-              <div style={{display:"flex",alignItems:"center",gap:3,fontSize:9,color:B.steel}}><div style={{width:6,height:6,borderRadius:"50%",background:"#fff",border:"1px solid #999"}}/>Примечание</div>
+            <div style={{display:"flex",gap:8,marginTop:6,marginLeft:0,paddingTop:6,paddingLeft:130,borderTop:"1px solid #F1F5F9",flexWrap:"wrap"}}>
+              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#10B981"}}><div style={{width:8,height:8,borderRadius:2,background:"#10B981"}}/>Да</div>
+              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#F59E0B"}}><div style={{width:8,height:8,borderRadius:2,background:"#F59E0B"}}/>Частично</div>
+              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:"#EF4444"}}><div style={{width:8,height:8,borderRadius:2,background:"#EF4444"}}/>Нет</div>
+              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:B.steel}}><div style={{width:8,height:8,borderRadius:2,background:"#E2E8F0"}}/>Нет оценки</div>
+              <div style={{display:"flex",alignItems:"center",gap:5,fontSize:9,color:B.steel}}><div style={{width:6,height:6,borderRadius:"50%",background:"#fff",border:"1px solid #999"}}/>Примечание</div>
             </div>
           </div>;})}
         </div>
