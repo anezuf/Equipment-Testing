@@ -320,6 +320,9 @@ button {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   }
+  .add-vendor-label {
+    display: none !important;
+  }
 }
 
 /* Hide НИТС label on very small screens */
