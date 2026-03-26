@@ -841,10 +841,10 @@ export default function App(){
             <div style={{flex:1,fontSize:10,fontWeight:700,color:B.steel,textTransform:"uppercase",letterSpacing:"0.5px"}}>Параметр</div>
             <div style={{flex:1,fontSize:10,fontWeight:700,color:B.steel,textTransform:"uppercase",letterSpacing:"0.5px",borderLeft:`1px solid ${B.border}`,paddingLeft:12}}>Требование</div>
           </div>
-          {sec.items.map((it,ii)=><div key={ii} style={{display:"flex",alignItems:"flex-start",gap:0,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
+          {sec.items.map((it,ii)=><div key={ii} style={{display:"flex",alignItems:"stretch",gap:0,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
             <div style={{flex:1,display:"flex",gap:0,minWidth:0}}>
-              <textarea value={it.n} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter,system-ui,sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}/>
-              <div style={{flex:1,minWidth:0,borderLeft:`1px solid ${B.border}`,paddingLeft:12,marginLeft:12}}>
+              <div style={{flex:1,fontSize:12,color:B.graphite,lineHeight:"1.5",wordBreak:"break-word",padding:"2px 0"}}>{it.n}</div>
+              <div style={{flex:1,minWidth:0,borderLeft:`1px solid ${B.border}`,paddingLeft:12,marginLeft:12,display:"flex",alignItems:"center"}}>
                 <textarea value={it.n2||""} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n2:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} placeholder="Введите требование" style={{width:"100%",border:"none",background:"none",fontSize:12,color:B.steel,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter,system-ui,sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}/>
               </div>
             </div>
