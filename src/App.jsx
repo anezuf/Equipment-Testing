@@ -945,14 +945,14 @@ export default function App(){
       <div style={{display:"flex",flexWrap:"wrap",gap:16,marginBottom:24}}>
         <div data-bars-wrap="" style={{flex:"1 1 100%",display:"flex",flexWrap:"wrap",gap:10}}>
           {sortedIdx.map(i=>{const v=vendors[i];
-            return <div data-vendor-bars="" key={i} style={{flex:"1 1 340px",minWidth:0,background:"#fff",borderRadius:16,padding:12,border:`1px solid ${B.border}`,overflow:"hidden"}}>
+            return <div data-vendor-bars="" key={i} style={{flex:"1 1 calc(50% - 8px)",maxWidth:"calc(50% - 8px)",minWidth:0,background:"#fff",borderRadius:16,padding:12,border:`1px solid ${B.border}`,overflow:"hidden"}}>
             <div style={{fontSize:12,fontWeight:700,color:VC[i%VC.length],marginBottom:6}}>{v.name} — {fmt(totals[i])}/10</div>
             {sections.map((s,si)=>{
               const val=allSec[i]?allSec[i][si]:0;
               const valBg=val>=8?"#D1FAE5":val>=5?"#FEF3C7":val>0?"#FEE2E2":"#F1F5F9";
               const valC=val>=8?"#065F46":val>=5?"#92400E":val>0?"#991B1B":"#7B97B2";
               return <div key={si} style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
-                <div className="sec-bar-label" style={{width:100,fontSize:9,color:"#334155",fontWeight:500,textAlign:"right",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={s.n}>{s.n}</div>
+                <div className="sec-bar-label" style={{width:120,minWidth:0,fontSize:9,color:"#334155",fontWeight:500,textAlign:"right",flexShrink:0,whiteSpace:"normal",wordBreak:"break-word"}} title={s.n}>{s.n}</div>
                 <div style={{flex:1,minWidth:0}}><SegBar scores={v.scores} notes={v.notes} images={v.images} si={si} onNoteClick={setNotePopup} secs={sections} offs={SEC_OFF} sortByColor/></div>
                 <div style={{width:36,height:20,borderRadius:6,fontSize:11,fontWeight:700,background:valBg,color:valC,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{fmt(val)}</div>
               </div>;
