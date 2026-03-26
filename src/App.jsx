@@ -80,7 +80,16 @@ export default function App(){
   const [heatmapSort,setHeatmapSort]=useState({col:null,label:null});
   const [heatmapSelectedVendor, setHeatmapSelectedVendor] = useState(null);
   const [techSpecs,setTechSpecs]=useState(()=>{
-    try{const s=localStorage.getItem("rack_tech_specs");return s?JSON.parse(s):[{n:"Общие требования",items:[{n:"Введите техническое условие"}]}];}catch{return [{n:"Общие требования",items:[{n:"Введите техническое условие"}]}];}
+    try{
+      const s=localStorage.getItem("rack_tech_specs");
+      const parsed=s?JSON.parse(s):[{n:"Общие требования",items:[{n:"Введите техническое условие",n2:""}]}];
+      return parsed.map(sec=>({
+        ...sec,
+        items:(sec.items||[]).map(it=>({n:it.n||"",n2:it.n2||""}))
+      }));
+    }catch{
+      return [{n:"Общие требования",items:[{n:"Введите техническое условие",n2:""}]}];
+    }
   });
   useEffect(()=>{try{localStorage.setItem("rack_tech_specs",JSON.stringify(techSpecs));}catch{}},[techSpecs]);
   useEffect(() => {
@@ -743,7 +752,7 @@ export default function App(){
         </div>
       </div>
       <div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
-        <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новое условие"}]}])} style={{padding:"10px 20px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:13,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
+        <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новое условие",n2:""}]}])} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
       </div>
       {techSpecs.map((sec,si)=><div key={si} style={{marginBottom:12}}>
         <div draggable onDragStart={e=>{e.dataTransfer.setData("text",JSON.stringify({type:"ts-sec",si}));e.dataTransfer.effectAllowed="move";}} onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect="move";}} onDrop={e=>{e.preventDefault();try{const d=JSON.parse(e.dataTransfer.getData("text"));if(d.type==="ts-sec"&&d.si!==si){const n=[...techSpecs];const [m]=n.splice(d.si,1);n.splice(si,0,m);setTechSpecs(n);}}catch{}}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`,cursor:"grab"}}>
@@ -754,10 +763,13 @@ export default function App(){
         <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
           {sec.items.map((it,ii)=><div key={ii} draggable onDragStart={e=>{e.stopPropagation();e.dataTransfer.setData("text",JSON.stringify({type:"ts-item",si,ii}));}} onDragOver={e=>{e.preventDefault();e.stopPropagation();}} onDrop={e=>{e.preventDefault();e.stopPropagation();try{const d=JSON.parse(e.dataTransfer.getData("text"));if(d.type==="ts-item"&&d.si===si&&d.ii!==ii){const n=[...techSpecs];const s={...n[si],items:[...n[si].items]};const [m]=s.items.splice(d.ii,1);s.items.splice(ii,0,m);n[si]=s;setTechSpecs(n);}}catch{}}} style={{display:"flex",alignItems:"flex-start",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none",cursor:"grab"}}>
             <svg width="12" height="12" viewBox="0 0 12 12" style={{flexShrink:0,opacity:0.3,marginTop:3}}><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg>
-            <textarea value={it.n} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter,system-ui,sans-serif",lineHeight:"1.4",padding:0}}/>
+            <div style={{flex:1,display:"flex",gap:8,minWidth:0}}>
+              <textarea value={it.n} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}/>
+              <textarea value={it.n2||""} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n2:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}/>
+            </div>
             {sec.items.length>1&&<button className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
           </div>)}
-          <button className="btn-secondary" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие"}]}:s))} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить условие</button>
+          <button className="btn-secondary" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие",n2:""}]}:s))} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить условие</button>
         </div>
       </div>)}
     </div>}
