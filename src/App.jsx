@@ -40,6 +40,31 @@ function loadSaved(storageKey){
 
 const EQ_TYPES=["стойка","pdu"];
 const PDU_DEFAULT=[{n:"Новый раздел",items:[{n:"Новый параметр",w:1}]}];
+const TECH_SPECS_DEFAULT=[{n:"Общие требования",items:[{n:"Введите техническое условие",n2:""}]}];
+
+function normalizeTechSpecs(data){
+  const arr=Array.isArray(data)?data:TECH_SPECS_DEFAULT;
+  return arr.map(sec=>({
+    ...sec,
+    n:sec?.n||"",
+    items:(sec?.items||[]).map(it=>({n:it?.n||"",n2:it?.n2||""}))
+  }));
+}
+
+function syncTechSpecsWithSections(editorSections,sourceSpecs){
+  if(!Array.isArray(editorSections)||editorSections.length===0)return normalizeTechSpecs(sourceSpecs);
+  const normalized=normalizeTechSpecs(sourceSpecs);
+  return editorSections.map(sec=>{
+    const srcSec=normalized.find(s=>s.n===sec.n);
+    return {
+      n:sec.n||"",
+      items:(sec.items||[]).map(it=>{
+        const srcItem=srcSec?.items?.find(x=>x.n===it.n);
+        return {n:it.n||"",n2:srcItem?.n2||""};
+      })
+    };
+  });
+}
 
 function HeatmapTh({si,s,active,onSort}){
   const [hov,setHov]=useState(false);
@@ -86,19 +111,26 @@ export default function App(){
   const [expImgs,setExpImgs]=useState({});
   const [heatmapSort,setHeatmapSort]=useState({col:null,label:null});
   const [heatmapSelectedVendor, setHeatmapSelectedVendor] = useState(null);
+  const techSpecsStorageKey=`rack_tech_specs_${eqType}`;
   const [techSpecs,setTechSpecs]=useState(()=>{
     try{
-      const s=localStorage.getItem("rack_tech_specs");
-      const parsed=s?JSON.parse(s):[{n:"Общие требования",items:[{n:"Введите техническое условие",n2:""}]}];
-      return parsed.map(sec=>({
-        ...sec,
-        items:(sec.items||[]).map(it=>({n:it.n||"",n2:it.n2||""}))
-      }));
+      const s=localStorage.getItem(`rack_tech_specs_${eqType}`);
+      const parsed=s?JSON.parse(s):TECH_SPECS_DEFAULT;
+      return syncTechSpecsWithSections(sections,parsed);
     }catch{
-      return [{n:"Общие требования",items:[{n:"Введите техническое условие",n2:""}]}];
+      return syncTechSpecsWithSections(sections,TECH_SPECS_DEFAULT);
     }
   });
-  useEffect(()=>{try{localStorage.setItem("rack_tech_specs",JSON.stringify(techSpecs));}catch{}},[techSpecs]);
+  useEffect(()=>{
+    try{
+      const raw=localStorage.getItem(techSpecsStorageKey);
+      const parsed=raw?JSON.parse(raw):TECH_SPECS_DEFAULT;
+      setTechSpecs(syncTechSpecsWithSections(sections,parsed));
+    }catch{
+      setTechSpecs(syncTechSpecsWithSections(sections,TECH_SPECS_DEFAULT));
+    }
+  },[eqType]);
+  useEffect(()=>{try{localStorage.setItem(techSpecsStorageKey,JSON.stringify(techSpecs));}catch{}},[techSpecs,techSpecsStorageKey]);
   useEffect(() => {
     const handler = () => setIsPortrait(window.innerHeight > window.innerWidth);
     window.addEventListener('resize', handler);
@@ -788,6 +820,13 @@ export default function App(){
           <div style={{fontSize:16,fontWeight:700,color:B.graphite}}>Технические условия</div>
           <div style={{fontSize:12,color:B.steel,marginTop:2}}>Критерии подбора оборудования — только для справки, не влияет на расчёты</div>
         </div>
+      </div>
+      <div style={{display:"flex",gap:6,marginBottom:12}}>
+        {EQ_TYPES.map(t=>
+          <button key={t} onClick={()=>switchEqType(t)} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===t?B.blue:B.border}`,background:eqType===t?"#EFF6FF":"#fff",color:eqType===t?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+            {t==="стойка"?"Стойка":"PDU"}
+          </button>
+        )}
       </div>
       <div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
         <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новое условие",n2:""}]}])} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
