@@ -908,7 +908,7 @@ export default function App(){
           {sections.map((s,si)=><div key={si} style={{marginBottom:3}}><span style={{fontWeight:700,color:B.blue}}>{si+1}.</span> {s.n}</div>)}
         </div>
         <div className="heatmap-table-wrap">
-        <div style={{borderRadius:12,overflow:"hidden",border:"1px solid #E5EAF0",background:"#fff"}}>
+        <div style={{borderRadius:12,overflow:"visible",border:"1px solid #E5EAF0",background:"#fff"}}>
         <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,tableLayout:"fixed"}}>
           <thead>
             <tr>
