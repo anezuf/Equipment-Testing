@@ -930,26 +930,26 @@ export default function App(){
           </button>
         )}
       </div>
-      {techSpecs.map((sec,si)=><div key={si} style={{marginBottom:12}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`}}>
+      {techSpecs.map((sec,si)=><div key={si} style={{marginBottom:12,borderRadius:16,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.06)",border:`1px solid ${B.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:0,borderLeft:`3px solid ${VC[si%VC.length]}`}}>
           <input value={sec.n} onChange={e=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,n:e.target.value}:s))} style={{flex:1,background:"transparent",border:"none",color:"#fff",fontSize:13,fontWeight:700,outline:"none",minWidth:0}}/>
           {techSpecs.length>1&&<button className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.filter((_,i)=>i!==si))} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
         </div>
-        <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
+        <div style={{background:"#fff"}}>
           <div style={{display:"flex",padding:"4px 28px 4px 16px",background:"#F8FAFC",borderBottom:`1px solid ${B.border}`}}>
             <div style={{flex:1,fontSize:10,fontWeight:700,color:B.steel,textTransform:"uppercase",letterSpacing:"0.5px"}}>Параметр</div>
             <div style={{flex:1,fontSize:10,fontWeight:700,color:B.steel,textTransform:"uppercase",letterSpacing:"0.5px",borderLeft:`1px solid ${B.border}`,paddingLeft:12}}>Требование</div>
           </div>
-          {sec.items.map((it,ii)=><div key={ii} style={{display:"flex",alignItems:"stretch",gap:0,position:"relative",padding:"8px 28px 8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
+          {sec.items.map((it,ii)=><div key={ii} style={{display:"flex",alignItems:"stretch",gap:8,padding:"10px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
             <div style={{flex:1,display:"flex",gap:0,minWidth:0}}>
               <div style={{flex:1,fontSize:12,color:B.graphite,lineHeight:"1.5",wordBreak:"break-word",padding:"2px 0",textAlign:"left"}}>{it.n}</div>
               <div style={{flex:1,minWidth:0,borderLeft:`1px solid ${B.border}`,paddingLeft:12,marginLeft:12,display:"flex",alignItems:"center"}}>
                 <textarea value={it.n2||""} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n2:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} placeholder="Введите требование" style={{width:"100%",border:"none",background:"none",fontSize:12,color:B.steel,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter,system-ui,sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}/>
               </div>
             </div>
-            {sec.items.length>1&&<button className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
+            {sec.items.length>1&&<button className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
           </div>)}
-          <button className="btn-secondary" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие",n2:""}]}:s))} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px"}}>+ Добавить условие</button>
+          <button onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие",n2:""}]}:s))} style={{width:"100%",padding:"10px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:0}}>+ Добавить условие</button>
         </div>
       </div>)}
     </div>}
