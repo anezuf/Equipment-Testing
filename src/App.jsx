@@ -664,14 +664,22 @@ export default function App(){
                       {sec.items.map((it,ii)=>
                         <SortableItemRow key={ii} id={`item-${si}-${ii}`}>
                           {(itemDrag,itemAttrs)=>
-                            <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
+                            <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
                               <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none"}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
                               <textarea value={it.n} onChange={e=>{setItemName(si,ii,e.target.value);e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",minWidth:0,resize:"none",overflow:"hidden",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0}} placeholder="Название параметра"/>
                               <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
                                 <button className="btn-score" onClick={()=>setItemWeight(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
-                                {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <button className="btn-score" key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap"}}>{l}</button>;})}
+                                {[{w:1,l:"Требование"},{w:0,l:"Преимущество"}].map(({w:wv,l})=>{
+                                  const on=wv===0?it.w===0:(it.w>=1);
+                                  const wc=WC[wv];
+                                  const star=wv===0?"☆":"★";
+                                  return <button className="btn-score" key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",gap:2}}>
+                                    <span>{star}</span>
+                                    <span className="editor-btn-label"> {l}</span>
+                                  </button>;
+                                })}
+                                {sec.items.length>1&&<button className="btn-icon-close" onClick={()=>rmItem(si,ii)} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
                               </div>
-                              {sec.items.length>1&&<button className="btn-icon-close" onClick={()=>rmItem(si,ii)} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
                             </div>
                           }
                         </SortableItemRow>
