@@ -646,7 +646,7 @@ export default function App(){
         </div>
       </div>
       <div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
-        <button className="btn-add-vendor" onClick={addSection} style={{padding:"10px 20px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:13,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
+        <button className="btn-add-vendor" onClick={addSection} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveSectionId(active.id)} onDragEnd={handleSectionDragEnd} onDragCancel={()=>setActiveSectionId(null)}>
         <SortableContext items={sections.map((_,si)=>`sec-${si}`)} strategy={verticalListSortingStrategy}>
