@@ -274,10 +274,6 @@ button {
     max-width: none !important;
   }
 
-  .editor-btn-label {
-    display: none !important;
-  }
-
   /* Heatmap table: horizontal scroll wrapper */
   .heatmap-table-wrap {
     overflow-x: auto;

@@ -676,13 +676,13 @@ export default function App(){
                               <textarea value={it.n} onChange={e=>{setItemName(si,ii,e.target.value);e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",minWidth:0,resize:"none",overflow:"hidden",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0}} placeholder="Название параметра"/>
                               <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
                                 <button className="btn-score" onClick={()=>setItemWeight(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
-                                {[{w:1,l:"Требование"},{w:0,l:"Преимущество"}].map(({w:wv,l})=>{
+                                {[{w:1},{w:0}].map(({w:wv})=>{
                                   const on=wv===0?it.w===0:(it.w>=1);
                                   const wc=WC[wv];
                                   const star=wv===0?"☆":"★";
                                   return <button className="btn-score" key={wv} onClick={()=>setItemWeight(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,transition:"all 0.15s",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",gap:2}}>
                                     <span>{star}</span>
-                                    <span className="editor-btn-label"> {l}</span>
+                                    {isPortrait ? null : <span className="editor-btn-label"> {wv===1 ? "Требование" : "Преимущество"}</span>}
                                   </button>;
                                 })}
                                 {sec.items.length>1&&<button className="btn-icon-close" onClick={()=>rmItem(si,ii)} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
@@ -705,7 +705,7 @@ export default function App(){
                           <div style={{flex:1,fontSize:12,color:B.graphite,lineHeight:"1.4",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{it.n}</div>
                           <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
                             <div style={{width:28,height:28,borderRadius:8,border:it.w===2?`2px solid #DC2626`:`2px solid ${B.border}`,background:it.w===2?"#FEE2E2":"#fff",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":B.steel,display:"flex",alignItems:"center",justifyContent:"center",visibility:it.w>=1?"visible":"hidden"}}>!</div>
-                            {[{w:1,l:"★ Требование"},{w:0,l:"☆ Преимущество"}].map(({w:wv,l})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];return <div key={wv} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,whiteSpace:"nowrap"}}>{l}</div>;})}
+                            {[{w:1},{w:0}].map(({w:wv})=>{const on=wv===0?it.w===0:(it.w>=1);const wc=WC[wv];const l=isPortrait ? (wv===1?"★":"☆") : (wv===1?"★ Требование":"☆ Преимущество");return <div key={wv} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:`2px solid ${B.border}`,background:on?wc.bg:"#fff",fontSize:10,fontWeight:700,color:on?wc.c:B.steel,whiteSpace:"nowrap"}}>{l}</div>;})}
                           </div>
                         </div>;
                       })()}
