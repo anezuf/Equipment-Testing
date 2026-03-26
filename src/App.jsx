@@ -77,6 +77,7 @@ export default function App(){
   const [showReset,setShowReset]=useState(false);
   const [expImgs,setExpImgs]=useState({});
   const [heatmapSort,setHeatmapSort]=useState({col:null,label:null});
+  const [heatmapSelectedVendor, setHeatmapSelectedVendor] = useState(null);
   const [techSpecs,setTechSpecs]=useState(()=>{
     try{const s=localStorage.getItem("rack_tech_specs");return s?JSON.parse(s):[{n:"Общие требования",items:[{n:"Введите техническое условие"}]}];}catch{return [{n:"Общие требования",items:[{n:"Введите техническое условие"}]}];}
   });
@@ -923,7 +924,7 @@ export default function App(){
           <tbody>
             {heatmapSortedIdx.map((i,rank)=>{const v=vendors[i];const t=totals[i];const isLastRow=rank===heatmapSortedIdx.length-1;
               const rowBg=rank%2?"#fff":"#F8FAFC";
-              return <tr key={i} style={{borderBottom:isLastRow?"none":`1px solid #F1F5F9`}}>
+              return <tr key={i} onClick={() => setHeatmapSelectedVendor(prev => prev === i ? null : i)} style={{borderBottom:isLastRow?"none":`1px solid #F1F5F9`,cursor:"pointer",opacity:heatmapSelectedVendor !== null && heatmapSelectedVendor !== i ? 0.4 : 1,transition:"opacity 0.2s"}}>
                 <td style={{padding:"6px 8px",fontSize:10,fontWeight:600,color:VC[i%VC.length],textAlign:"center",background:`linear-gradient(to right, ${VC[i%VC.length]} 0 3px, ${rowBg} 3px)`,borderRight:`1px solid ${B.border}`,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",borderRadius:isLastRow?"0 0 0 12px":undefined,backgroundClip:"padding-box"}}>{v.name}</td>
                 {sections.map((s,si)=>{
                   const val=allSec[i]?allSec[i][si]:0;
