@@ -828,9 +828,6 @@ export default function App(){
           </button>
         )}
       </div>
-      <div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
-        <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новое условие",n2:""}]}])} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Раздел</button>
-      </div>
       {techSpecs.map((sec,si)=><div key={si} style={{marginBottom:12}}>
         <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`}}>
           <input value={sec.n} onChange={e=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,n:e.target.value}:s))} style={{flex:1,background:"transparent",border:"none",color:"#fff",fontSize:13,fontWeight:700,outline:"none",minWidth:0}}/>
