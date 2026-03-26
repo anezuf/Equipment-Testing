@@ -42,7 +42,7 @@ function loadSaved(){
 
 function HeatmapTh({si,s,active,onSort}){
   const [hov,setHov]=useState(false);
-  return <th onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onSort} style={{textAlign:"center",padding:"4px 2px",fontSize:10,fontWeight:active?800:600,color:active?B.blue:B.steel,verticalAlign:"middle",cursor:"pointer",userSelect:"none",transition:"color 0.15s",whiteSpace:"nowrap",position:"relative"}}>{si+1}{hov&&<div style={{position:"absolute",bottom:"calc(100% + 6px)",left:"50%",transform:"translateX(-50%)",background:B.graphite,color:"#fff",fontSize:10,fontWeight:500,padding:"4px 8px",borderRadius:6,whiteSpace:"nowrap",pointerEvents:"none",zIndex:99,boxShadow:"0 2px 8px rgba(0,0,0,0.18)",lineHeight:"1.3"}}>{s.n}<div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:`5px solid ${B.graphite}`}}/></div>}</th>;
+  return <th onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)} onClick={onSort} style={{textAlign:"center",padding:"4px 2px",fontSize:10,fontWeight:active?800:600,color:active?B.blue:B.steel,verticalAlign:"middle",cursor:"pointer",userSelect:"none",transition:"color 0.15s",whiteSpace:"nowrap",position:"relative"}}>{si+1}{hov===true&&<div style={{position:"absolute",bottom:"calc(100% + 6px)",left:"50%",transform:"translateX(-50%)",background:"#334155",color:"#fff",fontSize:10,padding:"4px 8px",borderRadius:6,whiteSpace:"nowrap",pointerEvents:"none",zIndex:99}}>{s.n}<div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:"5px solid #334155"}}/></div>}</th>;
 }
 
 function SortableSectionShell({id,children}){
@@ -318,10 +318,16 @@ export default function App(){
     const sl=["✗ Нет","◐ Частично","✓ Да"];
     const sc_colors=["#EF4444","#F59E0B","#10B981"];
     const total=calcTotal(v.scores,allItems);
+    const esc=(str)=>String(str??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 
-    let html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${v.name}</title>
+    let html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(v.name)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
     <style>
+      *{
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
       *{margin:0;padding:0;box-sizing:border-box}
       body{font-family:Inter,system-ui,sans-serif;color:#334155;padding:32px;max-width:800px;margin:0 auto;font-size:13px;line-height:1.5}
       h1{font-size:22px;font-weight:800;margin-bottom:16px}
@@ -349,13 +355,13 @@ export default function App(){
     </style></head><body>`;
 
     html+=`<button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>`;
-    html+=`<h1>${v.name}</h1>`;
+    html+=`<h1>${esc(v.name)}</h1>`;
     const tColor=total!=null&&total>=7?"#10B981":total!=null&&total>=4?"#F59E0B":"#7B97B2";
     html+=`<div class="total" style="background:${tColor}">${fmt(total)} / 10</div>`;
 
     let gi=0;
     sections.forEach((sec,si)=>{
-      html+=`<div class="sec-block"><div class="sec">${sec.n}</div><div class="items">`;
+      html+=`<div class="sec-block"><div class="sec">${esc(sec.n)}</div><div class="items">`;
       sec.items.forEach((it,ii)=>{
         const sc=v.scores[gi];
         const nt=v.notes[gi]||"";
@@ -367,11 +373,11 @@ export default function App(){
         if(sc!=null){
           scoreLabel=sl[sc];scoreColor=sc_colors[sc];
         }
-        html+=`<div class="row"><div class="rhead">${star}<span class="rname">${it.n}</span><span class="rscore" style="color:${scoreColor}">${scoreLabel}</span></div>`;
+        html+=`<div class="row"><div class="rhead">${star}<span class="rname">${esc(it.n)}</span><span class="rscore" style="color:${scoreColor}">${scoreLabel}</span></div>`;
         if(nt)html+=`<div class="note">${nt}</div>`;
         if(imgs&&imgs.length){
           html+=`<div class="photos">`;
-          imgs.forEach(im=>{html+=`<img src="${im.data}" alt="${(im.name||"").replace(/"/g,"&quot;")}">`;});
+          imgs.forEach(im=>{html+=`<img src="${im.data}" alt="${esc(im.name||"")}">`;});
           html+=`</div>`;
         }
         html+=`</div>`;
@@ -384,32 +390,96 @@ export default function App(){
     html+=`<div class="srow" style="background:#334155;color:#fff;font-weight:700"><span>Раздел</span><span>Балл</span></div>`;
     sections.forEach((sec,si)=>{
       const val=calcSec(v.scores,si,sections,offs);
-      html+=`<div class="srow"><span class="sn">${sec.n}</span><span class="sv">${fmt(val)}</span></div>`;
+      html+=`<div class="srow"><span class="sn">${esc(sec.n)}</span><span class="sv">${fmt(val)}</span></div>`;
     });
     html+=`<div class="srow" style="border-top:2px solid #E5EAF0;font-weight:700"><span>ИТОГО</span><span style="color:${tColor}">${fmt(total)}</span></div>`;
     html+=`</div></body></html>`;
 
     const w=window.open("","_blank");
+    if(!w){
+      alert("Не удалось открыть окно печати. Разрешите всплывающие окна для этого сайта.");
+      return;
+    }
+    w.document.open();
     w.document.write(html);
     w.document.close();
+    w.focus();
+    const closePrintWindow=()=>{try{w.close();}catch{}};
+    w.onafterprint=closePrintWindow;
+    setTimeout(()=>{
+      try{
+        w.focus();
+        w.print();
+      }catch{
+        closePrintWindow();
+      }
+    },500);
   },[sections,vendors]);
 
-  const resizeVendors=useCallback((newSecs)=>{
-    const newLen=mkAll(newSecs).length;
-    setVendors(prev=>prev.map(v=>{
-      const sc=[...v.scores];const nt=[...v.notes];const im=[...(v.images||[])];
-      while(sc.length<newLen){sc.push(null);nt.push("");im.push(null);}
-      return {...v,scores:sc.slice(0,newLen),notes:nt.slice(0,newLen),images:im.slice(0,newLen)};
-    }));
-  },[]);
-
   const setSectionName=(si,name)=>{const n=sections.map((s,i)=>i===si?{...s,n:name}:s);setSections(n);};
-  const addSection=()=>{const n=[...sections,{n:"Новый раздел",items:[{n:"Параметр 1",w:2}]}];setSections(n);resizeVendors(n);};
-  const rmSection=(si)=>{if(sections.length<=1)return;const n=sections.filter((_,i)=>i!==si);setSections(n);resizeVendors(n);};
+  const addSection=()=>{
+    const newSection={n:"Новый раздел",items:[{n:"Параметр 1",w:2}]};
+    const insertAt=itemCount;
+    const blockLen=newSection.items.length;
+    setSections([...sections,newSection]);
+    setVendors(prev=>prev.map(v=>{
+      const scores=[...v.scores];
+      const notes=[...v.notes];
+      const images=[...(v.images||[])];
+      scores.splice(insertAt,0,...Array(blockLen).fill(null));
+      notes.splice(insertAt,0,...Array(blockLen).fill(""));
+      images.splice(insertAt,0,...Array(blockLen).fill(null));
+      return {...v,scores,notes,images};
+    }));
+  };
+  const rmSection=(si)=>{
+    if(sections.length<=1)return;
+    const absIdx=SEC_OFF[si];
+    const blockLen=sections[si].items.length;
+    const n=sections.filter((_,i)=>i!==si);
+    setSections(n);
+    setVendors(prev=>prev.map(v=>{
+      const scores=[...v.scores];
+      const notes=[...v.notes];
+      const images=[...(v.images||[])];
+      scores.splice(absIdx,blockLen);
+      notes.splice(absIdx,blockLen);
+      images.splice(absIdx,blockLen);
+      return {...v,scores,notes,images};
+    }));
+  };
   const setItemName=(si,ii,name)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,n:name}:it)}:s);setSections(n);};
   const setItemWeight=(si,ii,w)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,w}:it)}:s);setSections(n);};
-  const addItem=(si)=>{const n=sections.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новый параметр",w:2}]}:s);setSections(n);resizeVendors(n);};
-  const rmItem=(si,ii)=>{if(sections[si].items.length<=1)return;const n=sections.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s);setSections(n);resizeVendors(n);};
+  const addItem=(si,ii)=>{
+    const insertIdx=ii==null?sections[si].items.length-1:ii;
+    const absIdx=SEC_OFF[si]+insertIdx+1;
+    const n=sections.map((s,i)=>i===si?{...s,items:[...s.items.slice(0,insertIdx+1),{n:"Новый параметр",w:2},...s.items.slice(insertIdx+1)]}:s);
+    setSections(n);
+    setVendors(prev=>prev.map(v=>{
+      const scores=[...v.scores];
+      const notes=[...v.notes];
+      const images=[...(v.images||[])];
+      scores.splice(absIdx,0,null);
+      notes.splice(absIdx,0,"");
+      images.splice(absIdx,0,null);
+      return {...v,scores,notes,images};
+    }));
+  };
+  const rmItem=(si,ii)=>{
+    if(sections[si].items.length<=1)return;
+    const absIdx=SEC_OFF[si]+ii;
+    const n=sections.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s);
+    setSections(n);
+    setVendors(prev=>prev.map(v=>{
+      const scores=[...v.scores];
+      const notes=[...v.notes];
+      const images=[...(v.images||[])];
+      scores.splice(absIdx,1);
+      notes.splice(absIdx,1);
+      images.splice(absIdx,1);
+      return {...v,scores,notes,images};
+    }));
+  };
 
   const [activeSectionId,setActiveSectionId]=useState(null);
   const [activeItemId,setActiveItemId]=useState(null);
@@ -838,7 +908,7 @@ export default function App(){
           {sections.map((s,si)=><div key={si} style={{marginBottom:3}}><span style={{fontWeight:700,color:B.blue}}>{si+1}.</span> {s.n}</div>)}
         </div>
         <div className="heatmap-table-wrap">
-        <div style={{borderRadius:12,overflow:"hidden",border:"1px solid #E5EAF0",background:"#fff"}}>
+        <div style={{borderRadius:12,overflow:"visible",border:"1px solid #E5EAF0",background:"#fff"}}>
         <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,tableLayout:"fixed"}}>
           <thead>
             <tr>
