@@ -325,12 +325,6 @@ button {
   }
 }
 
-@media (max-width: 768px) and (orientation: portrait) {
-  .add-vendor-label {
-    display: none !important;
-  }
-}
-
 @media (max-width: 768px) and (orientation: landscape) {
   .nav-left-group { flex-direction: row !important; align-items: center !important; gap: 8px !important; width: auto !important; }
   .nav-tabs { width: auto !important; }
