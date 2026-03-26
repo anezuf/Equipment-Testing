@@ -38,16 +38,8 @@ function loadSaved(storageKey){
   }catch{return null;}
 }
 
-const PDU_DEFAULT_SECTIONS=[{n:"Новый раздел",items:[{n:"Новый параметр",w:1}]}];
-
-function getSectionsByEqType(eqType,savedData){
-  if(eqType==="pdu"){
-    const savedSections=savedData?.sections;
-    if(Array.isArray(savedSections)&&savedSections.length===1)return savedSections;
-    return PDU_DEFAULT_SECTIONS;
-  }
-  return savedData?.sections||DEF_SECTIONS;
-}
+const EQ_TYPES=["стойка","pdu"];
+const PDU_DEFAULT=[{n:"Новый раздел",items:[{n:"Новый параметр",w:1}]}];
 
 function HeatmapTh({si,s,active,onSort}){
   const [hov,setHov]=useState(false);
@@ -72,19 +64,15 @@ export default function App(){
   const [eqType,setEqType]=useState(()=>localStorage.getItem("rack_eq_type")||"стойка");
   const STORAGE_KEY=`rack_scoring_data_${eqType}`;
   const saved=useRef(loadSaved(`rack_scoring_data_${localStorage.getItem("rack_eq_type")||"стойка"}`));
-  const skipNextSaveRef=useRef(false);
-  const [sections,setSections]=useState(()=>getSectionsByEqType(eqType,saved.current));
+  const [sections,setSections]=useState(()=>saved.current?.sections||(eqType==="pdu"?PDU_DEFAULT:DEF_SECTIONS));
   const ALL=useMemo(()=>mkAll(sections),[sections]);
   const SEC_OFF=useMemo(()=>mkOff(sections),[sections]);
   const itemCount=ALL.length;
 
   const [vendors,setVendors]=useState(()=>{
-    const initialSections=getSectionsByEqType(eqType,saved.current);
+    const initialSections=saved.current?.sections||(eqType==="pdu"?PDU_DEFAULT:DEF_SECTIONS);
     const initialItemCount=mkAll(initialSections).length;
-    const hasValidSavedForType=eqType==="pdu"
-      ? Array.isArray(saved.current?.sections)&&saved.current.sections.length===1
-      : !!saved.current?.sections;
-    if(hasValidSavedForType&&saved.current?.vendors){
+    if(saved.current?.vendors){
       return saved.current.vendors.map(v=>({...v,images:v.images||Array(initialItemCount).fill(null)}));
     }
     return [{name:"Вендор 1",scores:Array(initialItemCount).fill(null),notes:Array(initialItemCount).fill(""),images:Array(initialItemCount).fill(null)}];
@@ -122,30 +110,30 @@ export default function App(){
     try{localStorage.setItem("rack_eq_type",eqType);}catch{}
   },[eqType]);
 
-  useEffect(()=>{
-    const savedData=loadSaved(STORAGE_KEY);
-    const nextSections=getSectionsByEqType(eqType,savedData);
-    const nextItemCount=mkAll(nextSections).length;
-    const hasValidSavedForType=eqType==="pdu"
-      ? Array.isArray(savedData?.sections)&&savedData.sections.length===1
-      : !!savedData?.sections;
-    const nextVendors=hasValidSavedForType&&savedData?.vendors
-      ? savedData.vendors.map(v=>({...v,images:v.images||Array(nextItemCount).fill(null)}))
-      : [{name:"Вендор 1",scores:Array(nextItemCount).fill(null),notes:Array(nextItemCount).fill(""),images:Array(nextItemCount).fill(null)}];
-    skipNextSaveRef.current=true;
-    setSections(nextSections);
-    setVendors(nextVendors);
-    setAct(0);
-  },[STORAGE_KEY,eqType]);
-
   /* Auto-save to localStorage on every change */
   useEffect(()=>{
-    if(skipNextSaveRef.current){
-      skipNextSaveRef.current=false;
-      return;
-    }
     try{localStorage.setItem(STORAGE_KEY,JSON.stringify({sections,vendors}));}catch{}
   },[STORAGE_KEY,sections,vendors]);
+
+  const switchEqType=useCallback((newType)=>{
+    if(newType===eqType)return;
+    localStorage.setItem("rack_eq_type",newType);
+    setEqType(newType);
+    try{
+      const raw=localStorage.getItem(`rack_scoring_data_${newType}`);
+      if(raw){
+        const d=JSON.parse(raw);
+        if(d.sections)setSections(d.sections);
+        if(d.vendors)setVendors(d.vendors.map(v=>({...v,images:v.images||Array(mkAll(d.sections||[]).length).fill(null)})));
+      }else{
+        const defSecs=newType==="pdu"?PDU_DEFAULT:DEF_SECTIONS;
+        setSections(defSecs);
+        setVendors([{name:"Вендор 1",scores:Array(mkAll(defSecs).length).fill(null),notes:Array(mkAll(defSecs).length).fill(""),images:Array(mkAll(defSecs).length).fill(null)}]);
+      }
+    }catch{}
+    setAct(0);
+    setNoteOpen(null);
+  },[eqType]);
 
   /* Export to Excel (same format as template) */
   const exportExcelFile=useCallback(async()=>{
@@ -704,19 +692,10 @@ export default function App(){
           </button>
         </div>
       </div>
-      <div style={{display:"flex",justifyContent:"flex-start",marginBottom:10,gap:8,flexWrap:"wrap"}}>
-        {["стойка","pdu"].map(type=>
-          <button key={type} onClick={()=>{
-            if(type==="pdu"){
-              const pduSaved=loadSaved("rack_scoring_data_pdu");
-              if(Array.isArray(pduSaved?.sections)&&pduSaved.sections.length>1){
-                try{localStorage.removeItem("rack_scoring_data_pdu");}catch{}
-              }
-            }
-            localStorage.setItem("rack_eq_type",type);
-            setEqType(type);
-          }} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===type?B.blue:B.border}`,background:eqType===type?"#EFF6FF":"#fff",color:eqType===type?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
-            {type==="стойка"?"Стойка":"PDU"}
+      <div style={{display:"flex",gap:6,marginBottom:12}}>
+        {EQ_TYPES.map(t=>
+          <button key={t} onClick={()=>switchEqType(t)} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===t?B.blue:B.border}`,background:eqType===t?"#EFF6FF":"#fff",color:eqType===t?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+            {t==="стойка"?"Стойка":"PDU"}
           </button>
         )}
       </div>
