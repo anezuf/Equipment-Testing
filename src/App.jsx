@@ -380,6 +380,98 @@ export default function App(){
     input.click();
   },[sections]);
 
+  const exportTechSpecs=useCallback(async()=>{
+    try{
+      const {default:ExcelJS}=await import("exceljs");
+      const wb=new ExcelJS.Workbook();
+      const ws=wb.addWorksheet("Тех. условия");
+
+      const argb=hex=>"FF"+hex.replace("#","");
+      const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:argb(hex)}});
+      const fnt=(color,bold=false,size)=>({bold,color:{argb:argb(color)},...(size?{size}:{})});
+      const CENTER={horizontal:"center",vertical:"middle"};
+      const LEFT={horizontal:"left",vertical:"middle"};
+
+      ws.getColumn(1).width=5;
+      ws.getColumn(2).width=36;
+      ws.getColumn(3).width=44;
+
+      /* ROW 1: title */
+      ws.addRow(["ТЕХНИЧЕСКИЕ УСЛОВИЯ"]);
+      ws.mergeCells(1,1,1,3);
+      const tc=ws.getCell(1,1);
+      tc.fill=fill("#334155");tc.font=fnt("#FFFFFF",true,13);tc.alignment=CENTER;
+      ws.getRow(1).height=26;
+
+      /* ROW 2: column headers */
+      ws.addRow(["#","Параметр","Требование"]);
+      for(let c=1;c<=3;c++){
+        const cell=ws.getCell(2,c);
+        cell.fill=fill("#334155");cell.font=fnt("#FFFFFF",true);cell.alignment=CENTER;
+      }
+      ws.getRow(2).height=18;
+
+      let rowNum=3;
+      let gi=0;
+      techSpecs.forEach(sec=>{
+        /* section header — blue like editor */
+        ws.addRow([sec.n]);
+        ws.mergeCells(rowNum,1,rowNum,3);
+        const sc=ws.getCell(rowNum,1);
+        sc.fill=fill("#2F9AFF");sc.font=fnt("#FFFFFF",true);sc.alignment=CENTER;
+        ws.getRow(rowNum).height=16;
+        rowNum++;
+
+        sec.items.forEach(it=>{
+          const altBg=gi%2===0?"#F5F8FB":"#FFFFFF";
+          ws.addRow([gi+1,it.n,it.n2||""]);
+          ws.getRow(rowNum).height=15;
+
+          const ca=ws.getCell(rowNum,1);
+          ca.font=fnt("#7B97B2");ca.alignment=CENTER;ca.fill=fill(altBg);
+
+          const cb=ws.getCell(rowNum,2);
+          cb.font=fnt("#334155");cb.alignment=LEFT;cb.fill=fill(altBg);
+
+          const cc=ws.getCell(rowNum,3);
+          cc.font=fnt("#334155");cc.alignment=LEFT;cc.fill=fill(altBg);
+
+          rowNum++;gi++;
+        });
+      });
+
+      const buffer=await wb.xlsx.writeBuffer();
+      const blob=new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;a.download=`tech_specs_${eqType}.xlsx`;a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }catch(err){
+      console.error(err);
+      alert("Ошибка экспорта Excel: "+err.message);
+    }
+  },[techSpecs,eqType]);
+
+  const importTechSpecs=useCallback(()=>{
+    const input=document.createElement("input");
+    input.type="file";
+    input.accept=".json";
+    input.onchange=e=>{
+      const file=e.target.files[0];
+      if(!file)return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        try{
+          const d=JSON.parse(ev.target.result);
+          if(Array.isArray(d))setTechSpecs(normalizeTechSpecs(d));
+          else alert("Неверный формат файла");
+        }catch{alert("Ошибка чтения JSON");}
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  },[]);
+
   /* Reset vendor scores and notes (keeps sections/structure) */
   const doReset=useCallback(()=>{
     setVendors([{name:"Вендор 1",scores:Array(itemCount).fill(null),notes:Array(itemCount).fill(""),images:Array(itemCount).fill(null)}]);
@@ -819,6 +911,16 @@ export default function App(){
         <div style={{textAlign:"left"}}>
           <div style={{fontSize:16,fontWeight:700,color:B.graphite}}>Технические условия</div>
           <div style={{fontSize:12,color:B.steel,marginTop:2}}>Критерии подбора оборудования — только для справки, не влияет на расчёты</div>
+        </div>
+        <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+          <button className="btn-secondary" onClick={importTechSpecs} style={{padding:"6px 14px",borderRadius:10,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:4}}>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Загрузить
+          </button>
+          <button className="btn-action" onClick={exportTechSpecs} style={{padding:"6px 14px",borderRadius:10,border:`1.5px solid ${B.blue}`,background:"#fff",color:B.blue,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:4}}>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 10V2M5 5l3-3 3 3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Сохранить
+          </button>
         </div>
       </div>
       <div style={{display:"flex",gap:6,marginBottom:12}}>
