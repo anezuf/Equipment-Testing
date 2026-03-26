@@ -529,13 +529,13 @@ export default function App(){
 
     {/* NAV */}
     <div data-nav="" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 24px",background:"#fff",borderBottom:`1px solid ${B.border}`,position:"sticky",top:0,zIndex:50,gap:8,flexWrap:"wrap"}}>
-      <div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
+      <div className="nav-left-group" style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <Logo h={26}/>
           <div style={{width:1,height:22,background:B.border}}/>
-          <span style={{fontSize:13,fontWeight:700,color:B.graphite,letterSpacing:"0.5px"}}>НИТС</span>
+          <span className="nav-nits" style={{fontSize:13,fontWeight:700,color:B.graphite,letterSpacing:"0.5px"}}>НИТС</span>
         </div>
-        <div style={{display:"flex",gap:3,background:"#F1F5F9",borderRadius:20,padding:2}}>{navBtn("Редактор","editor")}{navBtn("Тех. условия","techspecs")}{navBtn("Оценка","input")}{navBtn("Дашборд","dashboard")}</div>
+        <div className="nav-tabs" style={{display:"flex",gap:3,background:"#F1F5F9",borderRadius:20,padding:2}}>{navBtn("Редактор","editor")}{navBtn("Тех. условия","techspecs")}{navBtn("Оценка","input")}{navBtn("Дашборд","dashboard")}</div>
       </div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
         {view==="dashboard"&&<button className="btn-add-vendor" onClick={exportPDF} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>PDF</button>}
@@ -543,7 +543,7 @@ export default function App(){
     </div>
 
     {/* ═══ EDITOR ═══ */}
-    {view==="editor"&&<div style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
+    {view==="editor"&&<div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8,paddingBottom:12,borderBottom:`1px solid ${B.border}`}}>
         <div style={{textAlign:"left"}}>
           <div style={{fontSize:16,fontWeight:700,color:B.graphite}}>Редактор чек-листа</div>
@@ -635,7 +635,7 @@ export default function App(){
     </div>}
 
     {/* ═══ INPUT ═══ */}
-    {view==="techspecs"&&<div style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
+    {view==="techspecs"&&<div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8,paddingBottom:12,borderBottom:`1px solid ${B.border}`}}>
         <div style={{textAlign:"left"}}>
           <div style={{fontSize:16,fontWeight:700,color:B.graphite}}>Технические условия</div>
@@ -662,7 +662,7 @@ export default function App(){
       </div>)}
     </div>}
 
-        {view==="input"&&<div style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
+        {view==="input"&&<div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
       <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
         <div style={{display:"inline-flex",gap:6,padding:"8px 16px",background:"#fff",borderRadius:12,border:`1px solid ${B.border}`,alignItems:"center",flexWrap:"wrap",justifyContent:"center"}}>
           <IconNo c="#EF4444" s={13}/><span style={{fontSize:11,color:"#EF4444",fontWeight:600}}>Нет</span>
@@ -690,7 +690,7 @@ export default function App(){
           <button className="btn-danger" onClick={()=>setShowReset(true)} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid #EF4444`,background:"#fff",color:"#EF4444",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",transition:"all 0.2s ease"}}>Сбросить</button>
         </div>
       </div>
-      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+      <div className="vendor-tabs-wrap" style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
         {vendors.map((v,i)=>{return <div key={i} onClick={()=>setAct(i)} style={{display:"inline-flex",alignItems:"center",borderRadius:12,cursor:"pointer",background:i===act?VC[i%VC.length]+"10":"#fff",border:`2px solid ${i===act?VC[i%VC.length]:B.border}`,transition:"all 0.2s",maxWidth:260,minWidth:0,overflow:"hidden"}}>
           <div style={{display:"flex",alignItems:"center",gap:5,padding:"6px 8px 6px 12px",minWidth:0}}>
             <div style={{width:8,height:8,borderRadius:"50%",background:VC[i%VC.length],flexShrink:0}}/><input value={v.name} onChange={e=>setName(i,e.target.value)} onClick={e=>e.stopPropagation()} style={{background:"none",border:"none",color:B.graphite,fontSize:12,fontWeight:i===act?700:400,width:Math.min(Math.max(v.name.length*7.5,60),140),minWidth:40,maxWidth:140,outline:"none",overflow:"hidden",textOverflow:"ellipsis"}} title={v.name}/><span style={{fontSize:9,color:B.steel,flexShrink:0,whiteSpace:"nowrap"}}>{filled(v.scores)}/{itemCount}</span>
@@ -705,8 +705,8 @@ export default function App(){
             {sec.items.map((it,ii)=>{const idx=off+ii;const v=vendors[act]?.scores[idx];const nt=vendors[act]?.notes[idx]||"";const imgs=vendors[act]?.images?.[idx]||null;const hasImgs=imgs&&imgs.length>0;const isExp=noteOpen===idx||noteOpen===-999;const isReq=it.w>=1;const hasNote=nt&&nt.trim()!==""&&nt.trim()!=="<br>"&&nt.trim()!=="<div><br></div>";
               return <div key={ii} style={{borderTop:ii?`1px solid #F1F5F9`:"none"}}>
                 <div style={{display:"flex",alignItems:"center",padding:"8px 16px",gap:10,flexWrap:"wrap"}}>
-                  <div style={{flex:"1 1 150px",display:"flex",alignItems:"center",gap:6,minWidth:0}}><span style={{fontSize:12,color:B.graphite,overflow:"hidden",textOverflow:"ellipsis"}}>{it.n}</span><span style={wbBadge(it.w)}>{it.w===2?"★!":it.w===1?"★":"☆"}</span></div>
-                  <div style={{display:"flex",gap:10,alignItems:"center",flexShrink:0}}>
+                  <div className="input-item-name" style={{flex:"1 1 150px",display:"flex",alignItems:"center",gap:6,minWidth:0}}><span style={{fontSize:12,color:B.graphite,overflow:"hidden",textOverflow:"ellipsis"}}>{it.n}</span><span style={wbBadge(it.w)}>{it.w===2?"★!":it.w===1?"★":"☆"}</span></div>
+                  <div className="input-item-btns" style={{display:"flex",gap:10,alignItems:"center",flexShrink:0}}>
                     {isReq?
                       [0,1,2].map(n2=>{const Ic=ICO[n2];const on=v===n2;return <button className="btn-score" key={n2} onClick={()=>setScore(idx,n2)} style={{width:38,height:38,borderRadius:10,border:on?`2px solid ${SM[n2].c}`:`1.5px solid ${B.border}`,background:on?SM[n2].bg:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",boxShadow:on?`0 2px 8px ${SM[n2].c}22`:"none"}}><Ic c={on?SM[n2].c:"#B0BEC5"} s={16}/></button>;})
                       :
@@ -837,6 +837,7 @@ export default function App(){
         <div data-heatmap-legend="" style={{display:"none",marginBottom:10,fontSize:9,color:B.graphite,columnCount:2,columnGap:16}}>
           {sections.map((s,si)=><div key={si} style={{marginBottom:3}}><span style={{fontWeight:700,color:B.blue}}>{si+1}.</span> {s.n}</div>)}
         </div>
+        <div className="heatmap-table-wrap">
         <div style={{borderRadius:12,overflow:"hidden",border:"1px solid #E5EAF0",background:"#fff"}}>
         <table style={{width:"100%",borderCollapse:"collapse",fontSize:10,tableLayout:"fixed"}}>
           <thead>
@@ -867,6 +868,7 @@ export default function App(){
           </tbody>
         </table>
         </div>
+        </div>
       </div>
 
       {/* Vendor bars */}
@@ -880,7 +882,7 @@ export default function App(){
               const valBg=val>=8?"#D1FAE5":val>=5?"#FEF3C7":val>0?"#FEE2E2":"#F1F5F9";
               const valC=val>=8?"#065F46":val>=5?"#92400E":val>0?"#991B1B":"#7B97B2";
               return <div key={si} style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
-                <div style={{width:100,fontSize:9,color:"#334155",fontWeight:500,textAlign:"right",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={s.n}>{s.n}</div>
+                <div className="sec-bar-label" style={{width:100,fontSize:9,color:"#334155",fontWeight:500,textAlign:"right",flexShrink:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={s.n}>{s.n}</div>
                 <div style={{flex:1,minWidth:0}}><SegBar scores={v.scores} notes={v.notes} images={v.images} si={si} onNoteClick={setNotePopup} secs={sections} offs={SEC_OFF} sortByColor/></div>
                 <div style={{width:36,height:20,borderRadius:6,fontSize:11,fontWeight:700,background:valBg,color:valC,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{fmt(val)}</div>
               </div>;

@@ -1,0 +1,24 @@
+---
+alwaysApply: true
+---
+
+Respond in Russian. Write commit messages in English.
+
+After every change: app must compile and run identically. Verify all imports before finishing. Never leave unused imports or dead code.
+
+File structure:
+- New reusable component → src/components/
+- Constants/colors → src/constants.jsx
+- Utility functions → src/utils.js
+- Scoring logic → src/scoring.js
+- App.jsx only: global state, handlers, JSX layout. Never add components or pure functions there.
+
+CSS: all static styles go to src/index.css. No inline <style> tags in components. No transform:scale on hover — use box-shadow and background-color instead. All buttons must have display:inline-flex; align-items:center; justify-content:center.
+
+Never duplicate functions that exist in another file — import instead. Always use fmt() from utils.js for number formatting.
+
+Notes: empty note = "", "<br>", or "<div><br></div>". Always sanitize before saving. Strip HTML tags before writing to Excel.
+
+Drag and drop: always use @dnd-kit/sortable, never native HTML5 drag API. Always add DragOverlay.
+
+Google Fonts Inter must include italic: ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800

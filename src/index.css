@@ -55,7 +55,6 @@ body {
 }
 
 #root {
-  width: 1126px;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -120,6 +119,7 @@ code {
 .npop p:last-child { margin: 0; }
 
 html, body, #root, #app { margin: 0; padding: 0; width: 100%; min-height: 100vh; }
+html, body { overflow-x: hidden; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #F5F8FB; }
 
@@ -223,6 +223,85 @@ button {
   background-color: #EF4444 !important;
   color: #fff !important;
   border-left-color: transparent !important;
+}
+
+/* ── Mobile responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* NAV: reduce padding, stack logo row + tabs vertically */
+  [data-nav] {
+    padding: 8px 12px !important;
+  }
+  .nav-left-group {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    width: 100%;
+  }
+  .nav-tabs {
+    width: 100%;
+  }
+  .btn-nav {
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+  }
+
+  /* View content: reduce top-level padding */
+  .view-section-pad {
+    padding: 12px 10px !important;
+  }
+
+  /* INPUT item rows: stack name+badge (line 1) and buttons (line 2) */
+  .input-item-name {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+  .input-item-btns {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    flex-wrap: wrap;
+  }
+
+  /* Vendor tabs: horizontal scroll instead of wrap */
+  .vendor-tabs-wrap {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .vendor-tabs-wrap > div {
+    flex-shrink: 1;
+    min-width: auto !important;
+  }
+
+  /* Heatmap table: horizontal scroll wrapper */
+  .heatmap-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Dashboard gauges: shrink to fit more per row */
+  [data-gauges] > div {
+    min-width: 80px !important;
+    max-width: 120px !important;
+  }
+
+  /* Dashboard vendor bars: stack full-width vertically */
+  [data-vendor-bars] {
+    flex: 1 1 100% !important;
+  }
+
+  /* Section label inside vendor bars */
+  .sec-bar-label {
+    width: 80px !important;
+    font-size: 8px !important;
+  }
+}
+
+/* Hide НИТС label on very small screens */
+@media (max-width: 480px) {
+  .nav-nits {
+    display: none !important;
+  }
 }
 
 @media print {
