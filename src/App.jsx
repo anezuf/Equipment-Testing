@@ -1011,7 +1011,7 @@ export default function App(){
               return <div key={ii} style={{borderTop:ii?`1px solid #F1F5F9`:"none"}}>
                 <div style={{display:"flex",alignItems:"center",padding:"8px 16px",gap:10,flexWrap:"wrap"}}>
                   <div style={{flex:"1 1 150px",minWidth:0}}>
-                    <div className="input-item-name" style={{display:"flex",alignItems:"flex-start",gap:6,minWidth:0}}>
+                    <div className="input-item-name" style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}>
                       <span style={{fontSize:12,color:B.graphite,whiteSpace:"normal",wordBreak:"break-word",lineHeight:"1.4",textAlign:"left",minWidth:0}}>{it.n}</span>
                       <span style={wbBadge(it.w)}>{it.w===2?"★!":it.w===1?"★":"☆"}</span>
                       {techReq&&<div style={{position:"relative",display:"inline-flex"}}>
