@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function SegBar({scores,notes,images,si,onNoteClick,secs,offs,sortByColor}){
   const off=offs[si],items=secs[si].items,t=items.length;
   const [hov,setHov]=useState(null);
   const [tapped,setTapped]=useState(null);
+  useEffect(() => {
+    if(tapped === null) return;
+    const clear = () => setTapped(null);
+    const timer = setTimeout(clear, 2000);
+    window.addEventListener('touchstart', clear, {once: true});
+    window.addEventListener('click', clear, {once: true});
+    return () => { clearTimeout(timer); window.removeEventListener('touchstart', clear); window.removeEventListener('click', clear); };
+  }, [tapped]);
   if(!t)return null;
   let cells=items.map((it,ii)=>{const v=scores[off+ii];const nt=notes[off+ii]||"";const imgs=images?.[off+ii]||null;return{v,nt,imgs,idx:off+ii,name:it.n};});
   if(sortByColor){
@@ -33,8 +41,12 @@ function SegBar({scores,notes,images,si,onNoteClick,secs,offs,sortByColor}){
           onMouseEnter={()=>setHov(ci)}
           onMouseLeave={()=>setHov(null)}
           onClick={e=>{
-            if(!hasNote){ setTapped(ci); setTimeout(()=>setTapped(null), 1500); return; }
-            onNoteClick({name:cell.name,text:cell.nt,imgs:cell.imgs,x:e.clientX,y:e.clientY});
+            e.stopPropagation();
+            if(hasNote){
+              onNoteClick({name:cell.name,text:cell.nt,imgs:cell.imgs,x:e.clientX,y:e.clientY});
+              return;
+            }
+            setTapped(prev => prev === ci ? null : ci);
           }}>
           {hasNote&&<div style={{width:6,height:6,borderRadius:"50%",background:"#fff",opacity:0.9,boxShadow:"0 0 3px rgba(0,0,0,0.3)"}}/>}
         </div>;
