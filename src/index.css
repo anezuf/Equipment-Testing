@@ -178,6 +178,28 @@ button {
 .btn-nav:hover { box-shadow: inset 0 0 0 100vw rgba(0,0,0,0.08) !important; }
 .btn-nav:active { box-shadow: inset 0 0 0 100vw rgba(0,0,0,0.16) !important; }
 
+/* iOS Safari: liquid glass nav (WebKit touch devices) — legacy .btn-nav only */
+@supports (-webkit-touch-callout: none) {
+  /* Active nav button — frosted glass pill */
+  .btn-nav[style*="background: rgb(47, 154, 255)"],
+  .btn-nav[style*="background: #2F9AFF"] {
+    background: rgba(47, 154, 255, 0.72) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow:
+      0 2px 12px rgba(47, 154, 255, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+    color: #fff !important;
+  }
+
+  /* Inactive nav buttons */
+  .btn-nav {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+}
+
 /* Score / weight toggle buttons */
 .btn-score:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.14) !important; }
 .btn-score:active { box-shadow: none !important; }
