@@ -195,7 +195,7 @@ function LiquidTabs({ tabs, active, onChange }) {
         background: 'rgba(255,255,255,0.25)',
         backdropFilter: 'blur(30px) saturate(180%)',
         WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-        border: '1px solid rgba(255,255,255,0.6)',
+        border: 'none',
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.08)',
         userSelect: 'none', touchAction: 'none',
       }}
