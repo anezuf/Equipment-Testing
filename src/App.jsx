@@ -95,6 +95,7 @@ function LiquidTabs({ tabs, active, onChange }) {
   const startPillLeft = useRef(0);
   const startIdx = useRef(0);
   const lastIdx = useRef(active);
+  const mouseDown = useRef(false);
 
   useEffect(() => {
     lastIdx.current = active;
@@ -189,6 +190,46 @@ function LiquidTabs({ tabs, active, onChange }) {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onMouseDown={e => {
+        mouseDown.current = true;
+        startX.current = e.clientX;
+        startIdx.current = active;
+        lastIdx.current = active;
+        const rects = getTabRects();
+        startPillLeft.current = rects[active]?.left ?? 0;
+        setDragging(true);
+        e.preventDefault();
+      }}
+      onMouseMove={e => {
+        if (!mouseDown.current) return;
+        const dx = e.clientX - startX.current;
+        const rects = getTabRects();
+        if (!rects.length) return;
+        const newLeft = Math.max(rects[0].left, Math.min(rects[rects.length - 1].left, startPillLeft.current + dx));
+        setPillLeft(newLeft);
+        const pillCenter = newLeft + (rects[startIdx.current]?.width ?? 70) / 2;
+        let closest = 0;
+        let minDist = Infinity;
+        rects.forEach((r, i) => {
+          const dist = Math.abs(r.center - pillCenter);
+          if (dist < minDist) { minDist = dist; closest = i; }
+        });
+        if (closest !== lastIdx.current) { lastIdx.current = closest; onChange(tabs[closest].v); }
+      }}
+      onMouseUp={() => {
+        if (!mouseDown.current) return;
+        mouseDown.current = false;
+        setDragging(false);
+        const rects = getTabRects();
+        if (rects[lastIdx.current]) { setPillLeft(rects[lastIdx.current].left); setPillWidth(rects[lastIdx.current].width); }
+      }}
+      onMouseLeave={() => {
+        if (!mouseDown.current) return;
+        mouseDown.current = false;
+        setDragging(false);
+        const rects = getTabRects();
+        if (rects[lastIdx.current]) { setPillLeft(rects[lastIdx.current].left); setPillWidth(rects[lastIdx.current].width); }
+      }}
       style={{
         position: 'relative', display: 'flex', gap: 0, padding: '3px',
         borderRadius: 22,
@@ -198,6 +239,7 @@ function LiquidTabs({ tabs, active, onChange }) {
         border: 'none',
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.08)',
         userSelect: 'none', touchAction: 'none',
+        cursor: dragging ? 'grabbing' : 'grab',
       }}
     >
       {/* Glass pill */}
