@@ -85,204 +85,6 @@ function SortableItemRow({id,children}){
   </div>;
 }
 
-function LiquidTabs({ tabs, active, onChange }) {
-  const containerRef = useRef(null);
-  const [dragging, setDragging] = useState(false);
-  const draggingRef = useRef(false);
-  const [pillLeft, setPillLeft] = useState(null);
-  const [pillWidth, setPillWidth] = useState(null);
-  const startX = useRef(0);
-  const startPillLeft = useRef(0);
-  const startIdx = useRef(0);
-  const lastIdx = useRef(active);
-  const mouseDown = useRef(false);
-
-  useEffect(() => {
-    lastIdx.current = active;
-  }, [active]);
-
-  const getTabRects = () => {
-    const container = containerRef.current;
-    if (!container) return [];
-    const btns = [...container.querySelectorAll('[data-tab]')];
-    const cRect = container.getBoundingClientRect();
-    return btns.map(btn => {
-      const r = btn.getBoundingClientRect();
-      return { left: r.left - cRect.left, width: r.width, center: r.left - cRect.left + r.width / 2 };
-    });
-  };
-
-  // Snap pill to active tab
-  useEffect(() => {
-    if (dragging) return;
-    const rects = getTabRects();
-    if (rects[active]) {
-      setPillLeft(rects[active].left);
-      setPillWidth(rects[active].width);
-    }
-  }, [active, dragging]);
-
-  // Also snap on mount after layout
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      const rects = getTabRects();
-      if (rects[active]) {
-        setPillLeft(rects[active].left);
-        setPillWidth(rects[active].width);
-      }
-    });
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  const handleTouchStart = (e) => {
-    const rects = getTabRects();
-    startX.current = e.touches[0].clientX;
-    startIdx.current = active;
-    lastIdx.current = active;
-    startPillLeft.current = rects[active]?.left ?? 0;
-    draggingRef.current = true;
-    setDragging(true);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!draggingRef.current) return;
-    const dx = e.touches[0].clientX - startX.current;
-    const rects = getTabRects();
-    if (!rects.length) return;
-
-    // Move pill with finger
-    const newLeft = Math.max(
-      rects[0].left,
-      Math.min(rects[rects.length - 1].left, startPillLeft.current + dx)
-    );
-    setPillLeft(newLeft);
-
-    // Find closest tab center to current pill center
-    const pillCenter = newLeft + (rects[startIdx.current]?.width ?? 70) / 2;
-    let closest = 0;
-    let minDist = Infinity;
-    rects.forEach((r, i) => {
-      const dist = Math.abs(r.center - pillCenter);
-      if (dist < minDist) { minDist = dist; closest = i; }
-    });
-
-    if (closest !== lastIdx.current) {
-      lastIdx.current = closest;
-      onChange(tabs[closest].v);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    draggingRef.current = false;
-    setDragging(false);
-    // Snap to active
-    const rects = getTabRects();
-    if (rects[lastIdx.current]) {
-      setPillLeft(rects[lastIdx.current].left);
-      setPillWidth(rects[lastIdx.current].width);
-    }
-  };
-
-  return (
-    <div
-      ref={containerRef}
-      className="nav-tabs"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={e => {
-        mouseDown.current = true;
-        startX.current = e.clientX;
-        startIdx.current = active;
-        lastIdx.current = active;
-        const rects = getTabRects();
-        startPillLeft.current = rects[active]?.left ?? 0;
-        setDragging(true);
-        e.preventDefault();
-      }}
-      onMouseMove={e => {
-        if (!mouseDown.current) return;
-        const dx = e.clientX - startX.current;
-        const rects = getTabRects();
-        if (!rects.length) return;
-        const newLeft = Math.max(rects[0].left, Math.min(rects[rects.length - 1].left, startPillLeft.current + dx));
-        setPillLeft(newLeft);
-        const pillCenter = newLeft + (rects[startIdx.current]?.width ?? 70) / 2;
-        let closest = 0;
-        let minDist = Infinity;
-        rects.forEach((r, i) => {
-          const dist = Math.abs(r.center - pillCenter);
-          if (dist < minDist) { minDist = dist; closest = i; }
-        });
-        if (closest !== lastIdx.current) { lastIdx.current = closest; onChange(tabs[closest].v); }
-      }}
-      onMouseUp={() => {
-        if (!mouseDown.current) return;
-        mouseDown.current = false;
-        setDragging(false);
-        const rects = getTabRects();
-        if (rects[lastIdx.current]) { setPillLeft(rects[lastIdx.current].left); setPillWidth(rects[lastIdx.current].width); }
-      }}
-      onMouseLeave={() => {
-        if (!mouseDown.current) return;
-        mouseDown.current = false;
-        setDragging(false);
-        const rects = getTabRects();
-        if (rects[lastIdx.current]) { setPillLeft(rects[lastIdx.current].left); setPillWidth(rects[lastIdx.current].width); }
-      }}
-      style={{
-        position: 'relative', display: 'flex', gap: 0, padding: '3px',
-        borderRadius: 22,
-        background: 'rgba(255,255,255,0.25)',
-        backdropFilter: 'blur(30px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-        border: 'none',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.08)',
-        userSelect: 'none', touchAction: 'none',
-        cursor: dragging ? 'grabbing' : 'grab',
-      }}
-    >
-      {/* Glass pill */}
-      <div style={{
-        position: 'absolute', top: 3,
-        height: 'calc(100% - 6px)',
-        left: pillLeft ?? 0,
-        width: pillWidth ?? 70,
-        borderRadius: 18,
-        background: 'rgba(255,255,255,0.75)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255,255,255,0.9)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,1), 0 1px 4px rgba(0,0,0,0.10)',
-        transition: dragging ? 'none' : 'left 0.3s cubic-bezier(0.34,1.56,0.64,1), width 0.2s ease',
-        pointerEvents: 'none', zIndex: 0,
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: 2, left: '10%', right: '10%', height: 3, borderRadius: 2,
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, rgba(255,255,255,1) 60%, transparent)',
-          filter: 'blur(0.5px)',
-        }}/>
-      </div>
-      {/* Tabs */}
-      {tabs.map((tab, i) => (
-        <button key={tab.v} data-tab={i} onClick={() => onChange(tab.v)} style={{
-          position: 'relative', zIndex: 1,
-          padding: '6px 16px', borderRadius: 18, border: 'none', background: 'none',
-          color: active === i ? '#000' : 'rgba(0,0,0,0.45)',
-          fontSize: 12, fontWeight: active === i ? 700 : 500,
-          cursor: 'pointer', whiteSpace: 'nowrap', transition: 'color 0.2s',
-          WebkitTapHighlightColor: 'transparent',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {tab.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export default function App(){
   const [eqType,setEqType]=useState(()=>localStorage.getItem("rack_eq_type")||"стойка");
   const STORAGE_KEY=`rack_scoring_data_${eqType}`;
@@ -970,6 +772,7 @@ export default function App(){
     const item=sec?.items?.find(x=>x.n===itemName);
     return item?.n2||"";
   };
+  const navBtn=(label,v)=><button className="btn-nav" onClick={()=>setView(v)} style={{padding:"6px 16px",borderRadius:20,border:"none",cursor:"pointer",background:view===v?B.blue:"transparent",color:view===v?"#fff":B.steel,fontSize:12,fontWeight:600,transition:"all 0.2s",whiteSpace:"nowrap"}}>{label}</button>;
   return <div style={{minHeight:"100vh",background:B.bg,fontFamily:"Inter, system-ui, sans-serif",position:"relative",overflowX:"hidden"}}>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet"/>
 
@@ -1000,11 +803,7 @@ export default function App(){
           <div style={{width:1,height:22,background:B.border}}/>
           <span className="nav-nits" style={{fontSize:13,fontWeight:700,color:B.graphite,letterSpacing:"0.5px"}}>НИТС</span>
         </div>
-        <LiquidTabs
-          tabs={[{label:"Редактор",v:"editor"},{label:"Тех. условия",v:"techspecs"},{label:"Оценка",v:"input"},{label:"Дашборд",v:"dashboard"}]}
-          active={["editor","techspecs","input","dashboard"].indexOf(view)}
-          onChange={v => setView(v)}
-        />
+        <div className="nav-tabs" style={{display:"flex",gap:3,background:"#F1F5F9",borderRadius:20,padding:2}}>{navBtn("Редактор","editor")}{navBtn("Тех. условия","techspecs")}{navBtn("Оценка","input")}{navBtn("Дашборд","dashboard")}</div>
       </div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
         {view==="dashboard"&&<button className="btn-add-vendor" onClick={exportPDF} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>PDF</button>}
