@@ -772,7 +772,7 @@ export default function App(){
     const item=sec?.items?.find(x=>x.n===itemName);
     return item?.n2||"";
   };
-  const navBtn=(label,v)=><button className="btn-nav" onClick={()=>setView(v)} style={{padding:"6px 16px",borderRadius:20,border:"none",cursor:"pointer",background:view===v?B.blue:"transparent",color:view===v?"#fff":B.steel,fontSize:12,fontWeight:600,transition:"all 0.2s",whiteSpace:"nowrap"}}>{label}</button>;
+  const navBtn=(label,v)=><button className="btn-nav" onClick={()=>setView(v)} style={{padding:"10px 16px",borderRadius:20,border:"none",cursor:"pointer",background:view===v?B.blue:"transparent",color:view===v?"#fff":B.steel,fontSize:13,fontWeight:600,transition:"all 0.2s",whiteSpace:"nowrap"}}>{label}</button>;
   return <div style={{minHeight:"100vh",background:B.bg,fontFamily:"Inter, system-ui, sans-serif",position:"relative",overflowX:"hidden"}}>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet"/>
 
