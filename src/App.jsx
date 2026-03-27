@@ -456,19 +456,65 @@ export default function App(){
   const importTechSpecs=useCallback(()=>{
     const input=document.createElement("input");
     input.type="file";
-    input.accept=".json";
-    input.onchange=e=>{
+    input.accept=".json,.xlsx,.xls";
+    input.onchange=async e=>{
       const file=e.target.files[0];
       if(!file)return;
-      const reader=new FileReader();
-      reader.onload=ev=>{
-        try{
-          const d=JSON.parse(ev.target.result);
-          if(Array.isArray(d))setTechSpecs(normalizeTechSpecs(d));
-          else alert("Неверный формат файла");
-        }catch{alert("Ошибка чтения JSON");}
-      };
-      reader.readAsText(file);
+      const ext=file.name.split(".").pop().toLowerCase();
+
+      if(ext==="json"){
+        const reader=new FileReader();
+        reader.onload=ev=>{
+          try{
+            const d=JSON.parse(ev.target.result);
+            if(Array.isArray(d))setTechSpecs(normalizeTechSpecs(d));
+            else alert("Неверный формат файла");
+          }catch{alert("Ошибка чтения JSON");}
+        };
+        reader.readAsText(file);
+        return;
+      }
+
+      try{
+        const buf=await file.arrayBuffer();
+        const wb=XLSX.read(buf,{type:"array"});
+        const wsName=wb.SheetNames.find(n=>n==="ТУ")||wb.SheetNames[0];
+        const ws=wb.Sheets[wsName];
+        const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+
+        const newSpecs=[];
+        let curSec=null;
+        for(let r=2;r<data.length;r++){
+          const row=data[r];
+          if(!row||row.every(c=>c===""||c==null))continue;
+          const colA=row[0];
+          const colB=String(row[1]||"").trim();
+          const colC=String(row[2]||"").trim();
+          const aNum=Number(colA);
+
+          if(colA&&isNaN(aNum)&&colB===""){
+            curSec={n:String(colA).trim(),items:[]};
+            newSpecs.push(curSec);
+            continue;
+          }
+
+          if(!isNaN(aNum)&&aNum>0&&colB){
+            if(!curSec){
+              curSec={n:"Раздел",items:[]};
+              newSpecs.push(curSec);
+            }
+            curSec.items.push({n:colB,n2:colC});
+          }
+        }
+
+        if(newSpecs.length===0){
+          alert("Не удалось распознать структуру файла");
+          return;
+        }
+        setTechSpecs(normalizeTechSpecs(newSpecs));
+      }catch(err){
+        alert("Ошибка чтения XLSX: "+err.message);
+      }
     };
     input.click();
   },[]);
