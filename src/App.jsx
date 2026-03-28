@@ -1014,7 +1014,7 @@ export default function App(){
                 images: Array(totalItems).fill(null)
               })));
               setShowApplyConfirm(false);
-              setView("editor");
+              setTechSpecsEditMode(false);
             }} style={{padding:"10px 28px",borderRadius:12,border:"none",background:B.blue,color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
               Применить
             </button>
@@ -1197,11 +1197,6 @@ export default function App(){
             {t==="стойка"?"Стойка":"PDU"}
           </button>
         )}
-        <div style={{width:1,height:20,background:B.border,margin:"0 4px"}}/>
-        {techSpecsEditMode&&<button type="button" className="btn-primary" onClick={()=>setShowApplyConfirm(true)} style={{padding:"6px 14px",borderRadius:10,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:4,boxShadow:`0 2px 8px ${B.blue}33`}}>
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          Применить в редактор
-        </button>}
       </div>
       {techSpecsEditMode&&<div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
         <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новый параметр",n2:""}]}])} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>+ Раздел</button>
