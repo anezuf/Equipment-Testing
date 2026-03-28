@@ -1045,23 +1045,27 @@ export default function App(){
                       {sec.items.map((it,ii)=>
                         <SortableItemRow key={ii} id={`titem-${si}-${ii}`}>
                           {(itemDrag,itemAttrs)=>
-                            <div style={{display:"flex",alignItems:"flex-start",flexWrap:"wrap",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
-                              <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none",marginTop:10}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
-                              <AutoSizeTextarea
-                                value={it.n}
-                                onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}}
-                                minHeight={20}
-                                placeholder="Параметр"
-                                style={{flex:"1 1 180px",border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}
-                              />
-                              <AutoSizeTextarea
-                                value={it.n2||""}
-                                onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n2:v}:x)}:s));}}
-                                minHeight={36}
-                                placeholder="Требование"
-                                style={{flex:"2 1 260px",border:"none",background:"#F8FAFC",borderRadius:6,fontSize:12,color:B.steel,outline:"none",resize:"none",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:"4px 8px",minWidth:0}}
-                              />
-                              {sec.items.length>1&&<button type="button" className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center"}}>×</button>}
+                            <div style={{display:"flex",alignItems:"stretch",gap:8,padding:"0 16px",minHeight:40,borderTop:ii?`1px solid #F1F5F9`:"none"}}>
+                              <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none",alignSelf:"center"}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
+                              <div style={{flex:"0 0 40%",display:"flex",alignItems:"center",padding:"8px 0",borderRight:`1px solid ${B.border}`,paddingRight:12}}>
+                                <AutoSizeTextarea
+                                  value={it.n}
+                                  onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}}
+                                  minHeight={20}
+                                  placeholder="Параметр"
+                                  style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}
+                                />
+                              </div>
+                              <div style={{flex:"1 1 60%",display:"flex",alignItems:"center",padding:"8px 0",paddingLeft:12,background:"transparent"}}>
+                                <AutoSizeTextarea
+                                  value={it.n2||""}
+                                  onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n2:v}:x)}:s));}}
+                                  minHeight={36}
+                                  placeholder="Требование"
+                                  style={{flex:1,border:"none",background:"#EFF6FF",borderRadius:6,padding:"6px 10px",fontSize:12,color:B.steel,outline:"none",resize:"none",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",minWidth:0}}
+                                />
+                              </div>
+                              {sec.items.length>1&&<button type="button" className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center",alignSelf:"center"}}>×</button>}
                             </div>
                           }
                         </SortableItemRow>
