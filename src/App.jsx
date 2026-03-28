@@ -1209,8 +1209,21 @@ export default function App(){
                         <SortableItemRow key={ii} id={`titem-${si}-${ii}`}>
                           {(itemDrag,itemAttrs)=>
                             <div className="ts-item-row" style={{display:"flex",alignItems:"stretch",gap:8,padding:"0 16px",minHeight:40,borderTop:ii?`1px solid #F1F5F9`:"none"}}>
-                              <div className="ts-param-col" style={{position:"relative",flex:"0 0 40%",display:"flex",alignItems:"center",padding:"8px 0",borderRight:`1px solid ${B.border}`,paddingRight:12}}>
-                                <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none",marginRight:6}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
+                              <div className="ts-param-col" style={{position:"relative",flex:"0 0 40%",display:"flex",alignItems:"flex-start",padding:"8px 0",borderRight:`1px solid ${B.border}`,paddingRight:12}}>
+                                <span
+                                  style={{
+                                    cursor:"grab",
+                                    display:"flex",
+                                    flexShrink:0,
+                                    opacity:0.3,
+                                    touchAction:"none",
+                                    marginRight:6,
+                                    marginTop:3,
+                                    alignSelf:"flex-start"
+                                  }}
+                                  {...itemDrag}
+                                  {...itemAttrs}
+                                ><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
                                 <AutoSizeTextarea
                                   value={it.n}
                                   onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}}
