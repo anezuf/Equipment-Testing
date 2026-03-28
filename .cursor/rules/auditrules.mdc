@@ -19,6 +19,6 @@ Never duplicate functions that exist in another file — import instead. Always 
 
 Notes: empty note = "", "<br>", or "<div><br></div>". Always sanitize before saving. Strip HTML tags before writing to Excel.
 
-Drag and drop: always use @dnd-kit/sortable, never native HTML5 drag API. Always add DragOverlay.
+List reordering: use ↑/↓ buttons and array swaps in state; do not use native HTML5 drag API.
 
 Google Fonts Inter must include italic: ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800
