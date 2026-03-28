@@ -386,8 +386,36 @@ button {
 }
 
 @media print {
+  /* Reset desktop #root zoom; avoid viewport scaling in the printed output */
+  #root {
+    zoom: 1 !important;
+    transform: none !important;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  /* Let the document grow naturally; avoid scroll traps from screen layout */
+  body, html {
+    background: #fff !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    max-width: 100%;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  /* Full-screen fixed overlays (modals) should not cover or paginate oddly */
+  [style*="position:fixed"] {
+    display: none !important;
+  }
+  /* Sticky nav is hidden via [data-nav]; neutralize any sticky for print fallbacks */
+  [style*="position:sticky"] {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+  }
+
   [data-nav] { display: none !important; }
-  body, html { background: #fff !important; margin: 0 auto !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; max-width: 100%; }
   #root, #app { margin: 0 auto !important; }
   button { display: none !important; }
   [data-dash] { padding: 8px !important; max-width: 100% !important; margin: 0 auto !important; }
