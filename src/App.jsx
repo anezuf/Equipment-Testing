@@ -1030,8 +1030,15 @@ export default function App(){
           <span className="nav-nits" style={{fontSize:13,fontWeight:700,color:B.graphite,letterSpacing:"0.5px"}}>НИТС</span>
         </div>
         <div className="nav-tabs" style={{display:"flex",gap:3,background:"#F1F5F9",borderRadius:20,padding:2}}>
-          <div style={{overflow:"hidden", maxWidth:(view==="techspecs"||view==="editor")?150:0, opacity:(view==="techspecs"||view==="editor")?1:0, transition:"all 0.3s ease", display:"inline-flex"}}>
-            {(view==="techspecs"||view==="editor") && navBtn("Редактор","editor")}
+          <div style={{
+            overflow:"hidden",
+            maxWidth: (view==="techspecs"||view==="editor") ? 150 : 0,
+            opacity: (view==="techspecs"||view==="editor") ? 1 : 0,
+            transition:"max-width 0.3s ease, opacity 0.3s ease",
+            display:"inline-flex",
+            pointerEvents: (view==="techspecs"||view==="editor") ? "auto" : "none",
+          }}>
+            {navBtn("Редактор","editor")}
           </div>
           {navBtn("Тех. условия","techspecs")}{navBtn("Оценка","input")}{navBtn("Дашборд","dashboard")}
         </div>
