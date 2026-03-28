@@ -1191,6 +1191,7 @@ export default function App(){
           )}
         </div>
       </div>
+      {!techSpecsEditMode && (
       <div style={{display:"flex",gap:6,marginBottom:12,alignItems:"center",flexWrap:"wrap"}}>
         {EQ_TYPES.map(t=>
           <button key={t} onClick={()=>switchEqType(t)} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===t?B.blue:B.border}`,background:eqType===t?"#EFF6FF":"#fff",color:eqType===t?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
@@ -1198,6 +1199,7 @@ export default function App(){
           </button>
         )}
       </div>
+      )}
       {techSpecsEditMode&&<div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
         <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новый параметр",n2:""}]}])} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>+ Раздел</button>
       </div>}
