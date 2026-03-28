@@ -210,6 +210,7 @@ export default function App(){
   const [notePopup,setNotePopup]=useState(null);
   const [infoPopup,setInfoPopup]=useState(null);
   const [showReset,setShowReset]=useState(false);
+  const [showApplyConfirm, setShowApplyConfirm] = useState(false);
   const [expImgs,setExpImgs]=useState({});
   const [heatmapSort,setHeatmapSort]=useState({col:null,label:null});
   const [heatmapSelectedVendor, setHeatmapSelectedVendor] = useState(null);
@@ -984,6 +985,42 @@ export default function App(){
       </div>
     </div>}
 
+    {showApplyConfirm && (
+      <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999}} onClick={()=>setShowApplyConfirm(false)}>
+        <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:20,padding:"28px 32px",maxWidth:400,width:"90%",boxShadow:"0 20px 60px rgba(0,0,0,0.2)",textAlign:"center"}}>
+          <div style={{width:48,height:48,borderRadius:"50%",background:"#DBEAFE",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke={B.blue} strokeWidth="2" strokeLinecap="round"/></svg>
+          </div>
+          <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Применить в редактор?</div>
+          <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Разделы и параметры в редакторе будут обновлены из тех. условий. Веса новых параметров будут установлены как «Преимущество». Существующие веса сохранятся.</div>
+          <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+            <button type="button" className="btn-secondary" onClick={()=>setShowApplyConfirm(false)} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>Отмена</button>
+            <button type="button" className="btn-primary" onClick={()=>{
+              const newSections = techSpecs.map(sec => ({
+                n: sec.n,
+                items: sec.items.map(it => {
+                  const existing = sections.find(s=>s.n===sec.n)?.items?.find(x=>x.n===it.n);
+                  return { n: it.n, w: existing?.w ?? 0 };
+                })
+              }));
+              const totalItems = newSections.reduce((a,s)=>a+s.items.length,0);
+              setSections(newSections);
+              setVendors(v => v.map(vnd => ({
+                ...vnd,
+                scores: Array(totalItems).fill(null),
+                notes: Array(totalItems).fill(""),
+                images: Array(totalItems).fill(null)
+              })));
+              setShowApplyConfirm(false);
+              setView("editor");
+            }} style={{padding:"10px 28px",borderRadius:12,border:"none",background:B.blue,color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+              Применить
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
     {/* NAV */}
     <div data-nav="" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 24px",background:"#fff",borderBottom:`1px solid ${B.border}`,position:"sticky",top:0,zIndex:50,gap:8,flexWrap:"wrap"}}>
       <div className="nav-left-group" style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
@@ -992,7 +1029,12 @@ export default function App(){
           <div style={{width:1,height:22,background:B.border}}/>
           <span className="nav-nits" style={{fontSize:13,fontWeight:700,color:B.graphite,letterSpacing:"0.5px"}}>НИТС</span>
         </div>
-        <div className="nav-tabs" style={{display:"flex",gap:3,background:"#F1F5F9",borderRadius:20,padding:2}}>{navBtn("Редактор","editor")}{navBtn("Тех. условия","techspecs")}{navBtn("Оценка","input")}{navBtn("Дашборд","dashboard")}</div>
+        <div className="nav-tabs" style={{display:"flex",gap:3,background:"#F1F5F9",borderRadius:20,padding:2}}>
+          <div style={{overflow:"hidden", maxWidth:(view==="techspecs"||view==="editor")?150:0, opacity:(view==="techspecs"||view==="editor")?1:0, transition:"all 0.3s ease", display:"inline-flex"}}>
+            {(view==="techspecs"||view==="editor") && navBtn("Редактор","editor")}
+          </div>
+          {navBtn("Тех. условия","techspecs")}{navBtn("Оценка","input")}{navBtn("Дашборд","dashboard")}
+        </div>
       </div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
         {view==="dashboard"&&<button className="btn-add-vendor" onClick={exportPDF} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>PDF</button>}
@@ -1124,12 +1166,17 @@ export default function App(){
           </button>
         </div>
       </div>
-      <div style={{display:"flex",gap:6,marginBottom:12}}>
+      <div style={{display:"flex",gap:6,marginBottom:12,alignItems:"center",flexWrap:"wrap"}}>
         {EQ_TYPES.map(t=>
           <button key={t} onClick={()=>switchEqType(t)} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===t?B.blue:B.border}`,background:eqType===t?"#EFF6FF":"#fff",color:eqType===t?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
             {t==="стойка"?"Стойка":"PDU"}
           </button>
         )}
+        <div style={{width:1,height:20,background:B.border,margin:"0 4px"}}/>
+        <button type="button" className="btn-primary" onClick={()=>setShowApplyConfirm(true)} style={{padding:"6px 14px",borderRadius:10,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:4,boxShadow:`0 2px 8px ${B.blue}33`}}>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          Применить в редактор
+        </button>
       </div>
       <div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
         <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новый параметр",n2:""}]}])} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>+ Раздел</button>
