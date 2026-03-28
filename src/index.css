@@ -339,6 +339,48 @@ button {
   }
 }
 
+/* Mobile portrait — stack vertically */
+@media (max-width: 600px) and (orientation: portrait) {
+  .ts-item-row {
+    flex-wrap: wrap !important;
+    position: relative !important;
+    padding-right: 32px !important;
+    align-items: flex-start !important;
+  }
+  .ts-param-col {
+    flex: 1 1 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid #E5EAF0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 8px !important;
+  }
+  .ts-req-col {
+    flex: 1 1 100% !important;
+    padding-left: 0 !important;
+    padding-top: 8px !important;
+    border-left: none !important;
+  }
+  .ts-item-delete {
+    position: absolute !important;
+    top: 50% !important;
+    right: 6px !important;
+    transform: translateY(-50%) !important;
+  }
+}
+
+/* Mobile landscape — shrink columns to fit, no layout change */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .ts-param-col {
+    flex: 0 0 35% !important;
+  }
+  .ts-req-col {
+    flex: 1 1 55% !important;
+  }
+  .ts-item-delete {
+    flex-shrink: 0 !important;
+  }
+}
+
 @media print {
   [data-nav] { display: none !important; }
   body, html { background: #fff !important; margin: 0 auto !important; padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; max-width: 100%; }

@@ -1045,8 +1045,8 @@ export default function App(){
                       {sec.items.map((it,ii)=>
                         <SortableItemRow key={ii} id={`titem-${si}-${ii}`}>
                           {(itemDrag,itemAttrs)=>
-                            <div style={{display:"flex",alignItems:"stretch",gap:8,padding:"0 16px",minHeight:40,borderTop:ii?`1px solid #F1F5F9`:"none"}}>
-                              <div style={{position:"relative",flex:"0 0 40%",display:"flex",alignItems:"center",padding:"8px 0",borderRight:`1px solid ${B.border}`,paddingRight:12}}>
+                            <div className="ts-item-row" style={{display:"flex",alignItems:"stretch",gap:8,padding:"0 16px",minHeight:40,borderTop:ii?`1px solid #F1F5F9`:"none"}}>
+                              <div className="ts-param-col" style={{position:"relative",flex:"0 0 40%",display:"flex",alignItems:"center",padding:"8px 0",borderRight:`1px solid ${B.border}`,paddingRight:12}}>
                                 <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none",marginRight:6}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
                                 <AutoSizeTextarea
                                   value={it.n}
@@ -1056,7 +1056,7 @@ export default function App(){
                                   style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}
                                 />
                               </div>
-                              <div style={{flex:"1 1 60%",display:"flex",alignItems:"center",padding:"8px 0",paddingLeft:12,background:"transparent"}}>
+                              <div className="ts-req-col" style={{flex:"1 1 60%",display:"flex",alignItems:"center",padding:"8px 0",paddingLeft:12,background:"transparent"}}>
                                 <AutoSizeTextarea
                                   value={it.n2||""}
                                   onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n2:v}:x)}:s));}}
@@ -1065,7 +1065,7 @@ export default function App(){
                                   style={{flex:1,border:"none",background:"#EFF6FF",borderRadius:6,padding:"6px 10px",fontSize:12,color:B.steel,outline:"none",resize:"none",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",minWidth:0}}
                                 />
                               </div>
-                              {sec.items.length>1&&<button type="button" className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center",alignSelf:"center"}}>×</button>}
+                              {sec.items.length>1&&<button type="button" className="btn-icon-close ts-item-delete" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center",alignSelf:"center"}}>×</button>}
                             </div>
                           }
                         </SortableItemRow>
