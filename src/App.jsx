@@ -1036,13 +1036,17 @@ export default function App(){
                   {techSpecs.length>1&&<button type="button" className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.filter((_,i)=>i!==si))} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center"}}>×</button>}
                 </div>
                 <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
+                  <div style={{display:"flex",padding:"6px 16px",background:"#F8FAFC",borderBottom:`1px solid ${B.border}`}}>
+                    <div style={{flex:"0 0 40%",fontSize:10,fontWeight:700,color:B.steel,textTransform:"uppercase",letterSpacing:"0.5px"}}>Параметр</div>
+                    <div style={{flex:"1 1 60%",fontSize:10,fontWeight:700,color:B.steel,textTransform:"uppercase",letterSpacing:"0.5px",paddingLeft:16}}>Требование</div>
+                  </div>
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveTechItemId(active.id)} onDragEnd={e=>{setActiveTechItemId(null);makeTechSpecItemDragEnd(si)(e);}} onDragCancel={()=>setActiveTechItemId(null)}>
                     <SortableContext items={sec.items.map((_,ii)=>`titem-${si}-${ii}`)} strategy={verticalListSortingStrategy}>
                       {sec.items.map((it,ii)=>
                         <SortableItemRow key={ii} id={`titem-${si}-${ii}`}>
                           {(itemDrag,itemAttrs)=>
-                            <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
-                              <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none"}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
+                            <div style={{display:"flex",alignItems:"flex-start",flexWrap:"wrap",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
+                              <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none",marginTop:10}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
                               <AutoSizeTextarea
                                 value={it.n}
                                 onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}}
