@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 
 import { B, VC, ICO, SM, WC } from "./constants";
-import { DEF_SECTIONS, mkAll, mkOff } from "./sections";
+import { DEF_SECTIONS, PDU_DEFAULT, mkAll, mkOff } from "./sections";
 import { calcTotal, calcSec, hasFail } from "./scoring";
 import { fmt } from "./utils";
 import Logo from "./components/Logo";
@@ -39,7 +39,6 @@ function loadSaved(storageKey){
 }
 
 const EQ_TYPES=["стойка","pdu"];
-const PDU_DEFAULT=[{n:"Новый раздел",items:[{n:"Новый параметр",w:1}]}];
 const PDU_TECH_SPECS_DEFAULT=[{n:"Новый раздел",items:[{n:"Новый параметр",n2:""}]}];
 const TECH_SPECS_DEFAULT=[{n:"Общие требования",items:[{n:"Введите техническое условие",n2:""}]}];
 
