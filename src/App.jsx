@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 
 import { B, VC, ICO, SM, WC } from "./constants";
 import { DEF_SECTIONS, PDU_DEFAULT, mkAll, mkOff } from "./sections";
@@ -73,17 +73,23 @@ function SortableItemRow({id,children}){
 export default function App(){
   const [eqType,setEqType]=useState(()=>localStorage.getItem("rack_eq_type")||"стойка");
   const STORAGE_KEY=`rack_scoring_data_${eqType}`;
-  const saved=useRef(loadSaved(`rack_scoring_data_${localStorage.getItem("rack_eq_type")||"стойка"}`));
-  const [sections,setSections]=useState(()=>saved.current?.sections||(eqType==="pdu"?PDU_DEFAULT:DEF_SECTIONS));
+  const [sections,setSections]=useState(()=>{
+    const eq=localStorage.getItem("rack_eq_type")||"стойка";
+    const s=loadSaved(`rack_scoring_data_${eq}`);
+    if(s?.sections)return s.sections;
+    return eq==="pdu"?PDU_DEFAULT:DEF_SECTIONS;
+  });
   const ALL=useMemo(()=>mkAll(sections),[sections]);
   const SEC_OFF=useMemo(()=>mkOff(sections),[sections]);
   const itemCount=ALL.length;
 
   const [vendors,setVendors]=useState(()=>{
-    const initialSections=saved.current?.sections||(eqType==="pdu"?PDU_DEFAULT:DEF_SECTIONS);
+    const eq=localStorage.getItem("rack_eq_type")||"стойка";
+    const s=loadSaved(`rack_scoring_data_${eq}`);
+    const initialSections=s?.sections||(eq==="pdu"?PDU_DEFAULT:DEF_SECTIONS);
     const initialItemCount=mkAll(initialSections).length;
-    if(saved.current?.vendors){
-      return saved.current.vendors.map(v=>({...v,images:v.images||Array(initialItemCount).fill(null)}));
+    if(s?.vendors){
+      return s.vendors.map(v=>({...v,images:v.images||Array(initialItemCount).fill(null)}));
     }
     return [{name:"Вендор 1",scores:Array(initialItemCount).fill(null),notes:Array(initialItemCount).fill(""),images:Array(initialItemCount).fill(null)}];
   });
@@ -99,14 +105,12 @@ export default function App(){
   const [heatmapSelectedVendor, setHeatmapSelectedVendor] = useState(null);
   const techSpecsStorageKey=`rack_tech_specs_${eqType}`;
   const [techSpecs,setTechSpecs]=useState(()=>{
+    const eq=localStorage.getItem("rack_eq_type")||"стойка";
     try{
-      const eq=localStorage.getItem("rack_eq_type")||"стойка";
       const raw=localStorage.getItem(`rack_tech_specs_${eq}`);
-      if(raw)return normalizeTechSpecs(JSON.parse(raw));
-      return eq==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT;
-    }catch{
-      return TECH_SPECS_DEFAULT;
-    }
+      if(raw)return JSON.parse(raw);
+    }catch{}
+    return eq==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT;
   });
   useEffect(()=>{try{localStorage.setItem(techSpecsStorageKey,JSON.stringify(techSpecs));}catch{}},[techSpecs,techSpecsStorageKey]);
   useEffect(() => {
@@ -143,11 +147,9 @@ export default function App(){
     }catch{}
     try{
       const raw=localStorage.getItem(`rack_tech_specs_${newType}`);
-      if(raw)setTechSpecs(normalizeTechSpecs(JSON.parse(raw)));
+      if(raw)setTechSpecs(JSON.parse(raw));
       else setTechSpecs(newType==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT);
-    }catch{
-      setTechSpecs(TECH_SPECS_DEFAULT);
-    }
+    }catch{setTechSpecs(TECH_SPECS_DEFAULT);}
     setAct(0);
     setNoteOpen(null);
   },[eqType]);
