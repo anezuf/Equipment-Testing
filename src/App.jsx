@@ -40,6 +40,7 @@ function loadSaved(storageKey){
 
 const EQ_TYPES=["стойка","pdu"];
 const PDU_DEFAULT=[{n:"Новый раздел",items:[{n:"Новый параметр",w:1}]}];
+const PDU_TECH_SPECS_DEFAULT=[{n:"Новый раздел",items:[{n:"Новый параметр",n2:""}]}];
 const TECH_SPECS_DEFAULT=[{n:"Общие требования",items:[{n:"Введите техническое условие",n2:""}]}];
 
 function normalizeTechSpecs(data){
@@ -49,21 +50,6 @@ function normalizeTechSpecs(data){
     n:sec?.n||"",
     items:(sec?.items||[]).map(it=>({n:it?.n||"",n2:it?.n2||""}))
   }));
-}
-
-function syncTechSpecsWithSections(editorSections,sourceSpecs){
-  if(!Array.isArray(editorSections)||editorSections.length===0)return normalizeTechSpecs(sourceSpecs);
-  const normalized=normalizeTechSpecs(sourceSpecs);
-  return editorSections.map(sec=>{
-    const srcSec=normalized.find(s=>s.n===sec.n);
-    return {
-      n:sec.n||"",
-      items:(sec.items||[]).map(it=>{
-        const srcItem=srcSec?.items?.find(x=>x.n===it.n);
-        return {n:it.n||"",n2:srcItem?.n2||""};
-      })
-    };
-  });
 }
 
 function HeatmapTh({si,s,active,onSort}){
@@ -115,22 +101,14 @@ export default function App(){
   const techSpecsStorageKey=`rack_tech_specs_${eqType}`;
   const [techSpecs,setTechSpecs]=useState(()=>{
     try{
-      const s=localStorage.getItem(`rack_tech_specs_${eqType}`);
-      const parsed=s?JSON.parse(s):TECH_SPECS_DEFAULT;
-      return syncTechSpecsWithSections(sections,parsed);
+      const eq=localStorage.getItem("rack_eq_type")||"стойка";
+      const raw=localStorage.getItem(`rack_tech_specs_${eq}`);
+      if(raw)return normalizeTechSpecs(JSON.parse(raw));
+      return eq==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT;
     }catch{
-      return syncTechSpecsWithSections(sections,TECH_SPECS_DEFAULT);
+      return TECH_SPECS_DEFAULT;
     }
   });
-  useEffect(()=>{
-    try{
-      const raw=localStorage.getItem(techSpecsStorageKey);
-      const parsed=raw?JSON.parse(raw):TECH_SPECS_DEFAULT;
-      setTechSpecs(syncTechSpecsWithSections(sections,parsed));
-    }catch{
-      setTechSpecs(syncTechSpecsWithSections(sections,TECH_SPECS_DEFAULT));
-    }
-  },[eqType]);
   useEffect(()=>{try{localStorage.setItem(techSpecsStorageKey,JSON.stringify(techSpecs));}catch{}},[techSpecs,techSpecsStorageKey]);
   useEffect(() => {
     const handler = () => setIsPortrait(window.innerHeight > window.innerWidth);
@@ -164,6 +142,13 @@ export default function App(){
         setVendors([{name:"Вендор 1",scores:Array(mkAll(defSecs).length).fill(null),notes:Array(mkAll(defSecs).length).fill(""),images:Array(mkAll(defSecs).length).fill(null)}]);
       }
     }catch{}
+    try{
+      const raw=localStorage.getItem(`rack_tech_specs_${newType}`);
+      if(raw)setTechSpecs(normalizeTechSpecs(JSON.parse(raw)));
+      else setTechSpecs(newType==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT);
+    }catch{
+      setTechSpecs(TECH_SPECS_DEFAULT);
+    }
     setAct(0);
     setNoteOpen(null);
   },[eqType]);
@@ -482,6 +467,16 @@ export default function App(){
         const ws=wb.Sheets[wsName];
         const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
 
+        const hdrRow=data[1];
+        const badHdr=!Array.isArray(hdrRow)||hdrRow.length<3;
+        const h0=String(hdrRow?.[0]??"").trim();
+        const h1=String(hdrRow?.[1]??"").trim();
+        const h2=String(hdrRow?.[2]??"").trim();
+        if(badHdr||!h0||!h1||!h2){
+          alert("Неверный формат файла. Ожидается таблица с колонками: # | Параметр | Требуемые характеристики");
+          return;
+        }
+
         const newSpecs=[];
         let curSec=null;
         for(let r=2;r<data.length;r++){
@@ -507,11 +502,13 @@ export default function App(){
           }
         }
 
-        if(newSpecs.length===0){
-          alert("Не удалось распознать структуру файла");
+        const paramCount=newSpecs.reduce((a,s)=>a+(s.items?.length||0),0);
+        if(newSpecs.length===0||paramCount===0){
+          alert("Неверный формат файла. Ожидается таблица с колонками: # | Параметр | Требуемые характеристики");
           return;
         }
         setTechSpecs(normalizeTechSpecs(newSpecs));
+        alert(`Загружено разделов: ${newSpecs.length}, параметров: ${paramCount}`);
       }catch(err){
         alert("Ошибка чтения XLSX: "+err.message);
       }
