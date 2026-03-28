@@ -407,3 +407,9 @@ button {
   label { display: none !important; }
   [data-footer] { display: none !important; }
 }
+
+@media (min-width: 769px) {
+  #root {
+    zoom: 1.33;
+  }
+}
