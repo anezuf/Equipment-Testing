@@ -9,6 +9,7 @@ import Gauge from "./components/Gauge";
 import RichNote from "./components/RichNote";
 import SegBar from "./components/SegBar";
 import NotePopup from "./components/NotePopup";
+import AutoSizeTextarea from "./components/AutoSizeTextarea";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -710,6 +711,8 @@ export default function App(){
 
   const [activeSectionId,setActiveSectionId]=useState(null);
   const [activeItemId,setActiveItemId]=useState(null);
+  const [activeTechSecId,setActiveTechSecId]=useState(null);
+  const [activeTechItemId,setActiveTechItemId]=useState(null);
 
   const sensors=useSensors(useSensor(PointerSensor,{activationConstraint:{distance:5}}));
 
@@ -748,6 +751,29 @@ export default function App(){
       sc.splice(off+newIdx,0,ms);nt.splice(off+newIdx,0,mn);im.splice(off+newIdx,0,mi??null);
       return{...v,scores:sc,notes:nt,images:im};
     }));
+  };
+
+  const handleTechSpecSectionDragEnd=useCallback(({active,over})=>{
+    setActiveTechSecId(null);
+    if(!over||active.id===over.id)return;
+    setTechSpecs(p=>{
+      const oldIdx=p.findIndex((_,i)=>`tsec-${i}`===active.id);
+      const newIdx=p.findIndex((_,i)=>`tsec-${i}`===over.id);
+      if(oldIdx<0||newIdx<0)return p;
+      return arrayMove(p,oldIdx,newIdx);
+    });
+  },[]);
+
+  const makeTechSpecItemDragEnd=(si)=>({active,over})=>{
+    if(!over||active.id===over.id)return;
+    setTechSpecs(p=>{
+      const items=p[si]?.items;
+      if(!items)return p;
+      const oldIdx=items.findIndex((_,i)=>`titem-${si}-${i}`===active.id);
+      const newIdx=items.findIndex((_,i)=>`titem-${si}-${i}`===over.id);
+      if(oldIdx<0||newIdx<0)return p;
+      return p.map((s,i)=>i===si?{...s,items:arrayMove(s.items,oldIdx,newIdx)}:s);
+    });
   };
 
   const addV=()=>{if(vendors.length>=25)return;setVendors(p=>[...p,{name:`Вендор ${p.length+1}`,scores:Array(itemCount).fill(null),notes:Array(itemCount).fill(""),images:Array(itemCount).fill(null)}]);};
@@ -996,40 +1022,81 @@ export default function App(){
           </button>
         )}
       </div>
-      {techSpecs.map((sec,si)=><div key={si} style={{marginBottom:12,borderRadius:16,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.06)",border:`1px solid ${B.border}`}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:0,borderLeft:`3px solid ${VC[si%VC.length]}`}}>
-          <input value={sec.n} onChange={e=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,n:e.target.value}:s))} style={{flex:1,background:"transparent",border:"none",color:"#fff",fontSize:13,fontWeight:700,outline:"none",minWidth:0}}/>
-          {techSpecs.length>1&&<button className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.filter((_,i)=>i!==si))} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0}}>×</button>}
-        </div>
-        <div style={{background:"#fff"}}>
-          <div style={{display:"flex",padding:"4px 28px 4px 16px",background:"#F8FAFC",borderBottom:`1px solid ${B.border}`}}>
-            <div style={{flex:1,fontSize:10,fontWeight:700,color:B.steel,textTransform:"uppercase",letterSpacing:"0.5px"}}>Параметр</div>
-            <div style={{flex:1,fontSize:10,fontWeight:700,color:B.steel,textTransform:"uppercase",letterSpacing:"0.5px",borderLeft:`1px solid ${B.border}`,paddingLeft:12}}>Требование</div>
-          </div>
-          {sec.items.map((it,ii)=><div key={ii} style={{display:"flex",alignItems:"stretch",gap:8,padding:"10px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
-            <div style={{flex:1,display:"flex",gap:0,minWidth:0}}>
-              <textarea
-                value={it.n}
-                onChange={e=>{
-                  const v=e.target.value;
-                  e.target.style.height="auto";
-                  e.target.style.height=e.target.scrollHeight+"px";
-                  setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));
-                }}
-                onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}}
-                rows={1}
-                style={{flex:1,border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter,system-ui,sans-serif",lineHeight:"1.5",padding:0,minWidth:0,wordBreak:"break-word"}}
-                placeholder="Название параметра"
-              />
-              <div style={{flex:1,minWidth:0,borderLeft:`1px solid ${B.border}`,paddingLeft:12,marginLeft:12,display:"flex",alignItems:"center"}}>
-                <textarea value={it.n2||""} onChange={e=>{const v=e.target.value;e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n2:v}:x)}:s));}} onFocus={e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px";}} rows={1} placeholder="Введите требование" style={{width:"100%",border:"none",background:"none",fontSize:12,color:B.steel,outline:"none",resize:"none",overflow:"hidden",fontFamily:"Inter,system-ui,sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}/>
-              </div>
-            </div>
-            {sec.items.length>1&&<button className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0}}>×</button>}
-          </div>)}
-          <button onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"Новое условие",n2:""}]}:s))} style={{width:"100%",padding:"10px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:0}}>+ Добавить условие</button>
-        </div>
-      </div>)}
+      <div style={{display:"flex",justifyContent:"flex-start",marginBottom:12}}>
+        <button className="btn-add-vendor" onClick={()=>setTechSpecs(p=>[...p,{n:"Новый раздел",items:[{n:"Новый параметр",n2:""}]}])} style={{padding:"6px 14px",borderRadius:12,border:"1.5px dashed #CBD5E1",background:"#F8FAFC",color:"#7B97B2",fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>+ Раздел</button>
+      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveTechSecId(active.id)} onDragEnd={handleTechSpecSectionDragEnd} onDragCancel={()=>setActiveTechSecId(null)}>
+        <SortableContext items={techSpecs.map((_,si)=>`tsec-${si}`)} strategy={verticalListSortingStrategy}>
+          {techSpecs.map((sec,si)=>
+            <SortableSectionShell key={si} id={`tsec-${si}`}>
+              {(secDrag,secAttrs)=><>
+                <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`}}>
+                  <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.4,touchAction:"none"}} {...secDrag} {...secAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill="#fff"/><circle cx="8" cy="3" r="1.2" fill="#fff"/><circle cx="4" cy="6" r="1.2" fill="#fff"/><circle cx="8" cy="6" r="1.2" fill="#fff"/><circle cx="4" cy="9" r="1.2" fill="#fff"/><circle cx="8" cy="9" r="1.2" fill="#fff"/></svg></span>
+                  <input value={sec.n} onChange={e=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,n:e.target.value}:s))} style={{flex:1,background:"transparent",border:"none",color:"#fff",fontSize:13,fontWeight:700,outline:"none",minWidth:0}}/>
+                  {techSpecs.length>1&&<button type="button" className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.filter((_,i)=>i!==si))} style={{background:"none",border:"none",color:"#ffffff88",cursor:"pointer",fontSize:16,padding:"0 4px",flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center"}}>×</button>}
+                </div>
+                <div style={{background:"#fff",borderRadius:"0 0 12px 12px",border:`1px solid ${B.border}`,borderTop:"none"}}>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({active})=>setActiveTechItemId(active.id)} onDragEnd={e=>{setActiveTechItemId(null);makeTechSpecItemDragEnd(si)(e);}} onDragCancel={()=>setActiveTechItemId(null)}>
+                    <SortableContext items={sec.items.map((_,ii)=>`titem-${si}-${ii}`)} strategy={verticalListSortingStrategy}>
+                      {sec.items.map((it,ii)=>
+                        <SortableItemRow key={ii} id={`titem-${si}-${ii}`}>
+                          {(itemDrag,itemAttrs)=>
+                            <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:8,padding:"8px 16px",borderTop:ii?`1px solid #F1F5F9`:"none"}}>
+                              <span style={{cursor:"grab",display:"flex",flexShrink:0,opacity:0.3,touchAction:"none"}} {...itemDrag} {...itemAttrs}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
+                              <AutoSizeTextarea
+                                value={it.n}
+                                onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n:v}:x)}:s));}}
+                                minHeight={20}
+                                placeholder="Параметр"
+                                style={{flex:"1 1 180px",border:"none",background:"none",fontSize:12,color:B.graphite,outline:"none",resize:"none",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:0,minWidth:0}}
+                              />
+                              <AutoSizeTextarea
+                                value={it.n2||""}
+                                onChange={e=>{const v=e.target.value;setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.map((x,j)=>j===ii?{...x,n2:v}:x)}:s));}}
+                                minHeight={36}
+                                placeholder="Требование"
+                                style={{flex:"2 1 260px",border:"none",background:"#F8FAFC",borderRadius:6,fontSize:12,color:B.steel,outline:"none",resize:"none",fontFamily:"Inter, system-ui, sans-serif",lineHeight:"1.4",padding:"4px 8px",minWidth:0}}
+                              />
+                              {sec.items.length>1&&<button type="button" className="btn-icon-close" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s))} style={{background:"none",border:"none",color:B.steel,cursor:"pointer",fontSize:15,padding:"0 2px",flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center"}}>×</button>}
+                            </div>
+                          }
+                        </SortableItemRow>
+                      )}
+                    </SortableContext>
+                    <DragOverlay>
+                      {activeTechItemId&&(()=>{
+                        const parts=String(activeTechItemId).split("-");
+                        const dragSi=parseInt(parts[1],10);
+                        const dragIi=parseInt(parts[2],10);
+                        if(dragSi!==si)return null;
+                        const row=techSpecs[dragSi]?.items[dragIi];
+                        if(!row)return null;
+                        return <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:"#fff",boxShadow:"0 8px 24px rgba(0,0,0,0.13)",cursor:"grabbing",borderRadius:8,border:`1px solid ${B.border}`}}>
+                          <span style={{display:"flex",flexShrink:0,opacity:0.3}}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill={B.graphite}/><circle cx="8" cy="3" r="1.2" fill={B.graphite}/><circle cx="4" cy="6" r="1.2" fill={B.graphite}/><circle cx="8" cy="6" r="1.2" fill={B.graphite}/><circle cx="4" cy="9" r="1.2" fill={B.graphite}/><circle cx="8" cy="9" r="1.2" fill={B.graphite}/></svg></span>
+                          <div style={{flex:"1 1 120px",fontSize:12,color:B.graphite,lineHeight:"1.4",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis",minWidth:0}}>{row.n}</div>
+                          <div style={{flex:"1 1 160px",fontSize:12,color:B.steel,lineHeight:"1.4",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis",minWidth:0}}>{row.n2||""}</div>
+                        </div>;
+                      })()}
+                    </DragOverlay>
+                  </DndContext>
+                  <button type="button" className="btn-secondary" onClick={()=>setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:[...s.items,{n:"",n2:""}]}:s))} style={{width:"100%",padding:"8px",border:"none",borderTop:`1px solid #F1F5F9`,background:"none",color:B.blue,fontSize:12,fontWeight:600,cursor:"pointer",borderRadius:"0 0 12px 12px",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>+ Добавить условие</button>
+                </div>
+              </>}
+            </SortableSectionShell>
+          )}
+        </SortableContext>
+        <DragOverlay>
+          {activeTechSecId&&(()=>{
+            const si=techSpecs.findIndex((_,i)=>`tsec-${i}`===activeTechSecId);
+            if(si<0)return null;
+            const s=techSpecs[si];
+            return <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px",background:B.graphite,borderRadius:"12px 12px 0 0",borderLeft:`3px solid ${VC[si%VC.length]}`,boxShadow:"0 12px 32px rgba(0,0,0,0.28)",cursor:"grabbing"}}>
+              <span style={{display:"flex",flexShrink:0,opacity:0.4}}><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="4" cy="3" r="1.2" fill="#fff"/><circle cx="8" cy="3" r="1.2" fill="#fff"/><circle cx="4" cy="6" r="1.2" fill="#fff"/><circle cx="8" cy="6" r="1.2" fill="#fff"/><circle cx="4" cy="9" r="1.2" fill="#fff"/><circle cx="8" cy="9" r="1.2" fill="#fff"/></svg></span>
+              <div style={{flex:1,color:"#fff",fontSize:13,fontWeight:700,overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{s.n}</div>
+            </div>;
+          })()}
+        </DragOverlay>
+      </DndContext>
     </div>}
 
         {view==="input"&&<div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
