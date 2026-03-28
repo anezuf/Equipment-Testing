@@ -507,13 +507,33 @@ export default function App(){
           return;
         }
         setTechSpecs(normalizeTechSpecs(newSpecs));
-        alert(`Загружено разделов: ${newSpecs.length}, параметров: ${paramCount}`);
+        // Auto-sync sections from loaded tech specs, preserving weights from current defaults
+        const defaultSecs = eqType === "pdu" ? PDU_DEFAULT : DEF_SECTIONS;
+        const syncedSections = newSpecs.map(sec => {
+          const defSec = defaultSecs.find(s => s.n === sec.n);
+          return {
+            n: sec.n,
+            items: sec.items.map(it => {
+              const defItem = defSec?.items?.find(x => x.n === it.n);
+              return { n: it.n, w: defItem?.w ?? 1 };
+            })
+          };
+        });
+        const totalItems = syncedSections.reduce((a,s) => a + s.items.length, 0);
+        setSections(syncedSections);
+        setVendors(v => v.map(vnd => ({
+          ...vnd,
+          scores: Array(totalItems).fill(null),
+          notes: Array(totalItems).fill(""),
+          images: Array(totalItems).fill(null)
+        })));
+        alert(`✓ Загружено: разделов ${newSpecs.length}, параметров ${newSpecs.reduce((a,s)=>a+s.items.length,0)}`);
       }catch(err){
         alert("Ошибка чтения XLSX: "+err.message);
       }
     };
     input.click();
-  },[]);
+  },[eqType]);
 
   /* Reset vendor scores and notes (keeps sections/structure) */
   const doReset=useCallback(()=>{
