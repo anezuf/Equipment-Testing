@@ -371,58 +371,48 @@ export default function App(){
     try{
       const {default:ExcelJS}=await import("exceljs");
       const wb=new ExcelJS.Workbook();
-      const ws=wb.addWorksheet("Тех. условия");
-
+      const sheetName=eqType==="pdu"?"ТУ на PDU":"ТУ на стойки";
+      const ws=wb.addWorksheet(sheetName);
       const argb=hex=>"FF"+hex.replace("#","");
       const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:argb(hex)}});
       const fnt=(color,bold=false,size)=>({bold,color:{argb:argb(color)},...(size?{size}:{})});
       const CENTER={horizontal:"center",vertical:"middle"};
-      const LEFT={horizontal:"left",vertical:"middle"};
+      const LEFT={horizontal:"left",vertical:"middle",wrapText:true};
 
       ws.getColumn(1).width=5;
       ws.getColumn(2).width=36;
-      ws.getColumn(3).width=44;
+      ws.getColumn(3).width=60;
 
-      /* ROW 1: title */
-      ws.addRow(["ТЕХНИЧЕСКИЕ УСЛОВИЯ"]);
+      ws.addRow(["Технические условия"]);
       ws.mergeCells(1,1,1,3);
-      const tc=ws.getCell(1,1);
-      tc.fill=fill("#334155");tc.font=fnt("#FFFFFF",true,13);tc.alignment=CENTER;
+      const t=ws.getCell(1,1);
+      t.fill=fill("#334155");t.font=fnt("#FFFFFF",true,13);t.alignment=CENTER;
       ws.getRow(1).height=26;
 
-      /* ROW 2: column headers */
-      ws.addRow(["#","Параметр","Требование"]);
+      ws.addRow(["#","Параметр","Требуемые характеристики"]);
       for(let c=1;c<=3;c++){
         const cell=ws.getCell(2,c);
-        cell.fill=fill("#334155");cell.font=fnt("#FFFFFF",true);cell.alignment=CENTER;
+        cell.fill=fill("#334155");cell.font=fnt("#FFFFFF",true,10);cell.alignment=CENTER;
       }
       ws.getRow(2).height=18;
 
       let rowNum=3;
       let gi=0;
       techSpecs.forEach(sec=>{
-        /* section header — blue like editor */
         ws.addRow([sec.n]);
         ws.mergeCells(rowNum,1,rowNum,3);
         const sc=ws.getCell(rowNum,1);
-        sc.fill=fill("#2F9AFF");sc.font=fnt("#FFFFFF",true);sc.alignment=CENTER;
-        ws.getRow(rowNum).height=16;
+        sc.fill=fill("#2F9AFF");sc.font=fnt("#FFFFFF",true,10);sc.alignment=LEFT;
+        ws.getRow(rowNum).height=18;
         rowNum++;
 
         sec.items.forEach(it=>{
-          const altBg=gi%2===0?"#F5F8FB":"#FFFFFF";
+          const bg=gi%2===0?"#F5F8FB":"#FFFFFF";
           ws.addRow([gi+1,it.n,it.n2||""]);
           ws.getRow(rowNum).height=15;
-
-          const ca=ws.getCell(rowNum,1);
-          ca.font=fnt("#7B97B2");ca.alignment=CENTER;ca.fill=fill(altBg);
-
-          const cb=ws.getCell(rowNum,2);
-          cb.font=fnt("#334155");cb.alignment=LEFT;cb.fill=fill(altBg);
-
-          const cc=ws.getCell(rowNum,3);
-          cc.font=fnt("#334155");cc.alignment=LEFT;cc.fill=fill(altBg);
-
+          const ca=ws.getCell(rowNum,1);ca.fill=fill(bg);ca.font=fnt("#7B97B2");ca.alignment=CENTER;
+          const cb=ws.getCell(rowNum,2);cb.fill=fill(bg);cb.font=fnt("#334155");cb.alignment=LEFT;
+          const cc=ws.getCell(rowNum,3);cc.fill=fill(bg);cc.font=fnt("#334155");cc.alignment=LEFT;
           rowNum++;gi++;
         });
       });
@@ -431,11 +421,11 @@ export default function App(){
       const blob=new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
       const url=URL.createObjectURL(blob);
       const a=document.createElement("a");
-      a.href=url;a.download=`tech_specs_${eqType}.xlsx`;a.click();
+      a.href=url;a.download=eqType==="pdu"?"ТУ_на_PDU.xlsx":"ТУ_на_стойки.xlsx";a.click();
       setTimeout(()=>URL.revokeObjectURL(url),1000);
     }catch(err){
       console.error(err);
-      alert("Ошибка экспорта Excel: "+err.message);
+      alert("Ошибка экспорта: "+err.message);
     }
   },[techSpecs,eqType]);
 
