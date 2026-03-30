@@ -1,5 +1,6 @@
 ---
-name: scoring-agent
+name: logic-agent
+model: inherit
 description: Rack scoring specialist for rack-audit. Use after any changes touching sections/vendors/weights, eqType switching (стойка/PDU), Tech Specs edits that affect Editor or Scoring, vendor array resizing, localStorage key access, score calculation or Dashboard display. Also use to debug cross-tab data corruption or missing scores after parameter changes.
 ---
 

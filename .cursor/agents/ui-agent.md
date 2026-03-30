@@ -131,3 +131,85 @@ Where used:
 - What was changed
 - Why this improves UI/UX
 - Any remaining risks or follow-up suggestions
+
+## Mobile responsive rules
+
+All mobile styles live in src/index.css — never add media queries inline or in component files.
+
+### Breakpoints
+
+| Breakpoint | Targets |
+|---|---|
+| max-width: 768px | Mobile portrait + landscape general |
+| max-width: 768px + orientation: landscape | Mobile landscape nav override |
+| max-width: 600px + orientation: portrait | Small portrait — TechSpecs rows, btn-action |
+| max-width: 900px + orientation: landscape + max-height: 500px | Landscape phone TechSpecs columns |
+| min-width: 769px | Desktop zoom: 1.33 |
+
+### Desktop zoom
+`#root` has `zoom: 1.33` on desktop (≥769px). All component sizes are set at 1x scale — the zoom handles desktop enlargement. Never compensate for zoom manually in components.
+
+### What changes on mobile (max-width: 768px)
+
+**NavBar:**
+- `.nav-left-group` stacks vertically (column), full width
+- `.nav-tabs` full width, space-between
+- `.btn-nav` flex: 1, font-size 11px, padding 10px 4px
+- In landscape: nav-left-group goes back to row
+
+**Content:**
+- `.view-section-pad` reduces to padding 12px 10px
+
+**Vendor tabs:**
+- `.vendor-tabs-wrap` switches to horizontal scroll (no wrap)
+- Individual pills: flex-shrink 0, no max-width
+
+**Heatmap:**
+- `.heatmap-table-wrap` gets overflow-x: auto
+- Table font-size 8px, first column 70px, last column 32px
+
+**Dashboard:**
+- Gauges shrink: min-width 80px, max-width 120px
+- Vendor bars stack full width (flex: 1 1 100%)
+- `.sec-bar-label` shrinks to 80px, font-size 8px
+- `.vendor-legend-row` loses left padding
+
+### What changes on small portrait (max-width: 600px + portrait)
+
+**btn-action pills:**
+- `.btn-action-label` hidden (display: none) — only icon + format badge visible
+- Padding shrinks to 7px 12px, border-radius 16px, gap 5px
+- Icon shrinks to 12×12px
+- Format badge font-size 9px
+
+**TechSpecs rows:**
+- `.ts-item-row` wraps to two lines
+- `.ts-param-col` full width, bottom border instead of right
+- `.ts-req-col` full width, top padding instead of left
+- `.ts-item-delete` absolute positioned right side
+
+### CSS classes to use (never add new breakpoints without these)
+
+| Class | What it controls |
+|---|---|
+| .nav-left-group | NavBar left side grouping |
+| .nav-tabs | Tab pill container |
+| .view-section-pad | View top-level padding |
+| .input-item-name | Item name column in editor rows |
+| .input-item-btns | Item buttons column in editor rows |
+| .vendor-tabs-wrap | Vendor tab scroll container |
+| .heatmap-table-wrap | Heatmap horizontal scroll |
+| .sec-bar-label | Section label in vendor bars |
+| .vendor-legend-row | Legend row left padding |
+| .ts-item-row | TechSpecs parameter row |
+| .ts-param-col | TechSpecs parameter name column |
+| .ts-req-col | TechSpecs requirement text column |
+| .ts-item-delete | TechSpecs delete button |
+| .btn-action-label | Text label inside export/import pills |
+
+### Rules for new components
+- Every new row-based layout must use className for mobile stacking — no hardcoded flex-direction in inline styles
+- Every new table or wide element needs a scroll wrapper with className
+- Test at 375px portrait and 667px landscape before committing
+- Never hide elements with display:none inline — use a CSS class with media query
+- Print styles: all buttons hidden, nav hidden via [data-nav], use [data-no-print] for elements to hide

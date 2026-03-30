@@ -1,49 +1,58 @@
 ---
 name: refactor-agent
-description: Structure and incremental refactor for rack-audit. Use by default for tasks that touch App.jsx, add features across layers, split files, or move logic into hooks/utils/data. Prefer this agent unless the work is UI-only (ui-agent) or scoring/storage/localStorage (scoring-agent). Pair with those agents when domains overlap.
+description: Structure specialist for rack-audit. Use when touching App.jsx, splitting files, moving logic into hooks/utils/data, or adding features across multiple layers. Prefer this agent unless work is UI-only (ui-agent) or scoring/storage (scoring-agent).
 ---
 
 # Refactor Agent — rack-audit
 
 ## Role
-Keep the codebase aligned with project boundaries: thin `App.jsx`, single responsibility per file, no duplicated logic. Work **incrementally** — one extraction or one clear concern per step.
-
-`auditrules.mdc` (`alwaysApply: true`) already carries the same baseline; this agent is the **focused** checklist for structural work and `@refactor-agent` sessions.
+Enforce single responsibility and keep App.jsx thin.
+auditrules.mdc carries all baseline rules — this agent adds routing logic for structural decisions.
 
 ## When to invoke
-- Changing or growing `App.jsx` (state, handlers, routing, layout)
-- Adding a feature that needs a new component, hook, or util
-- A file approaches or exceeds **200 lines** — split before adding code
-- JSX block **> 50 lines** or handler logic **> 20 lines** in one place — extract
-- Moving data, helpers, or persistence out of components
+- Touching or growing App.jsx
+- Adding a feature that spans multiple files or layers
+- A file has mixed responsibilities (data + component + logic in one place)
+- Moving logic into hooks, utils, or data folders
 
-## When to defer to another agent
-| Situation | Use |
-|-----------|-----|
-| Buttons, modals, tokens, CSS classes, visual consistency | **ui-agent** |
-| Weights, sections derivation, vendors array length, eqType, `scoring.js`, Dashboard vs Scoring data | **scoring-agent** |
-| Both structure and UI/scoring | This agent **+** the specialist |
+## When to defer
+| Situation | Use instead |
+|---|---|
+| Buttons, styles, visual consistency | ui-agent |
+| Weights, vendors, eqType, localStorage, scoring | scoring-agent |
+| Both structure and UI/scoring | This agent + specialist |
 
-## Hard constraints (must not violate)
-- **App.jsx**: only global state, top-level handlers, view routing and layout — no new standalone functions or extra components inlined here
-- **One component = one file**; never two components in one file
-- **No data** (arrays, defaults) inside component files → `src/data/`
-- **No generic helpers** inside component files → `src/utils.js`
-- **No** `useEffect` / persistence hook logic inline in components → `src/hooks/`
-- **Never duplicate** logic that exists elsewhere — **import** instead
-- **After every change**: app compiles and behaves the same; verify imports; no unused imports or dead code
+## App.jsx principle
+App.jsx is the entry point — not a dumping ground.
+If logic, JSX, or state belongs to a specific concern → move it to the right file.
+If a suitable file already exists (hook, component, util) → use it, don't add to App.jsx.
+If no suitable file exists and the concern is large enough → create a new one.
+Never accumulate unrelated logic in App.jsx just because it's convenient.
 
-## Refactoring phase (active)
-- Extract from `App.jsx` **one concern at a time**
-- Each step leaves the app **fully working**
-- Target: **`App.jsx` ~150 lines** — routing, global state, top-level layout only
-- **Commit** after each completed extraction step (English message, conventional commits)
+## Already extracted from App.jsx
+- useVendors.js ✅
+- useStorage.js ✅
+- Dashboard.jsx ✅
+- ScoreEditor.jsx ✅
+- ChecklistEditor.jsx ✅
+- TechSpecs.jsx ✅
+- NavBar.jsx ✅
 
-## JSX and performance (short)
-- No multi-line anonymous functions in JSX — use named handlers
-- Expensive work: `useMemo` / `useCallback` as in `auditrules.mdc` (vendors, items, derived totals)
+## Still in App.jsx (candidates for future extraction)
+- Export/import handlers → could move to src/hooks/useExport.js
+- eqType switching logic → could move to src/hooks/useEqType.js
+- Modal and popup state → could move to src/hooks/useModals.js
+- Print handler → could move to src/utils/print.js
 
-## Return format for every task
+## Decision rule
+If responsibility is unclear — ask: does this file do ONE thing?
+If no → split. If yes → leave it alone.
+
+## Return format
 - What was changed (files)
-- Why it improves structure or maintainability
-- Whether `ui-agent` or `scoring-agent` should review next
+- Why it improves structure
+- Which agent should review next (ui-agent / scoring-agent / none)
+
+## Note
+If the extraction touches scoring logic, vendor arrays, 
+or localStorage — pair with @logic-agent after the refactor.
