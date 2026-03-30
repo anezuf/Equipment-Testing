@@ -1,5 +1,21 @@
 import { useState, useRef, useEffect } from "react";
 
+function RichNoteBtn({onMD,active,title,children}){
+  return (
+    <button type="button"
+      onMouseDown={e=>{e.preventDefault();onMD();}}
+      title={title}
+      style={{width:26,height:26,borderRadius:5,
+        border:`1px solid ${active?"#2F9AFF":"#E5EAF0"}`,
+        background:active?"#EFF6FF":"#fff",
+        color:active?"#2F9AFF":"#7B97B2",
+        cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",
+        fontSize:12,fontWeight:700,transition:"all 0.15s",flexShrink:0}}>
+      {children}
+    </button>
+  );
+}
+
 function RichNote({value,onChange}){
   const ref=useRef(null);
   const [fmts,setFmts]=useState({bold:false,ul:false,ol:false});
@@ -87,31 +103,17 @@ function RichNote({value,onChange}){
     updateFmts();
   };
 
-  const Btn=({onMD,active,title,children})=>(
-    <button type="button"
-      onMouseDown={e=>{e.preventDefault();onMD();}}
-      title={title}
-      style={{width:26,height:26,borderRadius:5,
-        border:`1px solid ${active?"#2F9AFF":"#E5EAF0"}`,
-        background:active?"#EFF6FF":"#fff",
-        color:active?"#2F9AFF":"#7B97B2",
-        cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",
-        fontSize:12,fontWeight:700,transition:"all 0.15s",flexShrink:0}}>
-      {children}
-    </button>
-  );
-
   return(
     <div style={{border:`${(isFocused||(value&&value!=="<br>"))?"1.5px solid #2F9AFF":"1px solid #E5EAF0"}`,borderRadius:8,background:"#F8FBFF",overflow:"hidden",transition:"border 0.15s"}}>
       <div style={{display:"flex",gap:3,padding:"4px 8px",borderBottom:"1px solid #E5EAF0",background:"#fff",flexWrap:"wrap",alignItems:"center"}}>
-        <Btn onMD={()=>exec("bold")} active={fmts.bold} title="Жирный (Ctrl+B)"><b>B</b></Btn>
+        <RichNoteBtn onMD={()=>exec("bold")} active={fmts.bold} title="Жирный (Ctrl+B)"><b>B</b></RichNoteBtn>
         <div style={{width:1,height:16,background:"#E5EAF0",margin:"0 2px"}}/>
-        <Btn onMD={()=>toggleList("UL")} active={fmts.ul} title="Маркированный список">
+        <RichNoteBtn onMD={()=>toggleList("UL")} active={fmts.ul} title="Маркированный список">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="2.5" cy="4" r="1.5" fill="currentColor"/><circle cx="2.5" cy="8" r="1.5" fill="currentColor"/><circle cx="2.5" cy="12" r="1.5" fill="currentColor"/><line x1="6" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><line x1="6" y1="8" x2="14" y2="8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><line x1="6" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
-        </Btn>
-        <Btn onMD={()=>toggleList("OL")} active={fmts.ol} title="Нумерованный список">
+        </RichNoteBtn>
+        <RichNoteBtn onMD={()=>toggleList("OL")} active={fmts.ol} title="Нумерованный список">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><text x="0" y="5" fontSize="5" fill="currentColor" fontWeight="700">1.</text><text x="0" y="9" fontSize="5" fill="currentColor" fontWeight="700">2.</text><text x="0" y="13" fontSize="5" fill="currentColor" fontWeight="700">3.</text><line x1="7" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><line x1="7" y1="8" x2="14" y2="8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><line x1="7" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
-        </Btn>
+        </RichNoteBtn>
         <div style={{width:1,height:16,background:"#E5EAF0",margin:"0 2px"}}/>
         <button type="button" onMouseDown={e=>{e.preventDefault();if(ref.current){ref.current.innerHTML="";onChange("");ref.current.focus();}}}
           title="Очистить всё"

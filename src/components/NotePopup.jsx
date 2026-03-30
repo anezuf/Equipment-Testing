@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { B } from "../constants";
 
 /* Note popup — shows on click, with param name, text, photos */
 function NotePopup({note,onClose}){
-  const [imgIdx,setImgIdx]=useState(0);
-  useEffect(()=>setImgIdx(0),[note]);
+  const [imgIdxByNote,setImgIdxByNote]=useState({});
   if(!note)return null;
+  const noteKey=JSON.stringify([note.name,note.text,note.imgs?.map(img=>img?.name)]);
   const imgs=note.imgs||[];
   const total=imgs.length;
+  const imgIdx=Math.min(imgIdxByNote[noteKey]??0,Math.max(total-1,0));
   const hasPrev=imgIdx>0,hasNext=imgIdx<total-1;
 
   return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,padding:16}} onClick={onClose}>
@@ -22,10 +23,10 @@ function NotePopup({note,onClose}){
         </>}
         {total>0&&<div style={{position:"relative",borderRadius:8,overflow:"hidden",background:"#F1F5F9"}}>
           <img src={imgs[imgIdx].data} alt={imgs[imgIdx].name||""} style={{display:"block",width:"100%",maxHeight:300,objectFit:"contain",borderRadius:8}}/>
-          {hasPrev&&<button onClick={e=>{e.stopPropagation();setImgIdx(i=>i-1);}} style={{position:"absolute",top:"50%",left:8,transform:"translateY(-50%)",width:32,height:32,borderRadius:"50%",background:"rgba(0,0,0,0.45)",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,lineHeight:1}}>‹</button>}
-          {hasNext&&<button onClick={e=>{e.stopPropagation();setImgIdx(i=>i+1);}} style={{position:"absolute",top:"50%",right:8,transform:"translateY(-50%)",width:32,height:32,borderRadius:"50%",background:"rgba(0,0,0,0.45)",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,lineHeight:1}}>›</button>}
+          {hasPrev&&<button onClick={e=>{e.stopPropagation();setImgIdxByNote(prev=>({...prev,[noteKey]:imgIdx-1}));}} style={{position:"absolute",top:"50%",left:8,transform:"translateY(-50%)",width:32,height:32,borderRadius:"50%",background:"rgba(0,0,0,0.45)",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,lineHeight:1}}>‹</button>}
+          {hasNext&&<button onClick={e=>{e.stopPropagation();setImgIdxByNote(prev=>({...prev,[noteKey]:imgIdx+1}));}} style={{position:"absolute",top:"50%",right:8,transform:"translateY(-50%)",width:32,height:32,borderRadius:"50%",background:"rgba(0,0,0,0.45)",border:"none",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,lineHeight:1}}>›</button>}
           {total>1&&<div style={{position:"absolute",bottom:6,left:"50%",transform:"translateX(-50%)",display:"flex",gap:5}}>
-            {imgs.map((_,i)=><div key={i} onClick={e=>{e.stopPropagation();setImgIdx(i);}} style={{width:i===imgIdx?16:6,height:6,borderRadius:3,background:i===imgIdx?"#fff":"rgba(255,255,255,0.5)",cursor:"pointer",transition:"all 0.2s"}}/>)}
+            {imgs.map((_,i)=><div key={i} onClick={e=>{e.stopPropagation();setImgIdxByNote(prev=>({...prev,[noteKey]:i}));}} style={{width:i===imgIdx?16:6,height:6,borderRadius:3,background:i===imgIdx?"#fff":"rgba(255,255,255,0.5)",cursor:"pointer",transition:"all 0.2s"}}/>)}
           </div>}
         </div>}
         {!note.text&&total===0&&<div style={{fontSize:12,color:B.steel}}>Нет данных</div>}

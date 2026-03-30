@@ -5,7 +5,7 @@ import { fmt } from "../../utils";
 export default function TechSpecs({
   techSpecs,
   setTechSpecs,
-  techSpecsSnapshot,
+  techSpecsSnapshot: techSpecsSnapshotRef,
   techSpecsEditMode,
   setTechSpecsEditMode,
   setShowApplyConfirm,
@@ -27,7 +27,7 @@ export default function TechSpecs({
           <div style={{ fontSize: 12, color: B.steel, marginTop: 2 }}>Критерии подбора оборудования — только для справки, не влияет на расчёты</div>
           {techSpecsEditMode && (
             <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
-              <button className="btn-danger" onClick={() => { setTechSpecs(techSpecsSnapshot.current); setTechSpecsEditMode(false); }} style={{ padding: "6px 14px", borderRadius: 10, border: "1.5px solid #EF4444", background: "#fff", color: "#EF4444", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+              <button className="btn-danger" onClick={() => { setTechSpecs(techSpecsSnapshotRef.current); setTechSpecsEditMode(false); }} style={{ padding: "6px 14px", borderRadius: 10, border: "1.5px solid #EF4444", background: "#fff", color: "#EF4444", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                 Отменить
               </button>
               <button className="btn-secondary" onClick={() => setShowApplyConfirm(true)} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.blue}`, background: "#fff", color: B.blue, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
@@ -52,7 +52,7 @@ export default function TechSpecs({
               </button>
             </>
           ) : (
-            <button className="btn-secondary" onClick={() => { techSpecsSnapshot.current = JSON.parse(JSON.stringify(techSpecs)); setTechSpecsEditMode(true); }} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.border}`, background: "#fff", color: B.steel, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+            <button className="btn-secondary" onClick={() => { techSpecsSnapshotRef.current = JSON.parse(JSON.stringify(techSpecs)); setTechSpecsEditMode(true); }} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.border}`, background: "#fff", color: B.steel, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               Редактировать
             </button>

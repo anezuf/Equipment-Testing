@@ -178,22 +178,22 @@ export default function App(){
   }, []);
 
   useEffect(() => {
-    try { localStorage.setItem("rack_techspecs_eq_type", JSON.stringify(techSpecsEqType)); } catch {}
+    try { localStorage.setItem("rack_techspecs_eq_type", JSON.stringify(techSpecsEqType)); } catch { /* ignored */ }
   }, [techSpecsEqType]);
   useEffect(() => {
-    try { localStorage.setItem("rack_editor_eq_type", JSON.stringify(editorEqType)); } catch {}
+    try { localStorage.setItem("rack_editor_eq_type", JSON.stringify(editorEqType)); } catch { /* ignored */ }
   }, [editorEqType]);
   useEffect(() => {
-    try { localStorage.setItem("rack_scoring_eq_type", JSON.stringify(scoringEqType)); } catch {}
+    try { localStorage.setItem("rack_scoring_eq_type", JSON.stringify(scoringEqType)); } catch { /* ignored */ }
   }, [scoringEqType]);
   useEffect(() => {
     EQ_TYPES.forEach((type) => {
-      try { localStorage.setItem(`rack_scoring_data_${type}`, JSON.stringify(scoringDataByType[type])); } catch {}
+      try { localStorage.setItem(`rack_scoring_data_${type}`, JSON.stringify(scoringDataByType[type])); } catch { /* ignored */ }
     });
   }, [scoringDataByType]);
   useEffect(() => {
     EQ_TYPES.forEach((type) => {
-      try { localStorage.setItem(`rack_tech_specs_${type}`, JSON.stringify(techSpecsByType[type])); } catch {}
+      try { localStorage.setItem(`rack_tech_specs_${type}`, JSON.stringify(techSpecsByType[type])); } catch { /* ignored */ }
     });
   }, [techSpecsByType]);
   useEffect(() => {
@@ -301,9 +301,9 @@ export default function App(){
     html+=`<div class="total" style="background:${tColor}">${fmt(total)} / 10</div>`;
 
     let gi=0;
-    scoringSections.forEach((sec,si)=>{
+    scoringSections.forEach((sec)=>{
       html+=`<div class="sec-block"><div class="sec">${esc(sec.n)}</div><div class="items">`;
-      sec.items.forEach((it,ii)=>{
+      sec.items.forEach((it)=>{
         const sc=v.scores[gi];
         const nt=v.notes[gi]||"";
         const imgs=v.images?.[gi]||null;
@@ -345,7 +345,7 @@ export default function App(){
     w.document.write(html);
     w.document.close();
     w.focus();
-    const closePrintWindow=()=>{try{w.close();}catch{}};
+    const closePrintWindow=()=>{try{w.close();}catch{/* ignored */}};
     w.onafterprint=closePrintWindow;
     setTimeout(()=>{
       try{
@@ -365,7 +365,7 @@ export default function App(){
       const current = prev[editorEqType] || {};
       const nextForType = { ...current, [itemName]: safeWeight };
       const next = { ...prev, [editorEqType]: nextForType };
-      try { localStorage.setItem(getEditorWeightsKey(editorEqType), JSON.stringify(nextForType)); } catch {}
+      try { localStorage.setItem(getEditorWeightsKey(editorEqType), JSON.stringify(nextForType)); } catch { /* ignored */ }
       return next;
     });
   }, [editorEqType, editorTechSpecs, getEditorWeightsKey]);

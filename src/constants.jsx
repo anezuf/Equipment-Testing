@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 const IconNo=({c="#EF4444",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="4" y1="4" x2="12" y2="12" stroke={c} strokeWidth="2.2" strokeLinecap="round"/><line x1="12" y1="4" x2="4" y2="12" stroke={c} strokeWidth="2.2" strokeLinecap="round"/></svg>;
 const IconMid=({c="#F59E0B",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><line x1="3" y1="8" x2="13" y2="8" stroke={c} strokeWidth="2.4" strokeLinecap="round"/></svg>;
 const IconYes=({c="#10B981",s=14})=><svg width={s} height={s} viewBox="0 0 16 16" fill="none"><polyline points="3,8.5 6.5,12 13,4.5" stroke={c} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>;

@@ -34,7 +34,7 @@ export function useStorage(key, initializer) {
   });
 
   useEffect(() => {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* ignored */ }
   }, [key, value]);
 
   return [value, setValue];
