@@ -1,6 +1,8 @@
 const TITLE_FILL = "1F3764";
 const HEADER_FILL = "DAE3F3";
 const WHITE = "FFFFFFFF";
+const BLACK = "FF000000";
+const PURE_WHITE_FILL = "FFFFFF";
 
 const borderless = {};
 
@@ -50,10 +52,19 @@ export const exportTechSpecsXlsx = async ({ techSpecs, eqType }) => {
     fill: { patternType: "solid", fgColor: { rgb: HEADER_FILL } },
     alignment: { horizontal: "center" },
   };
-  const dataNumberStyle = { alignment: { horizontal: "center" } };
-  const dataTextStyle = { alignment: { horizontal: "left" } };
+  const dataNumberStyle = {
+    font: { color: { rgb: BLACK } },
+    fill: { patternType: "solid", fgColor: { rgb: PURE_WHITE_FILL } },
+    alignment: { horizontal: "center" },
+  };
+  const dataTextStyle = {
+    font: { color: { rgb: BLACK } },
+    fill: { patternType: "solid", fgColor: { rgb: PURE_WHITE_FILL } },
+    alignment: { horizontal: "left" },
+  };
 
   let rowIdx = 0;
+  let globalIndex = 1;
   ws[XLSXStyle.utils.encode_cell({ r: rowIdx, c: 0 })] = makeCell("Технические условия", titleStyle);
   ws[XLSXStyle.utils.encode_cell({ r: rowIdx, c: 1 })] = makeCell("", titleStyle);
   ws[XLSXStyle.utils.encode_cell({ r: rowIdx, c: 2 })] = makeCell("", titleStyle);
@@ -75,10 +86,11 @@ export const exportTechSpecsXlsx = async ({ techSpecs, eqType }) => {
     ws[XLSXStyle.utils.encode_cell({ r: rowIdx, c: 2 })] = makeCell("Требуемые характеристики", colHeaderStyle);
     rowIdx += 1;
 
-    (sec?.items || []).forEach((item, idx) => {
-      ws[XLSXStyle.utils.encode_cell({ r: rowIdx, c: 0 })] = makeCell(idx + 1, dataNumberStyle);
+    (sec?.items || []).forEach((item) => {
+      ws[XLSXStyle.utils.encode_cell({ r: rowIdx, c: 0 })] = makeCell(globalIndex, dataNumberStyle);
       ws[XLSXStyle.utils.encode_cell({ r: rowIdx, c: 1 })] = makeCell(String(item?.n ?? ""), dataTextStyle);
       ws[XLSXStyle.utils.encode_cell({ r: rowIdx, c: 2 })] = makeCell(String(item?.n2 ?? ""), dataTextStyle);
+      globalIndex += 1;
       rowIdx += 1;
     });
   });
