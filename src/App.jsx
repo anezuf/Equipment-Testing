@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { loadSaved } from "./hooks/useStorage";
+import { loadSaved, useStorage } from "./hooks/useStorage";
 import { useVendors } from "./hooks/useVendors";
 
 import { B, EQ_TYPES } from "./constants";
@@ -142,7 +142,7 @@ export default function App(){
     sortedIdx,
     getAdvantages,
   } = useVendors({ scoringData, setScoringData, sections: scoringSections, act, setAct });
-  const [view,setView]=useState("editor");
+  const [view, setView] = useStorage("rack_active_view", "input");
   const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
   const [noteOpenByType, setNoteOpenByType] = useState({ стойка: null, pdu: null });
   const noteOpen = noteOpenByType[scoringEqType] ?? null;
