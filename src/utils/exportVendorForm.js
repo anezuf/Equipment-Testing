@@ -95,13 +95,10 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
     "Не рекомендован к включению в список рекомендованных производителей",
   ];
 
-  const verdictIndex =
-    typeof total === "number" ? (total >= 8 ? 0 : total >= 5 ? 1 : 2) : null;
-
   const verdictRowIndexes = [];
-  verdicts.forEach((text, idx) => {
+  verdicts.forEach((text) => {
     const verdictRowIndex = rows.length;
-    rows.push([text, "", "", "", verdictIndex === idx ? "✓" : ""]);
+    rows.push([text, "", "", "", ""]);
     verdictRowIndexes.push(verdictRowIndex);
     merges.push({ s: { r: verdictRowIndex, c: 0 }, e: { r: verdictRowIndex, c: 3 } });
   });
@@ -126,17 +123,16 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
   const topLabelStyle = makeStyle({ bold: true, size: 12, align: "center" });
   const headerStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "center" });
   const sectionStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "left" });
-  const dataNumberStyle = makeStyle({ fill: "FFFFFF", size: 10, align: "center" });
-  const dataTextStyle = makeStyle({ fill: "FFFFFF", size: 10, align: "left" });
-  const dataScoreStyle = makeStyle({ fill: "FFFFFF", size: 10, align: "center" });
+  const dataNumberStyle = makeStyle({ size: 10, align: "center" });
+  const dataTextStyle = makeStyle({ size: 10, align: "left" });
+  const dataScoreStyle = makeStyle({ size: 10, align: "center" });
   const categoryPPStyle = makeStyle({ fill: "C00000", color: "FFFFFF", bold: true, size: 10, align: "center" });
   const categoryOPStyle = makeStyle({ fill: "FFB3B3", color: "5C0000", bold: true, size: 10, align: "center" });
-  const categoryEmptyStyle = makeStyle({ fill: "FFFFFF", size: 10, align: "center" });
+  const categoryEmptyStyle = makeStyle({ size: 10, align: "center" });
   const totalLabelStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "left" });
   const totalValueStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "center" });
   const verdictTitleStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "left" });
   const verdictTextStyle = makeStyle({ size: 10, align: "left" });
-  const verdictMarkStyle = makeStyle({ size: 10, align: "center", fill: "FEE2E2", color: "AAAAAA" });
   const verdictMarkEmptyStyle = makeStyle({ size: 10, align: "center" });
 
   for (let c = 0; c < 5; c += 1) setCellStyle(ws, 0, c, titleStyle);
@@ -178,9 +174,9 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
   for (let c = 0; c < 5; c += 1) setCellStyle(ws, spacerBeforeVerdictRow, c, dataTextStyle);
   for (let c = 0; c < 5; c += 1) setCellStyle(ws, verdictTitleRowIndex, c, verdictTitleStyle);
 
-  verdictRowIndexes.forEach((rowIndex, idx) => {
+  verdictRowIndexes.forEach((rowIndex) => {
     for (let c = 0; c < 4; c += 1) setCellStyle(ws, rowIndex, c, verdictTextStyle);
-    setCellStyle(ws, rowIndex, 4, verdictIndex === idx ? verdictMarkStyle : verdictMarkEmptyStyle);
+    setCellStyle(ws, rowIndex, 4, verdictMarkEmptyStyle);
   });
 
   const wb = XLSX.utils.book_new();
