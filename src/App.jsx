@@ -829,11 +829,19 @@ export default function App(){
     setSections(newSections);
     setVendors(prev=>prev.map(v=>{
       const sc=[],nt=[],im=[];
-      newSections.forEach(sec=>{
-        const origIdx=sections.indexOf(sec);
+      for(let i=0;i<newSections.length;i++){
+        const sec=newSections[i];
+        let origIdx=-1;
+        for(let j=0;j<sections.length;j++){
+          if(sections[j]===sec){
+            origIdx=j;
+            break;
+          }
+        }
+        if(origIdx<0)continue;
         const off=oldOffs[origIdx];
-        for(let i=0;i<sec.items.length;i++){sc.push(v.scores[off+i]??null);nt.push(v.notes[off+i]??"");im.push(v.images?.[off+i]??null);}
-      });
+        for(let k=0;k<sec.items.length;k++){sc.push(v.scores[off+k]??null);nt.push(v.notes[off+k]??"");im.push(v.images?.[off+k]??null);}
+      }
       return{...v,scores:sc,notes:nt,images:im};
     }));
   };
@@ -845,7 +853,8 @@ export default function App(){
     setVendors(prev=>prev.map(v=>{
       const sc=[...v.scores];const nt=[...v.notes];const im=[...(v.images||[])];
       const[ms]=sc.splice(off+ii,1);const[mn]=nt.splice(off+ii,1);const[mi]=im.splice(off+ii,1);
-      sc.splice(off+newIdx,0,ms);nt.splice(off+newIdx,0,mn);im.splice(off+newIdx,0,mi??null);
+      const insertIdx=off+(newIdx>ii?newIdx-1:newIdx);
+      sc.splice(insertIdx,0,ms);nt.splice(insertIdx,0,mn);im.splice(insertIdx,0,mi??null);
       return{...v,scores:sc,notes:nt,images:im};
     }));
   };
