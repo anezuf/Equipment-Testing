@@ -8,8 +8,7 @@ description: Run before commit. Calls all specialist agents in sequence to verif
 Run these agents in order. Stop if any agent reports a blocker.
 
 ## Step 1 — Code quality
-@refactor-agent
-Check that no new logic was added to App.jsx, no mixed responsibilities, no dead code.
+@refactor-agent App.jsx has mixed responsibilities — extract export/import handlers to src/hooks/useExport.js and modal state to src/hooks/useModals.js. One extraction at a time, app must work after each step.
 
 ## Step 2 — Logic integrity  
 @logic-agent
