@@ -175,12 +175,14 @@ button {
   box-shadow: inset 0 0 0 100vw rgba(0,0,0,0.17) !important;
 }
 
-/* Secondary: white/outline — neutral gray tint, never blue */
+/* Secondary: white/outline — blue accent on hover */
 .btn-secondary:hover {
-  background-color: #F1F5F9 !important;
-  box-shadow: inset 0 0 0 1.5px rgba(0,0,0,0.13), 0 2px 6px rgba(0,0,0,0.05) !important;
+  border-color: #2F9AFF !important;
+  background-color: #EFF6FF !important;
+  color: #2F9AFF !important;
+  box-shadow: 0 2px 6px rgba(47,154,255,0.18) !important;
 }
-.btn-secondary:active { background-color: #E2E8F0 !important; }
+.btn-secondary:active { background-color: #dbeafe !important; }
 
 /* Danger: red-themed outline buttons (Сбросить, etc.) */
 .btn-danger:hover {
@@ -241,6 +243,34 @@ button {
   color: #2F9AFF !important;
 }
 .btn-action:active { background-color: #dbeafe !important; }
+
+/* Equipment type toggle buttons (Стойка / PDU) */
+.btn-eq-type {
+  padding: 6px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #E5EAF0;
+  background: #fff;
+  color: #7B97B2;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-eq-type-active {
+  border-color: #2F9AFF;
+  background: #EFF6FF;
+  color: #2F9AFF;
+}
+.btn-eq-type:hover {
+  border-color: #2F9AFF !important;
+  background-color: #EFF6FF !important;
+  color: #2F9AFF !important;
+}
+.btn-eq-type:active {
+  background-color: #dbeafe !important;
+}
 
 /* Vendor pill × zone */
 .vendor-rm:hover {

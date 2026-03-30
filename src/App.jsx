@@ -798,7 +798,7 @@ export default function App(){
         <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Сбросить всё?</div>
         <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Все вендоры, оценки и примечания будут удалены. Останется один пустой «Вендор 1». Структура разделов сохранится.</div>
         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-          <button className="btn-secondary" onClick={closeResetModal} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer"}}>Отмена</button>
+          <button className="btn-danger" onClick={closeResetModal} style={{padding:"10px 28px",borderRadius:12,border:"1.5px solid #EF4444",background:"#fff",color:"#EF4444",fontSize:14,fontWeight:600,cursor:"pointer"}}>Отмена</button>
           <button className="btn-primary" onClick={doReset} style={{padding:"10px 28px",borderRadius:12,border:"none",background:"#EF4444",color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer"}}>Да, сбросить</button>
         </div>
       </div>
@@ -813,7 +813,7 @@ export default function App(){
           <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Применить в редактор?</div>
           <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Разделы и параметры в редакторе будут обновлены из тех. условий. Новые параметры получат вес «Требование!». Существующие веса сохранятся.</div>
           <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-            <button type="button" className="btn-secondary" onClick={closeApplyConfirmModal} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>Отмена</button>
+            <button type="button" className="btn-danger" onClick={closeApplyConfirmModal} style={{padding:"10px 28px",borderRadius:12,border:"1.5px solid #EF4444",background:"#fff",color:"#EF4444",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>Отмена</button>
             <button type="button" className="btn-primary" onClick={applyTechSpecsToEditor} style={{padding:"10px 28px",borderRadius:12,border:"none",background:B.blue,color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
               Применить
             </button>

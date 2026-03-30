@@ -51,7 +51,7 @@ export default function ScoreEditor({
       <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {EQ_TYPES.map((t) => (
-            <button key={t} onClick={() => onSwitchEqType(t)} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===t?B.blue:B.border}`,background:eqType===t?"#EFF6FF":"#fff",color:eqType===t?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+            <button key={t} onClick={() => onSwitchEqType(t)} className={`btn-eq-type ${eqType===t?"btn-eq-type-active":""}`}>
               {t==="стойка"?"Стойка":"PDU"}
             </button>
           ))}
@@ -72,6 +72,7 @@ export default function ScoreEditor({
       </div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,alignItems:"center"}}>
         {vendors.length<25&&<button className="btn-add-vendor" onClick={addV} style={{padding:"6px 14px",borderRadius:12,border:"2px dashed #CBD5E1",background:"none",color:B.steel,cursor:"pointer",fontSize:12,whiteSpace:"nowrap"}}>{isPortrait ? '+' : '+ Добавить вендора'}</button>}
+        <button className="btn-danger" onClick={onShowReset} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid #EF4444`,background:"#fff",color:"#EF4444",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",transition:"all 0.2s ease"}}>Сбросить</button>
         <div style={{marginLeft:"auto",display:"flex",gap:6}}>
           <button className="btn-action" onClick={()=>exportVendorPDF(act)} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 1h5l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V2a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2"/><path d="M9 1v4h4" stroke="currentColor" strokeWidth="1.2"/></svg>
@@ -81,11 +82,10 @@ export default function ScoreEditor({
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             Загрузить
           </button>
-          <button className="btn-secondary" onClick={exportVendorForm} style={{padding:"6px 14px",borderRadius:10,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:4}}>
+          <button className="btn-action" onClick={exportVendorForm} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:4}}>
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 10V2M5 5l3-3 3 3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             Сохранить
           </button>
-          <button className="btn-danger" onClick={onShowReset} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid #EF4444`,background:"#fff",color:"#EF4444",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",transition:"all 0.2s ease"}}>Сбросить</button>
         </div>
       </div>
       <div className="vendor-tabs-wrap" style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>

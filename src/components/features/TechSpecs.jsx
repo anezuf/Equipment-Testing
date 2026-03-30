@@ -29,7 +29,7 @@ export default function TechSpecs({
         <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
           {techSpecsEditMode ? (
             <>
-              <button className="btn-secondary" onClick={() => { setTechSpecs(techSpecsSnapshot.current); setTechSpecsEditMode(false); }} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.border}`, background: "#fff", color: B.steel, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+              <button className="btn-danger" onClick={() => { setTechSpecs(techSpecsSnapshot.current); setTechSpecsEditMode(false); }} style={{ padding: "6px 14px", borderRadius: 10, border: "1.5px solid #EF4444", background: "#fff", color: "#EF4444", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                 Отменить
               </button>
               <button className="btn-secondary" onClick={() => setShowApplyConfirm(true)} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.blue}`, background: "#fff", color: B.blue, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
@@ -56,7 +56,7 @@ export default function TechSpecs({
       {!techSpecsEditMode && (
         <div style={{ display: "flex", gap: 6, marginBottom: 12, alignItems: "center", flexWrap: "wrap" }}>
           {EQ_TYPES.map((t) =>
-            <button key={t} onClick={() => switchEqType(t)} style={{ padding: "6px 16px", borderRadius: 12, border: `1.5px solid ${eqType === t ? B.blue : B.border}`, background: eqType === t ? "#EFF6FF" : "#fff", color: eqType === t ? B.blue : B.steel, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <button key={t} onClick={() => switchEqType(t)} className={`btn-eq-type ${eqType===t?"btn-eq-type-active":""}`}>
               {t === "стойка" ? "Стойка" : "PDU"}
             </button>,
           )}

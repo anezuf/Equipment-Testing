@@ -21,7 +21,7 @@ export default function ChecklistEditor({
     </div>
     <div style={{display:"flex",gap:6,marginBottom:12}}>
       {EQ_TYPES.map(t=>
-        <button key={t} onClick={()=>onSwitchEqType(t)} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===t?B.blue:B.border}`,background:eqType===t?"#EFF6FF":"#fff",color:eqType===t?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+        <button key={t} onClick={()=>onSwitchEqType(t)} className={`btn-eq-type ${eqType===t?"btn-eq-type-active":""}`}>
           {t==="стойка"?"Стойка":"PDU"}
         </button>
       )}
@@ -37,18 +37,30 @@ export default function ChecklistEditor({
               <div style={{flex:1,minWidth:220,color:B.graphite,fontSize:12,lineHeight:"1.4",display:"flex",alignItems:"center",gap:8}}>
                 <span>{it.n}</span>
                 {techSpecs?.[si]?.items?.[ii]?.n2?.trim() ? (
-                  <button
-                    type="button"
-                    className="btn-icon"
-                    onClick={(e)=>{
-                      e.stopPropagation();
-                      setInfoPopup((p)=>p&&p.si===si&&p.ii===ii?null:{si,ii});
-                    }}
-                    style={{width:18,height:18,borderRadius:"50%",border:`1px solid ${B.border}`,background:"#fff",color:B.steel,cursor:"pointer",fontSize:10,fontWeight:700,display:"inline-flex",alignItems:"center",justifyContent:"center",padding:0,flexShrink:0}}
-                    title="Показать требование"
-                  >
-                    ⓘ
-                  </button>
+                  <div style={{position:"relative",display:"inline-flex"}}>
+                    {infoPopup?.si===si&&infoPopup?.ii===ii&&(
+                      <div style={{position:"absolute",bottom:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",zIndex:300,background:"#334155",color:"#fff",fontSize:11,fontWeight:500,padding:"8px 12px",borderRadius:8,width:240,lineHeight:"1.5",boxShadow:"0 4px 16px rgba(0,0,0,0.22)",pointerEvents:"none",whiteSpace:"pre-wrap",wordBreak:"break-word",textAlign:"left"}}>
+                        <div style={{fontWeight:700,marginBottom:4,fontSize:12}}>{it.n}</div>
+                        {techSpecs[si].items[ii].n2}
+                        <div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:"5px solid #334155"}}/>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e)=>{
+                        e.stopPropagation();
+                        setInfoPopup((p)=>p&&p.si===si&&p.ii===ii?null:{si,ii});
+                      }}
+                      style={{background:"none",border:"none",padding:"0 2px",cursor:"pointer",color:B.steel,display:"inline-flex",alignItems:"center",justifyContent:"center",flexShrink:0,lineHeight:1}}
+                      title="Показать требование"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                        <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4" />
+                        <line x1="8" y1="7" x2="8" y2="11.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                        <circle cx="8" cy="4.8" r="0.9" fill="currentColor" />
+                      </svg>
+                    </button>
+                  </div>
                 ) : null}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
@@ -63,11 +75,6 @@ export default function ChecklistEditor({
                   </button>;
                 })}
               </div>
-              {infoPopup?.si===si&&infoPopup?.ii===ii&&techSpecs?.[si]?.items?.[ii]?.n2?.trim()?(
-                <div style={{width:"100%",fontSize:12,color:B.steel,background:"#EFF6FF",border:`1px solid ${B.border}`,borderRadius:8,padding:"8px 10px",lineHeight:"1.4"}}>
-                  {techSpecs[si].items[ii].n2}
-                </div>
-              ):null}
             </div>
           )}
         </div>
