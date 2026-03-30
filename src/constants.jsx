@@ -7,3 +7,4 @@ export const VC=[B.blue,B.neon,B.sea,B.amethyst,B.raspberry,B.pumpkin,B.lilac,B.
 export const ICO=[IconNo,IconMid,IconYes];
 export const SM=[{v:0,l:"Нет",c:"#EF4444",bg:"#FEE2E2",d:"Не соответствует"},{v:1,l:"Частично",c:"#F59E0B",bg:"#FEF3C7",d:"Есть замечания"},{v:2,l:"Да",c:"#10B981",bg:"#D1FAE5",d:"Полностью ОК"}];
 export const WC={0:{bg:"#DBEAFE",c:B.blue,bc:B.blue},1:{bg:"#FEE2E2",c:"#DC2626",bc:"#DC2626"},2:{bg:"#FEE2E2",c:"#DC2626",bc:"#DC2626"}};
+export const EQ_TYPES=["стойка","pdu"];
