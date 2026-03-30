@@ -1,7 +1,8 @@
+import { memo } from "react";
 import Logo from "../Logo";
 import { B } from "../../constants";
 
-export default function NavBar({
+function NavBar({
   view,
   setView,
   eqType,
@@ -113,3 +114,5 @@ export default function NavBar({
     </div>
   );
 }
+
+export default memo(NavBar);

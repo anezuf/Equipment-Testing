@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { B, VC, ICO } from "../../constants";
 import { fmt } from "../../utils";
 import { mkAll } from "../../sections";
@@ -9,7 +9,7 @@ import HeatmapTh from "../HeatmapTh";
 
 const [,,IconYes] = ICO;
 
-export default function Dashboard({
+function Dashboard({
   vendors,
   sections,
   totals,
@@ -161,3 +161,5 @@ export default function Dashboard({
     </div>
   </div>;
 }
+
+export default memo(Dashboard);
