@@ -7,6 +7,7 @@ import { DEF_SECTIONS, PDU_DEFAULT, mkAll, mkOff } from "./sections";
 import { calcTotal, calcSec } from "./scoring";
 import { fmt } from "./utils";
 import { exportTechSpecsXlsx } from "./utils/exportTechSpecs";
+import { exportVendorForm } from "./utils/exportVendorForm";
 import { TECH_SPECS_DEFAULT, PDU_TECH_SPECS_DEFAULT, normalizeTechSpecs } from "./data/techSpecs";
 import NotePopup from "./components/NotePopup";
 import Dashboard from "./components/features/Dashboard";
@@ -593,6 +594,12 @@ export default function App(){
     },500);
   },[sections,vendors]);
 
+  const exportActiveVendorForm = useCallback(() => {
+    const vendor = vendors[act];
+    if (!vendor) return;
+    exportVendorForm({ vendor, sections, eqType, ALL });
+  }, [vendors, act, sections, eqType, ALL]);
+
   const setSectionName=useCallback((si,name)=>{const n=sections.map((s,i)=>i===si?{...s,n:name}:s);setSections(n);},[sections,setSections]);
   const addSection=useCallback(()=>{
     const newSection={n:"Новый раздел",items:[{n:"Параметр 1",w:2}]};
@@ -873,6 +880,7 @@ export default function App(){
       onVendorNameChange={setName}
       onExportVendorPDF={exportVendorPDF}
       onImport={importFile}
+      onExportVendorForm={exportActiveVendorForm}
       onShowReset={showResetModal}
       infoPopup={infoPopup}
       setInfoPopup={setInfoPopup}

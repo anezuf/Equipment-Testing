@@ -24,6 +24,7 @@ export default function ScoreEditor({
   onVendorNameChange,
   onExportVendorPDF,
   onImport,
+  onExportVendorForm,
   onShowReset,
   infoPopup,
   setInfoPopup,
@@ -42,6 +43,7 @@ export default function ScoreEditor({
   const setName = onVendorNameChange;
   const exportVendorPDF = onExportVendorPDF;
   const importFile = onImport;
+  const exportVendorForm = onExportVendorForm;
 
   return <div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
       <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
@@ -67,6 +69,9 @@ export default function ScoreEditor({
           <button className="btn-action" onClick={importFile} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             Загрузить
+          </button>
+          <button className="btn-action" onClick={exportVendorForm} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.steel,fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:4}}>
+            ⬇ Форма
           </button>
           <button className="btn-danger" onClick={onShowReset} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid #EF4444`,background:"#fff",color:"#EF4444",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",transition:"all 0.2s ease"}}>Сбросить</button>
         </div>
