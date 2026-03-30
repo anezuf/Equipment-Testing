@@ -7,6 +7,7 @@ import { mkAll, mkOff } from "./sections";
 import { calcTotal, calcSec } from "./scoring";
 import { fmt } from "./utils";
 import { TECH_SPECS_DEFAULT, PDU_TECH_SPECS_DEFAULT, normalizeTechSpecs } from "./data/techSpecs";
+import { EDITOR_DEFAULT_WEIGHTS } from "./data/editorDefaultWeights";
 import { useImportExportHandlers } from "./hooks/useImportExportHandlers";
 import NotePopup from "./components/NotePopup";
 import Dashboard from "./components/features/Dashboard";
@@ -30,12 +31,13 @@ import NavBar from "./components/ui/NavBar";
 */
 
 export default function App(){
-  const deriveSectionsFromTechSpecs = useCallback((specs, weightsMap) => (
+  const deriveSectionsFromTechSpecs = useCallback((specs, weightsMap, defaultWeightsMap) => (
     (Array.isArray(specs) ? specs : []).map((sec) => ({
       n: sec?.n || "",
       items: (Array.isArray(sec?.items) ? sec.items : []).map((item) => {
         const name = item?.n || "";
-        const rawWeight = weightsMap?.[name];
+        const merged = { ...(defaultWeightsMap || {}), ...(weightsMap || {}) };
+        const rawWeight = merged[name];
         const w = rawWeight === 0 || rawWeight === 1 || rawWeight === 2 ? rawWeight : 2;
         return { n: name, w, sec: sec?.n || "" };
       }),
@@ -56,7 +58,8 @@ export default function App(){
   }, [getEditorWeightsKey]);
   const createDefaultScoringData = useCallback((type) => {
     const defaults = type === "pdu" ? PDU_TECH_SPECS_DEFAULT : TECH_SPECS_DEFAULT;
-    const defaultSections = deriveSectionsFromTechSpecs(defaults, {});
+    const defW = type === "pdu" ? EDITOR_DEFAULT_WEIGHTS.pdu : EDITOR_DEFAULT_WEIGHTS.стойка;
+    const defaultSections = deriveSectionsFromTechSpecs(defaults, {}, defW);
     const itemCount = mkAll(defaultSections).length;
     return { sections: defaultSections, vendors: [{ name: "Вендор 1", scores: Array(itemCount).fill(null), notes: Array(itemCount).fill(""), images: Array(itemCount).fill(null) }] };
   }, [deriveSectionsFromTechSpecs]);
@@ -102,8 +105,8 @@ export default function App(){
     pdu: techSpecsByType["pdu"] || PDU_TECH_SPECS_DEFAULT,
   }), [techSpecsByType]);
   const sectionsByType = useMemo(() => ({
-    стойка: deriveSectionsFromTechSpecs(scoringTechSpecsByType["стойка"], editorWeightsByType["стойка"] || {}),
-    pdu: deriveSectionsFromTechSpecs(scoringTechSpecsByType.pdu, editorWeightsByType.pdu || {}),
+    стойка: deriveSectionsFromTechSpecs(scoringTechSpecsByType["стойка"], editorWeightsByType["стойка"] || {}, EDITOR_DEFAULT_WEIGHTS.стойка),
+    pdu: deriveSectionsFromTechSpecs(scoringTechSpecsByType.pdu, editorWeightsByType.pdu || {}, EDITOR_DEFAULT_WEIGHTS.pdu),
   }), [deriveSectionsFromTechSpecs, editorWeightsByType, scoringTechSpecsByType]);
   const sections = sectionsByType[editorEqType] || [];
   const scoringSections = sectionsByType[scoringEqType] || [];
@@ -419,12 +422,7 @@ export default function App(){
   const closeResetModal=useCallback(()=>setShowReset(false),[setShowReset]);
   const closeApplyConfirmModal=useCallback(()=>setShowApplyConfirm(false),[setShowApplyConfirm]);
   const stopModalPropagation=useCallback((e)=>e.stopPropagation(),[]);
-  const navigateToInput=useCallback(()=>{
-    setScoringEqType(editorEqType);
-    setView("input");
-  },[editorEqType, setScoringEqType, setView]);
   const showResetModal=useCallback(()=>setShowReset(true),[setShowReset]);
-  const navigateDashboard=useCallback(()=>setView("dashboard"),[setView]);
   const applyTechSpecsToEditor=useCallback(()=>{
     setShowApplyConfirm(false);
     setTechSpecsEditMode(false);
@@ -487,7 +485,6 @@ export default function App(){
       isPortrait={isPortrait}
       onSwitchEqType={setEditorEqType}
       onItemWeightChange={setItemWeight}
-      onNavigateToInput={navigateToInput}
     />}
 
     {/* ═══ INPUT ═══ */}
@@ -535,7 +532,6 @@ export default function App(){
       infoPopup={infoPopup}
       setInfoPopup={setInfoPopup}
       getTechReq={getTechReq}
-      onNavigateDashboard={navigateDashboard}
     />}
 
     {/* DASHBOARD */}

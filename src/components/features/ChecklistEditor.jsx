@@ -8,7 +8,6 @@ export default function ChecklistEditor({
   isPortrait,
   onSwitchEqType,
   onItemWeightChange,
-  onNavigateToInput,
 }) {
   const [infoPopup, setInfoPopup] = useState(null);
 
@@ -64,12 +63,12 @@ export default function ChecklistEditor({
                 ) : null}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
-                <button type="button" className="btn-score btn-score-critical" onClick={()=>onItemWeightChange(si,ii,it.w===2?1:2)} style={{width:28,height:28,borderRadius:8,border:it.w===2?"2px solid #DC2626":"1.5px solid #E5EAF0",background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":"#7B97B2",display:"inline-flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
+                <button type="button" className="btn-score btn-score-critical" onClick={()=>onItemWeightChange(si,ii,it.w===2?1:2)} style={{width:28,height:28,boxSizing:"border-box",borderRadius:8,border:it.w===2?"2px solid #DC2626":"2px solid #E5EAF0",background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":"#7B97B2",display:"inline-flex",alignItems:"center",justifyContent:"center",transition:"background-color 0.15s,border-color 0.15s,color 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
                 {[{w:1},{w:0}].map(({w:wv})=>{
                   const on=wv===0?it.w===0:(it.w>=1);
                   const wc=WC[wv];
                   const star=wv===0?"☆":"★";
-                  return <button type="button" className={`btn-score ${wv===1?"btn-score-req":"btn-score-adv"}`} key={wv} onClick={()=>onItemWeightChange(si,ii,wv===0?0:1)} style={{padding:"4px 10px",borderRadius:8,border:on?`2px solid ${wc.bc}`:"1.5px solid #E5EAF0",background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:"#7B97B2",transition:"all 0.15s",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",gap:2}}>
+                  return <button type="button" className={`btn-score ${wv===1?"btn-score-req":"btn-score-adv"}`} key={wv} onClick={()=>onItemWeightChange(si,ii,wv===0?0:1)} style={{padding:"4px 10px",boxSizing:"border-box",borderRadius:8,border:on?`2px solid ${wc.bc}`:"2px solid #E5EAF0",background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:"#7B97B2",transition:"background-color 0.15s,border-color 0.15s,color 0.15s",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",gap:2,flexShrink:0}}>
                     <span>{star}</span>
                     {isPortrait ? null : <span className="editor-btn-label"> {wv===1 ? "Требование" : "Преимущество"}</span>}
                   </button>;
@@ -80,8 +79,5 @@ export default function ChecklistEditor({
         </div>
       </div>
     )}
-    <div style={{textAlign:"center",padding:20}}>
-      <button className="btn-primary" onClick={onNavigateToInput} style={{padding:"10px 32px",borderRadius:20,border:"none",background:`linear-gradient(90deg,${B.blue},${B.neon})`,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 16px ${B.blue}44`}}>Перейти к оценке →</button>
-    </div>
   </div>;
 }

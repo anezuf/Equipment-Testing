@@ -25,6 +25,7 @@ Never invent new UI patterns — always reuse existing ones from this document.
 - Never hardcode vendor colors — always use VC[index % VC.length]
 - Never create a new button variant — pick from the list below
 - Never use a background pill for PDF/XLSX format badges — use colored text only
+- **No duplicate view navigation** — switching «Редактор / Тех. условия / Оценка / Дашборд» только через **NavBar**. Не добавлять внизу экрана вторые CTA с градиентом и тенью (этот паттерн убран из проекта)
 
 ## Colors (import B and VC from src/constants.jsx)
 
@@ -34,15 +35,16 @@ Never invent new UI patterns — always reuse existing ones from this document.
 | B.steel | #7B97B2 | Secondary text, inactive buttons |
 | B.graphite | #334155 | Dark text, section headers |
 | B.border | #E5EAF0 | All borders and dividers |
-| B.neon | #3045E6 | Gradient end (paired with B.blue) |
+| B.neon | #3045E6 | Rare accent pairs (e.g. table striping) — not for primary buttons |
 | VC[] | 10 colors | Vendor colors — always VC[i % VC.length] |
 
 ## Button classes (defined in index.css)
 
 | Class | Use case |
 |---|---|
-| btn-primary | Main CTA, solid / gradient blue |
+| btn-primary | Solid actions (модалки «Применить», подтверждения). Без градиента в inline-стилях по умолчанию |
 | btn-secondary | White/outline secondary |
+| btn-secondary-flat | Same as secondary, but **no outer box-shadow on hover** — тулбарные действия (напр. «Редактировать» в TechSpecs), когда не нужна «подсветка» тенью |
 | btn-danger | Destructive (Сбросить, Отменить) |
 | btn-nav | NavBar tab buttons |
 | btn-score | Weight/score toggles |
@@ -55,6 +57,8 @@ Never invent new UI patterns — always reuse existing ones from this document.
 | vendor-rm | × on vendor pill — red bg on hover |
 
 Every button: type="button", display inline-flex, alignItems center, justifyContent center.
+
+**Hover shadows:** `.btn-primary:hover` и `.btn-secondary:hover` в CSS могут добавлять тень — для спокойного outline-кнопочного вида используйте **btn-secondary btn-secondary-flat**.
 
 ## Export/import pills (btn-action + modifier)
 
@@ -93,7 +97,7 @@ Where used:
 
 **ⓘ Info button** — 18×18 circle, B.border, B.steel, expands inline block below row (not a modal)
 
-**Weight toggles** — ! critical (28×28, red when active), ★/☆ pills using WC[] from constants
+**Weight toggles (редактор чек-листа)** — ! критичное (28×28), ★ требование / ☆ преимущество, цвета WC[]. Веса по умолчанию из форм ТУ: **ПП → 2**, **ОП → 1**, **П → 0** (данные в `src/data/editorDefaultWeights.js`; переопределения — `rack_editor_weights_*` в localStorage). При смене подписей пунктов в tech specs ключи весов — по полю `n` параметра.
 
 **Score buttons** — SM[] colors: Нет #EF4444 / Частично #F59E0B / Да #10B981
 
@@ -105,25 +109,25 @@ Where used:
 
 **Section header** — B.graphite bg, borderRadius 12px top, left border 3px VC[si%VC.length], content area white + B.border
 
-**Primary CTA** — gradient(B.blue→B.neon), borderRadius 20, blue glow shadow
-
 **Modal popup** — fixed overlay rgba(0,0,0,0.4), white card maxWidth 420, dark header B.graphite
 
 ## Reusable components
 
 | Component | Path | Use for |
 |---|---|---|
-| Gauge | src/components/ui/Gauge.jsx | Score 0–10 circular gauge |
-| SegBar | src/components/ui/SegBar.jsx | Section bar with tooltips |
-| RichNote | src/components/ui/RichNote.jsx | Rich text note fields |
-| AutoSizeTextarea | src/components/ui/AutoSizeTextarea.jsx | Growing text inputs |
-| NotePopup | src/components/ui/NotePopup.jsx | Note + photo viewer modal |
-| HeatmapTh | src/components/ui/HeatmapTh.jsx | Sortable heatmap header |
-| Logo | src/components/ui/Logo.jsx | App logo SVG |
+| Gauge | src/components/Gauge.jsx | Score 0–10 circular gauge |
+| SegBar | src/components/SegBar.jsx | Section bar with tooltips |
+| RichNote | src/components/RichNote.jsx | Rich text note fields |
+| AutoSizeTextarea | src/components/AutoSizeTextarea.jsx | Growing text inputs |
+| NotePopup | src/components/NotePopup.jsx | Note + photo viewer modal |
+| HeatmapTh | src/components/HeatmapTh.jsx | Sortable heatmap header |
+| Logo | src/components/Logo.jsx | App logo SVG |
 | NavBar | src/components/ui/NavBar.jsx | Top navigation |
 
+*Только NavBar лежит в `components/ui/`; остальные перечисленные — в корне `components/` до выноса в ui.*
+
 ## Component placement rules
-- Pure UI, no app state → src/components/ui/
+- Pure UI, no app state → src/components/ui/ (предпочтительно) или src/components/ для легаси-виджетов
 - Feature views with logic/data → src/components/features/
 - Used in one feature only → keep in that feature file until reused
 

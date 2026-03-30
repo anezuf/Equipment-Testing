@@ -184,6 +184,11 @@ button {
 }
 .btn-secondary:active { background-color: #dbeafe !important; }
 
+/* Outline secondary without outer shadow (toolbar / muted actions) */
+.btn-secondary.btn-secondary-flat:hover {
+  box-shadow: none !important;
+}
+
 /* Danger: red-themed outline buttons (Сбросить, etc.) */
 .btn-danger:hover {
   border-color: #DC2626 !important;

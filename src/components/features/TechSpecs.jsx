@@ -52,7 +52,7 @@ export default function TechSpecs({
               </button>
             </>
           ) : (
-            <button className="btn-secondary" onClick={() => { techSpecsSnapshotRef.current = JSON.parse(JSON.stringify(techSpecs)); setTechSpecsEditMode(true); }} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.border}`, background: "#fff", color: B.steel, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+            <button type="button" className="btn-secondary btn-secondary-flat" onClick={() => { techSpecsSnapshotRef.current = JSON.parse(JSON.stringify(techSpecs)); setTechSpecsEditMode(true); }} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.border}`, background: "#fff", color: B.steel, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               Редактировать
             </button>
