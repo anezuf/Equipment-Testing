@@ -234,6 +234,72 @@ export default function App(){
         const wsName=wb.SheetNames.find(n=>n==="Оценка")||wb.SheetNames[0];
         const ws=wb.Sheets[wsName];
         const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+        const norm=(val)=>String(val??"").trim().toLowerCase();
+
+        /* Vendor form format:
+           A1 contains " - " and row 4 headers match vendor template */
+        const a1=String(data?.[0]?.[0]??"").trim();
+        const vendorHdr=data?.[3]??[];
+        const isVendorForm=
+          a1.includes(" - ") &&
+          norm(vendorHdr[0])==="№ п. ту" &&
+          norm(vendorHdr[1])==="параметр" &&
+          norm(vendorHdr[3])==="оценка (0/1/2)" &&
+          norm(vendorHdr[4])==="примечание";
+
+        if(isVendorForm){
+          const allItems=mkAll(sections);
+          const itemIndexByName=new Map();
+          allItems.forEach((it,idx)=>{
+            const key=norm(it.n);
+            if(key&&!itemIndexByName.has(key))itemIndexByName.set(key,idx);
+          });
+
+          const vendorNameRaw=a1.split(" - ").slice(1).join(" - ").trim();
+          const vendorName=vendorNameRaw||`Вендор ${vendors.length+1}`;
+          const scores=Array(itemCount).fill(null);
+          const notes=Array(itemCount).fill("");
+          const images=Array(itemCount).fill(null);
+          let matchedCount=0;
+
+          for(let r=4;r<data.length;r++){
+            const row=Array.isArray(data[r])?data[r]:[];
+            const colA=row[0];
+            const colBRaw=row[1];
+            const colB=String(colBRaw??"").trim();
+
+            /* Section header row (A text + B empty) */
+            if(typeof colA==="string"&&colA.trim()!==""&&colB==="")continue;
+
+            /* Data row (A number): match parameter name from column B */
+            const aNum=Number(colA);
+            if(!Number.isFinite(aNum)||String(colA??"").trim()==="")continue;
+            if(!colB)continue;
+
+            const itemIdx=itemIndexByName.get(norm(colB));
+            if(itemIdx==null)continue;
+
+            const rawScore=row[3];
+            if(rawScore===""||rawScore==null)scores[itemIdx]=null;
+            else{
+              const num=Number(rawScore);
+              scores[itemIdx]=num===0||num===1||num===2?num:null;
+            }
+
+            const noteText=String(row[4]??"").trim();
+            if(noteText)notes[itemIdx]=noteText;
+            matchedCount++;
+          }
+
+          const newVendor={name:vendorName,scores,notes,images};
+          setVendors(prev=>[...prev,newVendor]);
+          setAct(vendors.length);
+          setView("input");
+          if(matchedCount===0){
+            alert("Не найдено совпадений параметров для импорта формы вендора");
+          }
+          return;
+        }
 
         /* Row 0 = title (skip), Row 1 = headers */
         const hdr=data[1]||[];
@@ -310,7 +376,7 @@ export default function App(){
       }
     };
     input.click();
-  },[sections]);
+  },[sections,itemCount,vendors.length]);
 
   const exportTechSpecs=useCallback(async()=>{
     try{
