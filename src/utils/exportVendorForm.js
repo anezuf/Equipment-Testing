@@ -13,13 +13,14 @@ const normalizeScore = (score) => (score === 0 || score === 1 || score === 2 ? s
 
 const stripNoteHtml = (str) => String(str ?? "").replace(/<[^>]*>/g, "").trim();
 
-const makeStyle = ({ fill, color, bold = false, size = 10, align = "left" } = {}) => {
+const makeStyle = ({ fill, color, bold = false, size = 10, align = "left", border } = {}) => {
   const style = {
-    font: { sz: size, bold },
+    font: { name: "Arial", sz: size, bold },
     alignment: { horizontal: align, vertical: "center", wrapText: true },
   };
   if (color) style.font.color = { rgb: color };
   if (fill) style.fill = { patternType: "solid", fgColor: { rgb: fill } };
+  if (border) style.border = border;
   return style;
 };
 
@@ -119,21 +120,79 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
   rowsMeta[verdictRowIndexes[2]] = { hpt: 24 };
   ws["!rows"] = rowsMeta;
 
+  const thinBorderGray = {
+    top: { style: "thin", color: { rgb: "D0D0D0" } },
+    bottom: { style: "thin", color: { rgb: "D0D0D0" } },
+    left: { style: "thin", color: { rgb: "D0D0D0" } },
+    right: { style: "thin", color: { rgb: "D0D0D0" } },
+  };
+  const thinBorderDark = {
+    top: { style: "thin", color: { rgb: "334155" } },
+    bottom: { style: "thin", color: { rgb: "334155" } },
+    left: { style: "thin", color: { rgb: "334155" } },
+    right: { style: "thin", color: { rgb: "334155" } },
+  };
+
   const titleStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 14, align: "center" });
   const topLabelStyle = makeStyle({ bold: true, size: 12, align: "center" });
-  const headerStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "center" });
+  const headerStyle = makeStyle({
+    fill: "334155",
+    color: "FFFFFF",
+    bold: true,
+    size: 10,
+    align: "center",
+    border: thinBorderDark,
+  });
   const sectionStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "left" });
-  const dataNumberStyle = makeStyle({ size: 10, align: "center" });
-  const dataTextStyle = makeStyle({ size: 10, align: "left" });
-  const dataScoreStyle = makeStyle({ size: 10, align: "center" });
-  const categoryPPStyle = makeStyle({ fill: "C00000", color: "FFFFFF", bold: true, size: 10, align: "center" });
-  const categoryOPStyle = makeStyle({ fill: "FFB3B3", color: "5C0000", bold: true, size: 10, align: "center" });
-  const categoryEmptyStyle = makeStyle({ size: 10, align: "center" });
-  const totalLabelStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "left" });
-  const totalValueStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "center" });
+  const dataNumberStyle = makeStyle({ size: 10, align: "center", border: thinBorderGray });
+  const dataTextStyle = makeStyle({ size: 10, align: "left", border: thinBorderGray });
+  const dataScoreStyle = makeStyle({ size: 10, align: "center", border: thinBorderGray });
+  const categoryPPStyle = makeStyle({
+    fill: "C00000",
+    color: "FFFFFF",
+    bold: true,
+    size: 10,
+    align: "center",
+    border: thinBorderGray,
+  });
+  const categoryOPStyle = makeStyle({
+    fill: "FFB3B3",
+    color: "5C0000",
+    bold: true,
+    size: 10,
+    align: "center",
+    border: thinBorderGray,
+  });
+  const categoryEmptyStyle = makeStyle({ size: 10, align: "center", border: thinBorderGray });
+  const totalLabelStyle = makeStyle({
+    fill: "334155",
+    color: "FFFFFF",
+    bold: true,
+    size: 10,
+    align: "left",
+    border: thinBorderGray,
+  });
+  const totalValueStyle = makeStyle({
+    fill: "334155",
+    color: "FFFFFF",
+    bold: true,
+    size: 10,
+    align: "center",
+    border: thinBorderGray,
+  });
+  const totalTailStyle = makeStyle({
+    fill: "334155",
+    color: "FFFFFF",
+    bold: true,
+    size: 10,
+    align: "left",
+    border: thinBorderGray,
+  });
   const verdictTitleStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "left" });
-  const verdictTextStyle = makeStyle({ size: 10, align: "left" });
-  const verdictMarkEmptyStyle = makeStyle({ size: 10, align: "center" });
+  const verdictTextStyle = makeStyle({ size: 10, align: "left", border: thinBorderGray });
+  const verdictMarkGoodStyle = makeStyle({ size: 10, align: "center", border: thinBorderGray, fill: "D1FAE5" });
+  const verdictMarkWarnStyle = makeStyle({ size: 10, align: "center", border: thinBorderGray, fill: "FEF3C7" });
+  const verdictMarkBadStyle = makeStyle({ size: 10, align: "center", border: thinBorderGray, fill: "FEE2E2" });
 
   for (let c = 0; c < 5; c += 1) setCellStyle(ws, 0, c, titleStyle);
 
@@ -169,14 +228,16 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
   setCellStyle(ws, totalRowIndex, 1, totalLabelStyle);
   setCellStyle(ws, totalRowIndex, 2, totalLabelStyle);
   setCellStyle(ws, totalRowIndex, 3, totalValueStyle);
-  setCellStyle(ws, totalRowIndex, 4, dataTextStyle);
+  setCellStyle(ws, totalRowIndex, 4, totalTailStyle);
 
   for (let c = 0; c < 5; c += 1) setCellStyle(ws, spacerBeforeVerdictRow, c, dataTextStyle);
   for (let c = 0; c < 5; c += 1) setCellStyle(ws, verdictTitleRowIndex, c, verdictTitleStyle);
 
-  verdictRowIndexes.forEach((rowIndex) => {
+  verdictRowIndexes.forEach((rowIndex, idx) => {
     for (let c = 0; c < 4; c += 1) setCellStyle(ws, rowIndex, c, verdictTextStyle);
-    setCellStyle(ws, rowIndex, 4, verdictMarkEmptyStyle);
+    if (idx === 0) setCellStyle(ws, rowIndex, 4, verdictMarkGoodStyle);
+    else if (idx === 1) setCellStyle(ws, rowIndex, 4, verdictMarkWarnStyle);
+    else setCellStyle(ws, rowIndex, 4, verdictMarkBadStyle);
   });
 
   const wb = XLSX.utils.book_new();
