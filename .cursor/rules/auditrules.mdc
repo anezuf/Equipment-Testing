@@ -2,23 +2,120 @@
 alwaysApply: true
 ---
 
-Respond in Russian. Write commit messages in English.
+## Language
+- Respond in Russian
+- Write commit messages in English (conventional commits: feat/fix/refactor/chore/style)
 
-After every change: app must compile and run identically. Verify all imports before finishing. Never leave unused imports or dead code.
+## Non-negotiable rules
+- After every change: app must compile and run identically
+- Verify all imports before finishing
+- Never leave unused imports or dead code
+- Never duplicate logic that already exists — always import instead
+- If unsure about library API — use Context7 before writing code
 
-File structure:
-- New reusable component → src/components/
-- Constants/colors → src/constants.jsx
+## Project file structure
+- Reusable UI component (no business logic) → src/components/ui/
+- Feature component (with logic) → src/components/features/
+- Static data and defaults → src/data/
+- Custom hooks (state + side effects) → src/hooks/
+- Constants and colors → src/constants.jsx
 - Utility functions → src/utils.js
 - Scoring logic → src/scoring.js
-- App.jsx only: global state, handlers, JSX layout. Never add components or pure functions there.
+- Section definitions → src/data/sections.js
+- App.jsx: only global state, top-level handlers, view routing and layout
+- Never add components or standalone functions to App.jsx
 
-CSS: all static styles go to src/index.css. No inline <style> tags in components. No transform:scale on hover — use box-shadow and background-color instead. All buttons must have display:inline-flex; align-items:center; justify-content:center.
+## File size and separation of concerns
+- If a file exceeds 200 lines — split it before adding new code
+- One component = one file, always. Never define two components in the same file
+- Never put data (arrays, objects, defaults) inside component files — move to src/data/
+- Never put helper functions inside component files — move to src/utils.js
+- Never put hook logic (useEffect, useState for persistence) inline in components — move to src/hooks/
+- Each file must have a single clear responsibility: data OR component OR hook OR util — never mix
 
-Never duplicate functions that exist in another file — import instead. Always use fmt() from utils.js for number formatting.
+## JSX complexity
+- If a JSX block exceeds 50 lines — extract it into a named component
+- If a function inside a component exceeds 20 lines — extract it outside or to utils
+- No anonymous logic inside JSX — onClick={() => { multiple lines }} must be a named handler
 
-Notes: empty note = "", "<br>", or "<div><br></div>". Always sanitize before saving. Strip HTML tags before writing to Excel.
+## CSS rules
+- Static styles → src/index.css using class names
+- Inline styles only for dynamic values (colors from state, calculated widths)
+- Never use transform:scale on hover — use box-shadow or background-color instead
+- Never use <style> tags inside components
+- All buttons must have: display:inline-flex; align-items:center; justify-content:center
+- Button hover effects: use class-based styles from index.css (btn-primary, btn-secondary, etc.)
 
-List reordering: use ↑/↓ buttons and array swaps in state; do not use native HTML5 drag API.
+## Performance
+- Wrap expensive calculations in useMemo — especially anything that iterates over all vendors or all items
+- Wrap event handlers passed as props in useCallback
+- Never recalculate derived data (totals, section scores, offsets) inside render — use useMemo
+- Never create new arrays or objects directly in JSX props — extract to variables above return()
 
-Google Fonts Inter must include italic: ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800
+## State consistency — critical
+- Vendor scores[], notes[], images[] must always have length === itemCount
+- When adding a new vendor — initialize all three arrays with Array(itemCount).fill(null/""/ null)
+- When adding or removing a section item — resize all vendor arrays accordingly using map()
+- When changing eqType — reload sections AND resize all vendor arrays to match new itemCount
+- Never mutate state directly — always use map(), filter(), or spread to create new arrays
+
+## localStorage rules
+- Always wrap localStorage calls in try/catch — it can throw in private browsing
+- Never read localStorage directly inside components — use loadSaved() from hooks/useStorage.js
+- Storage keys: rack_scoring_data_{eqType}, rack_tech_specs_{eqType}, rack_eq_type
+- Never store image binary data in localStorage — store only references or base64 with size check
+
+## Images
+- Images are stored per item per vendor: vendors[vi].images[itemIndex]
+- Max image size before storing: warn user if file exceeds 1MB
+- Always initialize images array when creating a new vendor or adding new items
+- Strip images from Excel export — export text data only
+
+## Excel export
+- Always strip HTML tags from notes before writing to Excel
+- Use fmt() for all numeric values written to cells
+- Never export image binaries to Excel — skip images silently
+- Always handle export errors with try/catch and show alert with error message
+
+## Notes and rich text
+- Empty note = "", "<br>", or "<div><br></div>" — treat all three as empty
+- Always sanitize notes before saving to state
+- Always strip HTML tags before writing to Excel
+- Rich text editing uses contentEditable — never use textarea for notes
+
+## Scoring logic
+- Never rewrite or inline scoring calculations — always import from src/scoring.js
+- calcTotal(), calcSec(), hasFail() are the only scoring functions — do not create alternatives
+- Weight: 0 = Преимущество (excluded from score), 1 = Требование, 2 = Требование!
+- Unfilled item (null) = 0 earned points but still counts toward maxPts
+
+## Vendors
+- Max vendors: 10 (matches VC color array length in constants.jsx)
+- Vendor color: always VC[vendorIndex % VC.length]
+- Never hardcode vendor colors inline — always use VC array
+
+## UI behaviour
+- List reordering: use ↑/↓ buttons with array swaps in state
+- Never use native HTML5 drag-and-drop API
+- Modals and popups: manage via state (null = closed, value = open)
+- Confirm dialogs (reset, delete): use inline confirm UI, never window.confirm()
+
+## Equipment types
+- Only two valid eqType values: "стойка" and "pdu"
+- Switching eqType reloads sections, vendors, techSpecs from their respective defaults or localStorage
+- Always persist eqType to localStorage on change
+
+## Print
+- All print styles live in @media print block inside index.css
+- Never add print-specific styles inline or in component files
+- Buttons, nav, footer must be hidden in print: use [data-nav], [data-footer], data-no-print attributes
+
+## Fonts
+- Google Fonts Inter must include italic weights:
+  ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800
+
+## Refactoring rules (active phase)
+- We are incrementally extracting code from App.jsx — one concern at a time
+- Each step must leave the app fully working before moving to the next
+- Target: App.jsx ends up ~150 lines — routing, global state, top-level layout only
+- Commit after every completed extraction step
