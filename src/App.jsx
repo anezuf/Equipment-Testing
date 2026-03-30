@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useStorage, loadSaved } from "./hooks/useStorage";
+import { loadSaved } from "./hooks/useStorage";
 import { useVendors } from "./hooks/useVendors";
 
 import { B, EQ_TYPES } from "./constants";
@@ -32,16 +32,90 @@ import * as XLSX from "xlsx";
 */
 
 export default function App(){
-  const [eqType,setEqType]=useStorage("rack_eq_type","стойка");
-  const STORAGE_KEY=`rack_scoring_data_${eqType}`;
-  const [scoringData,setScoringData]=useStorage(STORAGE_KEY,()=>{
-    const defSecs=eqType==="pdu"?PDU_DEFAULT:DEF_SECTIONS;
-    const defN=mkAll(defSecs).length;
-    return{sections:defSecs,vendors:[{name:"Вендор 1",scores:Array(defN).fill(null),notes:Array(defN).fill(""),images:Array(defN).fill(null)}]};
-  });
-  const sections=scoringData?.sections??(eqType==="pdu"?PDU_DEFAULT:DEF_SECTIONS);
-  const setSections=useCallback(ns=>setScoringData(p=>({...p,sections:typeof ns==="function"?ns(p.sections):ns})),[setScoringData]);
-  const [act,setAct]=useState(0);
+  const defaultSectionsByEqType = useCallback((type) => (type === "pdu" ? PDU_DEFAULT : DEF_SECTIONS), []);
+  const createDefaultScoringData = useCallback((type) => {
+    const defSecs = defaultSectionsByEqType(type);
+    const defN = mkAll(defSecs).length;
+    return { sections: defSecs, vendors: [{ name: "Вендор 1", scores: Array(defN).fill(null), notes: Array(defN).fill(""), images: Array(defN).fill(null) }] };
+  }, [defaultSectionsByEqType]);
+  const normalizeScoringData = useCallback((type, raw) => {
+    if (!raw?.sections || !Array.isArray(raw?.vendors)) return createDefaultScoringData(type);
+    const n = mkAll(raw.sections).length;
+    return {
+      sections: raw.sections,
+      vendors: raw.vendors.map((v) => ({
+        ...v,
+        scores: Array.isArray(v.scores) ? [...v.scores.slice(0, n), ...Array(Math.max(0, n - v.scores.length)).fill(null)] : Array(n).fill(null),
+        notes: Array.isArray(v.notes) ? [...v.notes.slice(0, n), ...Array(Math.max(0, n - v.notes.length)).fill("")] : Array(n).fill(""),
+        images: Array.isArray(v.images) ? [...v.images.slice(0, n), ...Array(Math.max(0, n - v.images.length)).fill(null)] : Array(n).fill(null),
+      })),
+    };
+  }, [createDefaultScoringData]);
+  const loadEqType = useCallback((key) => {
+    const saved = loadSaved(key);
+    return saved === "pdu" ? "pdu" : "стойка";
+  }, []);
+
+  const [techSpecsEqType, setTechSpecsEqType] = useState(() => loadEqType("rack_techspecs_eq_type"));
+  const [editorEqType, setEditorEqType] = useState(() => loadEqType("rack_editor_eq_type"));
+  const [scoringEqType, setScoringEqType] = useState(() => loadEqType("rack_scoring_eq_type"));
+  const [scoringDataByType, setScoringDataByType] = useState(() => ({
+    стойка: normalizeScoringData("стойка", loadSaved("rack_scoring_data_стойка")),
+    pdu: normalizeScoringData("pdu", loadSaved("rack_scoring_data_pdu")),
+  }));
+  const [techSpecsByType, setTechSpecsByType] = useState(() => ({
+    стойка: normalizeTechSpecs(loadSaved("rack_tech_specs_стойка") || TECH_SPECS_DEFAULT),
+    pdu: normalizeTechSpecs(loadSaved("rack_tech_specs_pdu") || PDU_TECH_SPECS_DEFAULT),
+  }));
+
+  const editorScoringData = scoringDataByType[editorEqType] || createDefaultScoringData(editorEqType);
+  const scoringData = scoringDataByType[scoringEqType] || createDefaultScoringData(scoringEqType);
+  const sections = editorScoringData.sections;
+  const scoringSections = scoringData.sections;
+  const setSections = useCallback((ns) => {
+    setScoringDataByType((prev) => {
+      const current = prev[editorEqType] || createDefaultScoringData(editorEqType);
+      const nextSections = typeof ns === "function" ? ns(current.sections) : ns;
+      return { ...prev, [editorEqType]: { ...current, sections: nextSections } };
+    });
+  }, [createDefaultScoringData, editorEqType]);
+  const setScoringSections = useCallback((ns) => {
+    setScoringDataByType((prev) => {
+      const current = prev[scoringEqType] || createDefaultScoringData(scoringEqType);
+      const nextSections = typeof ns === "function" ? ns(current.sections) : ns;
+      return { ...prev, [scoringEqType]: { ...current, sections: nextSections } };
+    });
+  }, [createDefaultScoringData, scoringEqType]);
+
+  const setScoringData = useCallback((updater) => {
+    setScoringDataByType((prev) => {
+      const current = prev[scoringEqType] || createDefaultScoringData(scoringEqType);
+      const nextValue = typeof updater === "function" ? updater(current) : updater;
+      return { ...prev, [scoringEqType]: nextValue };
+    });
+  }, [createDefaultScoringData, scoringEqType]);
+  const [actByType, setActByType] = useState({ стойка: 0, pdu: 0 });
+  const act = actByType[scoringEqType] ?? 0;
+  const setAct = useCallback((valOrUpdater) => {
+    setActByType((prev) => {
+      const current = prev[scoringEqType] ?? 0;
+      const next = typeof valOrUpdater === "function" ? valOrUpdater(current) : valOrUpdater;
+      return { ...prev, [scoringEqType]: next };
+    });
+  }, [scoringEqType]);
+  const {
+    vendors: editorVendors,
+    setVendors: setEditorVendors,
+    ALL: editorALL,
+    SEC_OFF: editorSEC_OFF,
+    itemCount: editorItemCount,
+  } = useVendors({ scoringData: editorScoringData, setScoringData: (updater) => {
+    setScoringDataByType((prev) => {
+      const current = prev[editorEqType] || createDefaultScoringData(editorEqType);
+      const nextValue = typeof updater === "function" ? updater(current) : updater;
+      return { ...prev, [editorEqType]: nextValue };
+    });
+  }, sections, act: 0, setAct: () => {} });
   const {
     vendors,
     setVendors,
@@ -59,10 +133,18 @@ export default function App(){
     allSec,
     sortedIdx,
     getAdvantages,
-  } = useVendors({ scoringData, setScoringData, sections, act, setAct });
+  } = useVendors({ scoringData, setScoringData, sections: scoringSections, act, setAct });
   const [view,setView]=useState("editor");
   const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
-  const [noteOpen,setNoteOpen]=useState(null);
+  const [noteOpenByType, setNoteOpenByType] = useState({ стойка: null, pdu: null });
+  const noteOpen = noteOpenByType[scoringEqType] ?? null;
+  const setNoteOpen = useCallback((valOrUpdater) => {
+    setNoteOpenByType((prev) => {
+      const current = prev[scoringEqType] ?? null;
+      const next = typeof valOrUpdater === "function" ? valOrUpdater(current) : valOrUpdater;
+      return { ...prev, [scoringEqType]: next };
+    });
+  }, [scoringEqType]);
   const [notePopup,setNotePopup]=useState(null);
   const [infoPopup,setInfoPopup]=useState(null);
   const [showReset,setShowReset]=useState(false);
@@ -70,8 +152,14 @@ export default function App(){
   const [expImgs,setExpImgs]=useState({});
   const [heatmapSort,setHeatmapSort]=useState({col:null,label:null});
   const [heatmapSelectedVendor, setHeatmapSelectedVendor] = useState(null);
-  const techSpecsStorageKey=`rack_tech_specs_${eqType}`;
-  const [techSpecs,setTechSpecs]=useStorage(techSpecsStorageKey,()=>eqType==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT);
+  const techSpecs = techSpecsByType[techSpecsEqType] || (techSpecsEqType === "pdu" ? PDU_TECH_SPECS_DEFAULT : TECH_SPECS_DEFAULT);
+  const setTechSpecs = useCallback((updater) => {
+    setTechSpecsByType((prev) => {
+      const current = prev[techSpecsEqType] || (techSpecsEqType === "pdu" ? PDU_TECH_SPECS_DEFAULT : TECH_SPECS_DEFAULT);
+      const nextValue = typeof updater === "function" ? updater(current) : updater;
+      return { ...prev, [techSpecsEqType]: normalizeTechSpecs(nextValue) };
+    });
+  }, [techSpecsEqType]);
   const [techSpecsEditMode,setTechSpecsEditMode]=useState(false);
   const techSpecsSnapshot=useRef(null);
   useEffect(() => {
@@ -81,24 +169,31 @@ export default function App(){
     return () => { window.removeEventListener('resize', handler); window.removeEventListener('orientationchange', handler); };
   }, []);
 
-  const switchEqType=useCallback((newType)=>{
-    if(newType===eqType)return;
-    setEqType(newType);
-    const savedScoring=loadSaved(`rack_scoring_data_${newType}`);
-    if(savedScoring?.sections&&savedScoring?.vendors){
-      const n=mkAll(savedScoring.sections).length;
-      setScoringData({sections:savedScoring.sections,vendors:savedScoring.vendors.map(v=>({...v,images:v.images||Array(n).fill(null)}))});
-    }else{
-      const defSecs=newType==="pdu"?PDU_DEFAULT:DEF_SECTIONS;
-      const defN=mkAll(defSecs).length;
-      setScoringData({sections:defSecs,vendors:[{name:"Вендор 1",scores:Array(defN).fill(null),notes:Array(defN).fill(""),images:Array(defN).fill(null)}]});
-    }
-    const savedTech=loadSaved(`rack_tech_specs_${newType}`);
-    if(savedTech)setTechSpecs(savedTech);
-    else setTechSpecs(newType==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT);
-    setAct(0);
-    setNoteOpen(null);
-  },[eqType]);
+  useEffect(() => {
+    try { localStorage.setItem("rack_techspecs_eq_type", JSON.stringify(techSpecsEqType)); } catch {}
+  }, [techSpecsEqType]);
+  useEffect(() => {
+    try { localStorage.setItem("rack_editor_eq_type", JSON.stringify(editorEqType)); } catch {}
+  }, [editorEqType]);
+  useEffect(() => {
+    try { localStorage.setItem("rack_scoring_eq_type", JSON.stringify(scoringEqType)); } catch {}
+  }, [scoringEqType]);
+  useEffect(() => {
+    EQ_TYPES.forEach((type) => {
+      try { localStorage.setItem(`rack_scoring_data_${type}`, JSON.stringify(scoringDataByType[type])); } catch {}
+    });
+  }, [scoringDataByType]);
+  useEffect(() => {
+    EQ_TYPES.forEach((type) => {
+      try { localStorage.setItem(`rack_tech_specs_${type}`, JSON.stringify(techSpecsByType[type])); } catch {}
+    });
+  }, [techSpecsByType]);
+
+  const contextSections = view === "editor" ? sections : scoringSections;
+  const contextVendors = view === "editor" ? editorVendors : vendors;
+  const contextItemCount = view === "editor" ? editorItemCount : itemCount;
+  const contextSetSections = view === "editor" ? setSections : setScoringSections;
+  const contextSetVendors = view === "editor" ? setEditorVendors : setVendors;
 
   /* Export to Excel (same format as template) */
   const exportExcelFile=useCallback(async()=>{
@@ -106,7 +201,7 @@ export default function App(){
       const {default:ExcelJS}=await import("exceljs");
       const wb=new ExcelJS.Workbook();
       const ws=wb.addWorksheet("Оценка");
-      const colCount=3+vendors.length*2;
+      const colCount=3+contextVendors.length*2;
 
       /* helpers */
       const argb=hex=>"FF"+hex.replace("#","");
@@ -119,7 +214,7 @@ export default function App(){
       ws.getColumn(1).width=5;
       ws.getColumn(2).width=30;
       ws.getColumn(3).width=18;
-      vendors.forEach((_,vi)=>{
+      contextVendors.forEach((_,vi)=>{
         ws.getColumn(4+vi*2).width=12;
         ws.getColumn(5+vi*2).width=22;
       });
@@ -133,7 +228,7 @@ export default function App(){
 
       /* ROW 2: headers */
       const hdr=["#","Параметр","Тип"];
-      vendors.forEach((v,n)=>{hdr.push(v.name);hdr.push(`Прим. В${n+1}`);});
+      contextVendors.forEach((v,n)=>{hdr.push(v.name);hdr.push(`Прим. В${n+1}`);});
       ws.addRow(hdr);
       for(let c=1;c<=colCount;c++){
         const cell=ws.getCell(2,c);
@@ -144,7 +239,7 @@ export default function App(){
       /* data rows */
       let gi=0;
       let rowNum=3;
-      sections.forEach(sec=>{
+      contextSections.forEach(sec=>{
         /* section header */
         ws.addRow([sec.n]);
         ws.mergeCells(rowNum,1,rowNum,colCount);
@@ -160,7 +255,7 @@ export default function App(){
 
           const cleanNote=(str)=>{if(!str)return'';return str.replace(/<[^>]*>/g,'').trim();};
           const rowData=[gi+1,it.n,typeStr];
-          vendors.forEach(v=>{
+          contextVendors.forEach(v=>{
             rowData.push(v.scores[gi]!=null?v.scores[gi]:"");
             rowData.push(cleanNote(v.notes[gi]));
           });
@@ -182,7 +277,7 @@ export default function App(){
           cc.alignment=CENTER;
 
           /* score + note cols */
-          vendors.forEach((_,vi)=>{
+          contextVendors.forEach((_,vi)=>{
             const sc2=ws.getCell(rowNum,4+vi*2);
             sc2.fill=fill(altBg);sc2.alignment=CENTER;
             const nc=ws.getCell(rowNum,5+vi*2);
@@ -204,7 +299,7 @@ export default function App(){
       console.error(err);
       alert("Ошибка экспорта Excel: "+err.message);
     }
-  },[sections,vendors]);
+  },[contextSections,contextVendors]);
 
   /* Import JSON or XLSX */
   const importFile=useCallback(()=>{
@@ -219,8 +314,8 @@ export default function App(){
         reader.onload=ev=>{
           try{
             const d=JSON.parse(ev.target.result);
-            if(d.sections&&Array.isArray(d.sections)){setSections(d.sections);}
-            if(d.vendors&&Array.isArray(d.vendors)){setVendors(d.vendors.map(v=>({...v,images:v.images||Array(mkAll(d.sections||sections).length).fill(null)})));}
+            if(d.sections&&Array.isArray(d.sections)){contextSetSections(d.sections);}
+            if(d.vendors&&Array.isArray(d.vendors)){contextSetVendors(d.vendors.map(v=>({...v,images:v.images||Array(mkAll(d.sections||contextSections).length).fill(null)})));}
             setAct(0);setView("editor");
           }catch{alert("Ошибка чтения JSON");}
         };
@@ -249,7 +344,7 @@ export default function App(){
           norm(vendorHdr[4])==="примечание";
 
         if(isVendorForm){
-          const allItems=mkAll(sections);
+          const allItems=mkAll(contextSections);
           const itemIndexByName=new Map();
           allItems.forEach((it,idx)=>{
             const key=norm(it.n);
@@ -257,10 +352,10 @@ export default function App(){
           });
 
           const vendorNameRaw=a1.split(" - ").slice(1).join(" - ").trim();
-          const vendorName=vendorNameRaw||`Вендор ${vendors.length+1}`;
-          const scores=Array(itemCount).fill(null);
-          const notes=Array(itemCount).fill("");
-          const images=Array(itemCount).fill(null);
+          const vendorName=vendorNameRaw||`Вендор ${contextVendors.length+1}`;
+          const scores=Array(contextItemCount).fill(null);
+          const notes=Array(contextItemCount).fill("");
+          const images=Array(contextItemCount).fill(null);
           let matchedCount=0;
 
           for(let r=4;r<data.length;r++){
@@ -293,8 +388,8 @@ export default function App(){
           }
 
           const newVendor={name:vendorName,scores,notes,images};
-          setVendors(prev=>[...prev,newVendor]);
-          setAct(vendors.length);
+          contextSetVendors(prev=>[...prev,newVendor]);
+          setAct(contextVendors.length);
           setView("input");
           if(matchedCount===0){
             alert("Не найдено совпадений параметров для импорта формы вендора");
@@ -368,8 +463,8 @@ export default function App(){
           return{name:vn.name,scores,notes,images};
         });
 
-        setSections(newSections);
-        setVendors(newVendors);
+        contextSetSections(newSections);
+        contextSetVendors(newVendors);
         setAct(0);setView("input");
       }catch(err){
         console.error(err);
@@ -377,16 +472,16 @@ export default function App(){
       }
     };
     input.click();
-  },[sections,itemCount,vendors.length]);
+  },[contextSections,contextItemCount,contextVendors.length,contextSetSections,contextSetVendors,setAct]);
 
   const exportTechSpecs=useCallback(async()=>{
     try{
-      await exportTechSpecsXlsx({ techSpecs, eqType });
+      await exportTechSpecsXlsx({ techSpecs, eqType: techSpecsEqType });
     }catch(err){
       console.error(err);
       alert("Ошибка экспорта: "+err.message);
     }
-  },[techSpecs,eqType]);
+  },[techSpecs,techSpecsEqType]);
 
   const importTechSpecs=useCallback(()=>{
     const input=document.createElement("input");
@@ -451,7 +546,7 @@ export default function App(){
         }
         setTechSpecs(normalizeTechSpecs(validSpecs));
         // Auto-sync sections from loaded tech specs, preserving weights from current defaults
-        const defaultSecs = eqType === "pdu" ? PDU_DEFAULT : DEF_SECTIONS;
+        const defaultSecs = editorEqType === "pdu" ? PDU_DEFAULT : DEF_SECTIONS;
         const syncedSections = validSpecs.map(sec => {
           const defSec = defaultSecs.find(s => s.n === sec.n);
           return {
@@ -464,7 +559,7 @@ export default function App(){
         });
         const totalItems = syncedSections.reduce((a,s) => a + s.items.length, 0);
         setSections(syncedSections);
-        setVendors(v => v.map(vnd => ({
+        setEditorVendors(v => v.map(vnd => ({
           ...vnd,
           scores: Array(totalItems).fill(null),
           notes: Array(totalItems).fill(""),
@@ -476,7 +571,7 @@ export default function App(){
       }
     };
     input.click();
-  },[eqType]);
+  },[editorEqType, setSections, setEditorVendors, setTechSpecs]);
 
   /* Reset vendor scores and notes (keeps sections/structure) */
   const doReset=useCallback(()=>{
@@ -484,15 +579,15 @@ export default function App(){
     setShowReset(false);
     setNoteOpen(null);
     setAct(0);
-  },[itemCount]);
+  },[itemCount, setAct, setNoteOpen, setVendors]);
 
   /* Export to Excel (CSV with BOM for proper Cyrillic in Excel) */
   /* Generate clean PDF report for a specific vendor */
   const exportVendorPDF=useCallback((vi)=>{
     const v=vendors[vi];
     if(!v)return;
-    const allItems=mkAll(sections);
-    const offs=mkOff(sections);
+    const allItems=mkAll(scoringSections);
+    const offs=mkOff(scoringSections);
     const sl=["✗ Нет","◐ Частично","✓ Да"];
     const sc_colors=["#EF4444","#F59E0B","#10B981"];
     const total=calcTotal(v.scores,allItems);
@@ -538,7 +633,7 @@ export default function App(){
     html+=`<div class="total" style="background:${tColor}">${fmt(total)} / 10</div>`;
 
     let gi=0;
-    sections.forEach((sec,si)=>{
+    scoringSections.forEach((sec,si)=>{
       html+=`<div class="sec-block"><div class="sec">${esc(sec.n)}</div><div class="items">`;
       sec.items.forEach((it,ii)=>{
         const sc=v.scores[gi];
@@ -566,8 +661,8 @@ export default function App(){
 
     html+=`<div class="summary" style="break-inside:avoid">`;
     html+=`<div class="srow" style="background:#334155;color:#fff;font-weight:700"><span>Раздел</span><span>Балл</span></div>`;
-    sections.forEach((sec,si)=>{
-      const val=calcSec(v.scores,si,sections,offs);
+    scoringSections.forEach((sec,si)=>{
+      const val=calcSec(v.scores,si,scoringSections,offs);
       html+=`<div class="srow"><span class="sn">${esc(sec.n)}</span><span class="sv">${fmt(val)}</span></div>`;
     });
     html+=`<div class="srow" style="border-top:2px solid #E5EAF0;font-weight:700"><span>ИТОГО</span><span style="color:${tColor}">${fmt(total)}</span></div>`;
@@ -592,21 +687,21 @@ export default function App(){
         closePrintWindow();
       }
     },500);
-  },[sections,vendors]);
+  },[scoringSections,vendors]);
 
   const exportActiveVendorForm = useCallback(() => {
     const vendor = vendors[act];
     if (!vendor) return;
-    exportVendorForm({ vendor, sections, eqType, ALL });
-  }, [vendors, act, sections, eqType, ALL]);
+    exportVendorForm({ vendor, sections: scoringSections, eqType: scoringEqType, ALL });
+  }, [vendors, act, scoringSections, scoringEqType, ALL]);
 
   const setSectionName=useCallback((si,name)=>{const n=sections.map((s,i)=>i===si?{...s,n:name}:s);setSections(n);},[sections,setSections]);
   const addSection=useCallback(()=>{
     const newSection={n:"Новый раздел",items:[{n:"Параметр 1",w:2}]};
-    const insertAt=itemCount;
+    const insertAt=editorItemCount;
     const blockLen=newSection.items.length;
     setSections([...sections,newSection]);
-    setVendors(prev=>prev.map(v=>{
+    setEditorVendors(prev=>prev.map(v=>{
       const scores=[...v.scores];
       const notes=[...v.notes];
       const images=[...(v.images||[])];
@@ -615,14 +710,14 @@ export default function App(){
       images.splice(insertAt,0,...Array(blockLen).fill(null));
       return {...v,scores,notes,images};
     }));
-  },[itemCount,sections,setSections,setVendors]);
+  },[editorItemCount,sections,setSections,setEditorVendors]);
   const rmSection=useCallback((si)=>{
     if(sections.length<=1)return;
-    const absIdx=SEC_OFF[si];
+    const absIdx=editorSEC_OFF[si];
     const blockLen=sections[si].items.length;
     const n=sections.filter((_,i)=>i!==si);
     setSections(n);
-    setVendors(prev=>prev.map(v=>{
+    setEditorVendors(prev=>prev.map(v=>{
       const scores=[...v.scores];
       const notes=[...v.notes];
       const images=[...(v.images||[])];
@@ -631,15 +726,15 @@ export default function App(){
       images.splice(absIdx,blockLen);
       return {...v,scores,notes,images};
     }));
-  },[sections,SEC_OFF,setSections,setVendors]);
+  },[sections,editorSEC_OFF,setSections,setEditorVendors]);
   const setItemName=useCallback((si,ii,name)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,n:name}:it)}:s);setSections(n);},[sections,setSections]);
   const setItemWeight=useCallback((si,ii,w)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,w}:it)}:s);setSections(n);},[sections,setSections]);
   const addItem=useCallback((si,ii)=>{
     const insertIdx=ii==null?sections[si].items.length-1:ii;
-    const absIdx=SEC_OFF[si]+insertIdx+1;
+    const absIdx=editorSEC_OFF[si]+insertIdx+1;
     const n=sections.map((s,i)=>i===si?{...s,items:[...s.items.slice(0,insertIdx+1),{n:"Новый параметр",w:2},...s.items.slice(insertIdx+1)]}:s);
     setSections(n);
-    setVendors(prev=>prev.map(v=>{
+    setEditorVendors(prev=>prev.map(v=>{
       const scores=[...v.scores];
       const notes=[...v.notes];
       const images=[...(v.images||[])];
@@ -648,13 +743,13 @@ export default function App(){
       images.splice(absIdx,0,null);
       return {...v,scores,notes,images};
     }));
-  },[sections,SEC_OFF,setSections,setVendors]);
+  },[sections,editorSEC_OFF,setSections,setEditorVendors]);
   const rmItem=useCallback((si,ii)=>{
     if(sections[si].items.length<=1)return;
-    const absIdx=SEC_OFF[si]+ii;
+    const absIdx=editorSEC_OFF[si]+ii;
     const n=sections.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s);
     setSections(n);
-    setVendors(prev=>prev.map(v=>{
+    setEditorVendors(prev=>prev.map(v=>{
       const scores=[...v.scores];
       const notes=[...v.notes];
       const images=[...(v.images||[])];
@@ -663,7 +758,7 @@ export default function App(){
       images.splice(absIdx,1);
       return {...v,scores,notes,images};
     }));
-  },[sections,SEC_OFF,setSections,setVendors]);
+  },[sections,editorSEC_OFF,setSections,setEditorVendors]);
 
   const resetHeatmapPrintScroll=useCallback(()=>{
     if(typeof document==="undefined")return;
@@ -688,18 +783,25 @@ export default function App(){
     window.print();
   },[resetHeatmapPrintScroll]);
 
+  const scoringTechSpecs = techSpecsByType[scoringEqType] || [];
   const getTechReq=useCallback((secName,itemName)=>{
-    const sec=techSpecs.find(s=>s.n===secName);
-    const item=sec?.items?.find(x=>x.n===itemName);
-    return item?.n2||"";
-  },[techSpecs]);
+    void secName;
+    const normalize = (v) => String(v || "").trim().toLowerCase();
+    const targetName = normalize(itemName);
+    if (!targetName) return "";
+    for (const sec of scoringTechSpecs) {
+      const found = sec?.items?.find((x) => normalize(x?.n) === targetName);
+      if (found?.n2) return found.n2;
+    }
+    return "";
+  },[scoringTechSpecs]);
   const moveSection=useCallback((si,dir)=>{
     const newIdx=si+dir;
     if(newIdx<0||newIdx>=sections.length)return;
     const oldOffs=mkOff(sections);
     const newSections=(()=>{const a=[...sections];[a[si],a[newIdx]]=[a[newIdx],a[si]];return a;})();
     setSections(newSections);
-    setVendors(prev=>prev.map(v=>{
+    setEditorVendors(prev=>prev.map(v=>{
       const sc=[],nt=[],im=[];
       for(let i=0;i<newSections.length;i++){
         const sec=newSections[i];
@@ -716,20 +818,20 @@ export default function App(){
       }
       return{...v,scores:sc,notes:nt,images:im};
     }));
-  },[sections,setSections,setVendors]);
+  },[sections,setSections,setEditorVendors]);
   const moveItem=useCallback((si,ii,dir)=>{
     const newIdx=ii+dir;
     if(newIdx<0||newIdx>=sections[si].items.length)return;
     setSections(p=>p.map((s,i)=>i===si?{...s,items:(()=>{const a=[...s.items];[a[ii],a[newIdx]]=[a[newIdx],a[ii]];return a;})()}:s));
-    const off=SEC_OFF[si];
-    setVendors(prev=>prev.map(v=>{
+    const off=editorSEC_OFF[si];
+    setEditorVendors(prev=>prev.map(v=>{
       const sc=[...v.scores];const nt=[...v.notes];const im=[...(v.images||[])];
       const[ms]=sc.splice(off+ii,1);const[mn]=nt.splice(off+ii,1);const[mi]=im.splice(off+ii,1);
       const insertIdx=off+(newIdx>ii?newIdx-1:newIdx);
       sc.splice(insertIdx,0,ms);nt.splice(insertIdx,0,mn);im.splice(insertIdx,0,mi??null);
       return{...v,scores:sc,notes:nt,images:im};
     }));
-  },[sections,SEC_OFF,setSections,setVendors]);
+  },[sections,editorSEC_OFF,setSections,setEditorVendors]);
   const moveTechSection=useCallback((si,dir)=>{
     const newIdx=si+dir;
     if(newIdx<0||newIdx>=techSpecs.length)return;
@@ -757,7 +859,7 @@ export default function App(){
     }));
     const totalItems = newSections.reduce((a,s)=>a+s.items.length,0);
     setSections(newSections);
-    setVendors(v => v.map(vnd => ({
+    setEditorVendors(v => v.map(vnd => ({
       ...vnd,
       scores: Array(totalItems).fill(null),
       notes: Array(totalItems).fill(""),
@@ -765,7 +867,7 @@ export default function App(){
     })));
     setShowApplyConfirm(false);
     setTechSpecsEditMode(false);
-  },[techSpecs,sections,setSections,setVendors,setShowApplyConfirm,setTechSpecsEditMode]);
+  },[techSpecs,sections,setSections,setEditorVendors,setShowApplyConfirm,setTechSpecsEditMode]);
   return <div style={{minHeight:"100vh",background:B.bg,fontFamily:"Inter, system-ui, sans-serif",position:"relative",overflowX:"hidden"}}>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet"/>
 
@@ -809,8 +911,6 @@ export default function App(){
     <NavBar
       view={view}
       setView={setView}
-      eqType={eqType}
-      switchEqType={switchEqType}
       vendorsCount={vendors.length}
       onExport={exportExcelFile}
       onImport={importFile}
@@ -821,12 +921,12 @@ export default function App(){
     {/* ═══ EDITOR ═══ */}
     {view==="editor"&&<ChecklistEditor
       sections={sections}
-      SEC_OFF={SEC_OFF}
-      eqType={eqType}
+      SEC_OFF={editorSEC_OFF}
+      eqType={editorEqType}
       isPortrait={isPortrait}
       onImport={importFile}
       onExport={exportExcelFile}
-      onSwitchEqType={switchEqType}
+      onSwitchEqType={setEditorEqType}
       onAddSection={addSection}
       onRemoveSection={rmSection}
       onSectionNameChange={setSectionName}
@@ -850,18 +950,20 @@ export default function App(){
       exportTechSpecs={exportTechSpecs}
       importTechSpecs={importTechSpecs}
       EQ_TYPES={EQ_TYPES}
-      switchEqType={switchEqType}
-      eqType={eqType}
+      switchEqType={setTechSpecsEqType}
+      eqType={techSpecsEqType}
       sections={sections}
       setSections={setSections}
-      setVendors={setVendors}
+      setVendors={setEditorVendors}
       moveTechSection={moveTechSection}
       moveTechItem={moveTechItem}
     />}
 
         {view==="input"&&<ScoreEditor
+      eqType={scoringEqType}
+      onSwitchEqType={setScoringEqType}
       vendors={vendors}
-      sections={sections}
+      sections={scoringSections}
       ALL={ALL}
       SEC_OFF={SEC_OFF}
       act={act}
@@ -890,8 +992,10 @@ export default function App(){
 
     {/* DASHBOARD */}
     {view==="dashboard"&&<Dashboard
+      eqType={scoringEqType}
+      onSwitchEqType={setScoringEqType}
       vendors={vendors}
-      sections={sections}
+      sections={scoringSections}
       totals={totals}
       allSec={allSec}
       sortedIdx={sortedIdx}

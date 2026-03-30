@@ -5,8 +5,6 @@ import { B } from "../../constants";
 function NavBar({
   view,
   setView,
-  eqType,
-  switchEqType,
   vendorsCount,
   onExport,
   onImport,
@@ -34,8 +32,6 @@ function NavBar({
     </button>
   );
 
-  void eqType;
-  void switchEqType;
   void vendorsCount;
   void onExport;
   void onImport;

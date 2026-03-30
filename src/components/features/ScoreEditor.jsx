@@ -1,9 +1,11 @@
-import { B, VC, ICO, SM, WC } from "../../constants";
+import { B, VC, ICO, SM, WC, EQ_TYPES } from "../../constants";
 import RichNote from "../RichNote";
 
 const [IconNo, IconMid, IconYes] = ICO;
 
 export default function ScoreEditor({
+  eqType,
+  onSwitchEqType,
   vendors,
   sections,
   ALL,
@@ -46,6 +48,15 @@ export default function ScoreEditor({
   const exportVendorForm = onExportVendorForm;
 
   return <div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
+      <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {EQ_TYPES.map((t) => (
+            <button key={t} onClick={() => onSwitchEqType(t)} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===t?B.blue:B.border}`,background:eqType===t?"#EFF6FF":"#fff",color:eqType===t?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+              {t==="стойка"?"Стойка":"PDU"}
+            </button>
+          ))}
+        </div>
+      </div>
       <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
         <div style={{display:"inline-flex",gap:6,padding:"8px 16px",background:"#fff",borderRadius:12,border:`1px solid ${B.border}`,alignItems:"center",flexWrap:"wrap",justifyContent:"center"}}>
           <IconNo c="#EF4444" s={13}/><span style={{fontSize:11,color:"#EF4444",fontWeight:600}}>Нет</span>

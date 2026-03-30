@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
-import { B, VC, ICO } from "../../constants";
+import { B, VC, ICO, EQ_TYPES } from "../../constants";
 import { fmt } from "../../utils";
 import { mkAll } from "../../sections";
 import { hasFail } from "../../scoring";
@@ -10,6 +10,8 @@ import HeatmapTh from "../HeatmapTh";
 const [,,IconYes] = ICO;
 
 function Dashboard({
+  eqType,
+  onSwitchEqType,
   vendors,
   sections,
   totals,
@@ -69,6 +71,13 @@ function Dashboard({
   }, [vendors, totals, allSec, heatmapSort]);
 
   return <div data-dash="" style={{maxWidth:1200,margin:"0 auto",padding:"20px 16px"}}>
+    <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12,justifyContent:"center"}}>
+      {EQ_TYPES.map((t) => (
+        <button key={t} onClick={() => onSwitchEqType(t)} style={{padding:"6px 16px",borderRadius:12,border:`1.5px solid ${eqType===t?B.blue:B.border}`,background:eqType===t?"#EFF6FF":"#fff",color:eqType===t?B.blue:B.steel,fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+          {t==="стойка"?"Стойка":"PDU"}
+        </button>
+      ))}
+    </div>
     {/* Gauges */}
     <div data-gauges="" style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:12,marginBottom:24}}>
       {sortedIdx.map(i=><Gauge key={i} value={totals[i]} color={VC[i%VC.length]} label={vendors[i].name} rank={ranks[i]} fail={fails[i]}/>)}
