@@ -6,16 +6,14 @@ import { B, EQ_TYPES } from "./constants";
 import { mkAll, mkOff } from "./sections";
 import { calcTotal, calcSec } from "./scoring";
 import { fmt } from "./utils";
-import { exportTechSpecsXlsx } from "./utils/exportTechSpecs";
-import { exportVendorForm } from "./utils/exportVendorForm";
 import { TECH_SPECS_DEFAULT, PDU_TECH_SPECS_DEFAULT, normalizeTechSpecs } from "./data/techSpecs";
+import { useImportExportHandlers } from "./hooks/useImportExportHandlers";
 import NotePopup from "./components/NotePopup";
 import Dashboard from "./components/features/Dashboard";
 import ScoreEditor from "./components/features/ScoreEditor";
 import ChecklistEditor from "./components/features/ChecklistEditor";
 import TechSpecs from "./components/features/TechSpecs";
 import NavBar from "./components/ui/NavBar";
-import * as XLSX from "xlsx";
 
 
 /* Weight: 0=Преимущество (excluded from score), 1=Требование, 2=Требование(!) critical */
@@ -227,366 +225,21 @@ export default function App(){
     });
   }, [createDefaultScoringData, sectionsByType]);
 
-  const contextSections = scoringSections;
-  const contextVendors = vendors;
-  const contextItemCount = itemCount;
-  const contextSetVendors = setVendors;
-
-  /* Export to Excel (same format as template) */
-  const exportExcelFile=useCallback(async()=>{
-    try{
-      const {default:ExcelJS}=await import("exceljs");
-      const wb=new ExcelJS.Workbook();
-      const ws=wb.addWorksheet("Оценка");
-      const colCount=3+contextVendors.length*2;
-
-      /* helpers */
-      const argb=hex=>"FF"+hex.replace("#","");
-      const fill=hex=>({type:"pattern",pattern:"solid",fgColor:{argb:argb(hex)}});
-      const fnt=(color,bold=false,size)=>({bold,color:{argb:argb(color)},...(size?{size}:{})});
-      const CENTER={horizontal:"center",vertical:"middle"};
-      const LEFT={horizontal:"left",vertical:"middle"};
-
-      /* column widths */
-      ws.getColumn(1).width=5;
-      ws.getColumn(2).width=30;
-      ws.getColumn(3).width=18;
-      contextVendors.forEach((_,vi)=>{
-        ws.getColumn(4+vi*2).width=12;
-        ws.getColumn(5+vi*2).width=22;
-      });
-
-      /* ROW 1: title */
-      ws.addRow(["ЧЕК-ЛИСТ ТЕСТИРОВАНИЯ СТОЕК"]);
-      ws.mergeCells(1,1,1,colCount);
-      const tc=ws.getCell(1,1);
-      tc.fill=fill("#334155");tc.font=fnt("#FFFFFF",true,13);tc.alignment=CENTER;
-      ws.getRow(1).height=26;
-
-      /* ROW 2: headers */
-      const hdr=["#","Параметр","Тип"];
-      contextVendors.forEach((v,n)=>{hdr.push(v.name);hdr.push(`Прим. В${n+1}`);});
-      ws.addRow(hdr);
-      for(let c=1;c<=colCount;c++){
-        const cell=ws.getCell(2,c);
-        cell.fill=fill("#334155");cell.font=fnt("#FFFFFF",true);cell.alignment=CENTER;
-      }
-      ws.getRow(2).height=18;
-
-      /* data rows */
-      let gi=0;
-      let rowNum=3;
-      contextSections.forEach(sec=>{
-        /* section header */
-        ws.addRow([sec.n]);
-        ws.mergeCells(rowNum,1,rowNum,colCount);
-        const sc=ws.getCell(rowNum,1);
-        sc.fill=fill("#2F9AFF");sc.font=fnt("#FFFFFF",true);sc.alignment=CENTER;
-        ws.getRow(rowNum).height=16;
-        rowNum++;
-
-        sec.items.forEach(it=>{
-          const typeStr=it.w===2?"★! Требование":it.w===1?"★ Требование":"☆ Преимущество";
-          const isReq=it.w>=1;
-          const altBg=gi%2===0?"#F5F8FB":"#FFFFFF";
-
-          const cleanNote=(str)=>{if(!str)return'';return str.replace(/<[^>]*>/g,'').trim();};
-          const rowData=[gi+1,it.n,typeStr];
-          contextVendors.forEach(v=>{
-            rowData.push(v.scores[gi]!=null?v.scores[gi]:"");
-            rowData.push(cleanNote(v.notes[gi]));
-          });
-          ws.addRow(rowData);
-          ws.getRow(rowNum).height=15;
-
-          /* A: number */
-          const ca=ws.getCell(rowNum,1);
-          ca.font=fnt("#7B97B2");ca.alignment=CENTER;
-
-          /* B: name */
-          const cb=ws.getCell(rowNum,2);
-          cb.font=fnt("#334155");cb.alignment=LEFT;
-
-          /* C: type */
-          const cc=ws.getCell(rowNum,3);
-          cc.fill=isReq?fill("#FEE2E2"):fill("#DBEAFE");
-          cc.font=isReq?fnt("#DC2626",true):fnt("#2F9AFF",true);
-          cc.alignment=CENTER;
-
-          /* score + note cols */
-          contextVendors.forEach((_,vi)=>{
-            const sc2=ws.getCell(rowNum,4+vi*2);
-            sc2.fill=fill(altBg);sc2.alignment=CENTER;
-            const nc=ws.getCell(rowNum,5+vi*2);
-            nc.fill=fill(altBg);nc.font=fnt("#7B97B2");
-          });
-
-          rowNum++;gi++;
-        });
-      });
-
-      /* download */
-      const buffer=await wb.xlsx.writeBuffer();
-      const blob=new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");
-      a.href=url;a.download="scoring_export.xlsx";a.click();
-      setTimeout(()=>URL.revokeObjectURL(url),1000);
-    }catch(err){
-      console.error(err);
-      alert("Ошибка экспорта Excel: "+err.message);
-    }
-  },[contextSections,contextVendors]);
-
-  /* Import JSON or XLSX */
-  const importFile=useCallback(()=>{
-    const input=document.createElement("input");
-    input.type="file";input.accept=".json,.xlsx,.xls";
-    input.onchange=async e=>{
-      const file=e.target.files[0];if(!file)return;
-      const ext=file.name.split(".").pop().toLowerCase();
-
-      if(ext==="json"){
-        const reader=new FileReader();
-        reader.onload=ev=>{
-          try{
-            const d=JSON.parse(ev.target.result);
-            if(d.vendors&&Array.isArray(d.vendors)){contextSetVendors(d.vendors.map(v=>({...v,images:v.images||Array(contextItemCount).fill(null)})));}
-            setAct(0);setView("editor");
-          }catch{alert("Ошибка чтения JSON");}
-        };
-        reader.readAsText(file);
-        return;
-      }
-
-      /* XLSX parsing with SheetJS */
-      try{
-        const buf=await file.arrayBuffer();
-        const wb=XLSX.read(buf,{type:"array"});
-        const wsName=wb.SheetNames.find(n=>n==="Оценка")||wb.SheetNames[0];
-        const ws=wb.Sheets[wsName];
-        const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
-        const norm=(val)=>String(val??"").trim().toLowerCase();
-
-        /* Vendor form format:
-           A1 contains " - " and row 4 headers match vendor template */
-        const a1=String(data?.[0]?.[0]??"").trim();
-        const vendorHdr=data?.[3]??[];
-        const isVendorForm=
-          a1.includes(" - ") &&
-          norm(vendorHdr[0])==="№ п. ту" &&
-          norm(vendorHdr[1])==="параметр" &&
-          norm(vendorHdr[3])==="оценка (0/1/2)" &&
-          norm(vendorHdr[4])==="примечание";
-
-        if(isVendorForm){
-          const allItems=mkAll(contextSections);
-          const itemIndexByName=new Map();
-          allItems.forEach((it,idx)=>{
-            const key=norm(it.n);
-            if(key&&!itemIndexByName.has(key))itemIndexByName.set(key,idx);
-          });
-
-          const vendorNameRaw=a1.split(" - ").slice(1).join(" - ").trim();
-          const vendorName=vendorNameRaw||`Вендор ${contextVendors.length+1}`;
-          const scores=Array(contextItemCount).fill(null);
-          const notes=Array(contextItemCount).fill("");
-          const images=Array(contextItemCount).fill(null);
-          let matchedCount=0;
-
-          for(let r=4;r<data.length;r++){
-            const row=Array.isArray(data[r])?data[r]:[];
-            const colA=row[0];
-            const colBRaw=row[1];
-            const colB=String(colBRaw??"").trim();
-
-            /* Section header row (A text + B empty) */
-            if(typeof colA==="string"&&colA.trim()!==""&&colB==="")continue;
-
-            /* Data row (A number): match parameter name from column B */
-            const aNum=Number(colA);
-            if(!Number.isFinite(aNum)||String(colA??"").trim()==="")continue;
-            if(!colB)continue;
-
-            const itemIdx=itemIndexByName.get(norm(colB));
-            if(itemIdx==null)continue;
-
-            const rawScore=row[3];
-            if(rawScore===""||rawScore==null)scores[itemIdx]=null;
-            else{
-              const num=Number(rawScore);
-              scores[itemIdx]=num===0||num===1||num===2?num:null;
-            }
-
-            const noteText=String(row[4]??"").trim();
-            if(noteText)notes[itemIdx]=noteText;
-            matchedCount++;
-          }
-
-          const newVendor={name:vendorName,scores,notes,images};
-          contextSetVendors(prev=>[...prev,newVendor]);
-          setAct(contextVendors.length);
-          setView("input");
-          if(matchedCount===0){
-            alert("Не найдено совпадений параметров для импорта формы вендора");
-          }
-          return;
-        }
-
-        /* Row 0 = title (skip), Row 1 = headers */
-        const hdr=data[1]||[];
-
-        /* Vendor columns: vendor name at col 3, 5, 7... note at col+1 */
-        const vendorCols=[];
-        for(let c=3;c<hdr.length;c+=2){
-          const name=String(hdr[c]||"").trim();
-          if(name)vendorCols.push({name,scoreCol:c,noteCol:c+1});
-        }
-        if(vendorCols.length===0){alert("Не найдены колонки вендоров");return;}
-
-        /* Parse sections and items from row 2 onward */
-        const newSections=[];
-        let curSec=null;
-        for(let r=2;r<data.length;r++){
-          const row=data[r];
-          if(!row||row.every(c=>c===""||c==null))continue;
-          const colA=row[0];
-          const colB=String(row[1]||"").trim();
-          const aNum=Number(colA);
-
-          /* Section header: col A is non-empty non-number, col B is empty */
-          if(colA&&isNaN(aNum)&&colB===""){
-            curSec={n:String(colA).trim(),items:[]};
-            newSections.push(curSec);
-            continue;
-          }
-
-          /* Item row: col A is a positive integer */
-          if(!isNaN(aNum)&&aNum>0){
-            const colC=String(row[2]||"");
-            const w=colC.includes("!")?2:colC.includes("★")?1:0;
-            if(!curSec){curSec={n:"Раздел",items:[]};newSections.push(curSec);}
-            curSec.items.push({n:String(row[1]||"").trim(),w});
-          }
-        }
-
-        if(newSections.length===0||newSections.every(s=>s.items.length===0)){
-          alert("Не удалось распознать структуру файла");return;
-        }
-
-        /* Build vendor score/note arrays */
-        const totalItems=newSections.reduce((a,s)=>a+s.items.length,0);
-        const newVendors=vendorCols.map(vn=>{
-          const scores=Array(totalItems).fill(null);
-          const notes=Array(totalItems).fill("");
-          const images=Array(totalItems).fill(null);
-          let idx=0;
-          for(let r=2;r<data.length;r++){
-            const row=data[r];
-            if(!row)continue;
-            const aNum=Number(row[0]);
-            if(isNaN(aNum)||aNum<=0)continue; /* skip title, header, section rows */
-            if(idx>=totalItems)break;
-            const rawScore=row[vn.scoreCol];
-            if(rawScore!=null&&rawScore!==""){
-              const num=Number(rawScore);
-              if(!isNaN(num)&&num>=0&&num<=2)scores[idx]=num;
-            }
-            const rawNote=String(row[vn.noteCol]||"").trim();
-            if(rawNote)notes[idx]=rawNote;
-            idx++;
-          }
-          return{name:vn.name,scores,notes,images};
-        });
-
-        contextSetVendors(newVendors);
-        setAct(0);setView("input");
-      }catch(err){
-        console.error(err);
-        alert("Ошибка чтения Excel: "+err.message);
-      }
-    };
-    input.click();
-  },[contextSections,contextItemCount,contextVendors.length,contextSetVendors,setAct]);
-
-  const exportTechSpecs=useCallback(async()=>{
-    try{
-      await exportTechSpecsXlsx({ techSpecs, eqType: techSpecsEqType });
-    }catch(err){
-      console.error(err);
-      alert("Ошибка экспорта: "+err.message);
-    }
-  },[techSpecs,techSpecsEqType]);
-
-  const importTechSpecs=useCallback(()=>{
-    const input=document.createElement("input");
-    input.type="file";
-    input.accept=".json,.xlsx,.xls";
-    input.onchange=async e=>{
-      const file=e.target.files[0];
-      if(!file)return;
-      const ext=file.name.split(".").pop().toLowerCase();
-
-      if(ext==="json"){
-        const reader=new FileReader();
-        reader.onload=ev=>{
-          try{
-            const d=JSON.parse(ev.target.result);
-            if(Array.isArray(d))setTechSpecs(normalizeTechSpecs(d));
-            else alert("Неверный формат файла");
-          }catch{alert("Ошибка чтения JSON");}
-        };
-        reader.readAsText(file);
-        return;
-      }
-
-      try{
-        const buf=await file.arrayBuffer();
-        const wb=XLSX.read(buf,{type:"array"});
-        const wsName=wb.SheetNames.find(n=>n==="ТУ")||wb.SheetNames[0];
-        const ws=wb.Sheets[wsName];
-        const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
-
-        const newSpecs=[];
-        let curSec=null;
-        for(let r=0;r<data.length;r++){
-          const row=Array.isArray(data[r])?data[r]:[];
-          const col0Raw=row[0];
-          const col1Raw=row[1];
-          const col2Raw=row[2];
-          const col0=String(col0Raw??"").trim();
-          const col1=String(col1Raw??"").trim();
-          const col2=String(col2Raw??"").trim();
-          const col1Empty=col1===""||Number.isNaN(col1Raw);
-          const col2Empty=col2===""||Number.isNaN(col2Raw);
-          const col0Numeric=col0!==""&&!Number.isNaN(Number(col0));
-
-          if(col0==="#" )continue;
-
-          if(col1Empty&&col0!==""&&col0!=="#"){
-            curSec={n:col0,items:[]};
-            newSpecs.push(curSec);
-            continue;
-          }
-
-          if(col0Numeric&&!col1Empty&&curSec){
-            curSec.items.push({n:col1,n2:col2Empty?"":col2});
-          }
-        }
-
-        const validSpecs=newSpecs.filter(sec=>Array.isArray(sec.items)&&sec.items.length>0);
-        if(validSpecs.length===0){
-          alert("Не удалось распознать структуру ТУ: в файле не найдено ни одного корректного раздела с параметрами.");
-          return;
-        }
-        setTechSpecs(normalizeTechSpecs(validSpecs));
-        alert(`✓ Загружено: разделов ${validSpecs.length}, параметров ${validSpecs.reduce((a,s)=>a+s.items.length,0)}`);
-      }catch(err){
-        alert("Ошибка чтения XLSX: "+err.message);
-      }
-    };
-    input.click();
-  },[setTechSpecs]);
+  const { exportExcelFile, importFile, exportTechSpecs, importTechSpecs, exportActiveVendorForm } =
+    useImportExportHandlers({
+      sections: scoringSections,
+      vendors,
+      itemCount,
+      setVendors,
+      setAct,
+      setView,
+      techSpecs,
+      techSpecsEqType,
+      setTechSpecs,
+      scoringEqType,
+      ALL,
+      act,
+    });
 
   /* Reset vendor scores and notes (keeps sections/structure) */
   const doReset=useCallback(()=>{
@@ -703,12 +356,6 @@ export default function App(){
       }
     },500);
   },[scoringSections,vendors]);
-
-  const exportActiveVendorForm = useCallback(() => {
-    const vendor = vendors[act];
-    if (!vendor) return;
-    exportVendorForm({ vendor, sections: scoringSections, eqType: scoringEqType, ALL });
-  }, [vendors, act, scoringSections, scoringEqType, ALL]);
 
   const setItemWeight = useCallback((si, ii, w) => {
     const itemName = editorTechSpecs?.[si]?.items?.[ii]?.n;
