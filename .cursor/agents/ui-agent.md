@@ -25,6 +25,36 @@ Never invent new UI patterns — always reuse existing ones from this document.
 - Never hardcode vendor colors — always use VC[index % VC.length]
 - Never create a new button style — pick from the existing list below
 
+## What NOT to do
+
+- Never use a background pill for PDF/XLSX format badges — use colored text only (`btn-action-format` + `btn-action-format-pdf` / `btn-action-format-xlsx`).
+- Never use transform:scale on hover for buttons.
+
+## Export button pattern (PDF / XLSX)
+
+Used in NavBar and action bars for file export/import.
+
+**PDF button (red tint)** — classes: `btn-action btn-action-pdf`
+
+- border: `1.5px solid #FECACA`
+- background: `#FEF2F2`
+- label text: `#334155` (class `btn-action-label`)
+- format badge: plain colored text `#DC2626`, 11px bold — `btn-action-format btn-action-format-pdf`
+
+**XLSX button (green tint)** — classes: `btn-action btn-action-xlsx`
+
+- border: `1.5px solid #BBF7D0`
+- background: `#F0FDF4`
+- label text: `#334155` (`btn-action-label`)
+- format badge: `#16A34A`, 11px bold — `btn-action-format btn-action-format-xlsx`
+
+**Structure:** icon (14px, stroke matches tint: red `#DC2626` / green `#16A34A`) + label + format badge.  
+**Border radius:** `20px` (pill).  
+**className:** always include `btn-action` plus `btn-action-pdf` or `btn-action-xlsx`.  
+Static layout lives in `src/index.css` (`.btn-action`, modifiers); do not duplicate long inline style blocks.
+
+**Mobile portrait:** `btn-action-label` is hidden — only icon + `PDF` / `XLSX` badge remain visible.
+
 ## Colors (import B and VC from src/constants.jsx)
 
 | Token | Hex | Use |
@@ -50,7 +80,7 @@ Never invent new UI patterns — always reuse existing ones from this document.
 | btn-icon-rm | × delete attachment — red bg on hover |
 | btn-file-upload | File upload — dashed → solid blue |
 | btn-add-vendor | Add vendor — dashed → solid blue |
-| btn-action | Action buttons (Отчёт, Загрузить) |
+| btn-action | File export/import pills — use with `btn-action-pdf` or `btn-action-xlsx` (see below) |
 | vendor-rm | × on vendor pill — red bg on hover |
 
 Every button must have:

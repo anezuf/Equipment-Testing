@@ -235,45 +235,60 @@ button {
 }
 .btn-add-vendor:active { background-color: #dbeafe !important; }
 
-/* Action buttons (Отчёт / Загрузить): gray base → solid blue on hover */
-.btn-action { transition: all 0.2s ease; }
-.btn-action:hover {
-  border-color: #2F9AFF !important;
-  background-color: #EFF6FF !important;
-  color: #2F9AFF !important;
+/* Export / import file buttons (PDF / XLSX) — see .cursor/agents/ui-agent.md */
+.btn-action {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-style: solid;
+  border-width: 1.5px;
 }
-.btn-action:active { background-color: #dbeafe !important; }
-
-/* File action pills: PDF/XLSX */
-.btn-file-pill {
-  padding: 8px 15px !important;
-  border-radius: 18px !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  gap: 6px !important;
-}
-.btn-file-pill svg {
-  width: 13px;
-  height: 13px;
+.btn-action svg {
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
-.btn-file-pill span {
-  font-size: 10px !important;
-  font-weight: 700 !important;
+.btn-action-format {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
-.btn-file-pdf:hover {
-  background-color: #FEE2E2 !important;
-  border-color: #FCA5A5 !important;
+.btn-action-format-pdf {
+  color: #dc2626;
 }
-.btn-file-pdf:active {
-  background-color: #FECACA !important;
+.btn-action-format-xlsx {
+  color: #16a34a;
 }
-.btn-file-xlsx:hover {
-  background-color: #DCFCE7 !important;
-  border-color: #86EFAC !important;
+.btn-action-pdf {
+  border-color: #fecaca;
+  background: #fef2f2;
 }
-.btn-file-xlsx:active {
-  background-color: #BBF7D0 !important;
+.btn-action-pdf:hover {
+  background-color: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+}
+.btn-action-pdf:active {
+  background-color: #fecaca !important;
+}
+.btn-action-xlsx {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+.btn-action-xlsx:hover {
+  background-color: #dcfce7 !important;
+  border-color: #86efac !important;
+}
+.btn-action-xlsx:active {
+  background-color: #bbf7d0 !important;
 }
 
 /* Equipment type toggle buttons (Стойка / PDU) */
@@ -424,20 +439,20 @@ button {
 
 /* Mobile portrait — stack vertically */
 @media (max-width: 600px) and (orientation: portrait) {
-  .btn-file-pill-label {
+  .btn-action-label {
     display: none !important;
   }
-  .btn-file-pill {
+  .btn-action {
     padding: 7px 12px !important;
     border-radius: 16px !important;
     font-size: 11px !important;
     gap: 5px !important;
   }
-  .btn-file-pill svg {
+  .btn-action svg {
     width: 12px !important;
     height: 12px !important;
   }
-  .btn-file-pill span {
+  .btn-action-format {
     font-size: 9px !important;
     letter-spacing: 0.35px !important;
   }

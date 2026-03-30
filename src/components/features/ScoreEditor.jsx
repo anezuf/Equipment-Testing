@@ -74,20 +74,20 @@ export default function ScoreEditor({
         {vendors.length<25&&<button className="btn-add-vendor" onClick={addV} style={{padding:"6px 14px",borderRadius:12,border:"2px dashed #CBD5E1",background:"none",color:B.steel,cursor:"pointer",fontSize:12,whiteSpace:"nowrap"}}>{isPortrait ? '+' : '+ Добавить вендора'}</button>}
         <button className="btn-danger" onClick={onShowReset} style={{padding:"6px 14px",borderRadius:12,border:`1.5px solid #EF4444`,background:"#fff",color:"#EF4444",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",transition:"all 0.2s ease"}}>Сбросить</button>
         <div style={{marginLeft:"auto",display:"flex",gap:6}}>
-          <button className="btn-file-pill btn-file-pdf" onClick={()=>exportVendorPDF(act)} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 18px",borderRadius:20,border:"1.5px solid #FECACA",background:"#FEF2F2",color:"#334155",fontSize:13,fontWeight:500,cursor:"pointer",whiteSpace:"nowrap"}}>
+          <button type="button" className="btn-action btn-action-pdf" onClick={()=>exportVendorPDF(act)}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7M5 8l3 3 3-3" stroke="#DC2626" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="btn-file-pill-label">Отчёт</span>
-            <span style={{color:"#DC2626",fontSize:11,fontWeight:700,letterSpacing:"0.5px"}}>PDF</span>
+            <span className="btn-action-label">Отчёт</span>
+            <span className="btn-action-format btn-action-format-pdf">PDF</span>
           </button>
-          <button className="btn-file-pill btn-file-xlsx" onClick={importFile} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 18px",borderRadius:20,border:"1.5px solid #BBF7D0",background:"#F0FDF4",color:"#334155",fontSize:13,fontWeight:500,cursor:"pointer",whiteSpace:"nowrap"}}>
+          <button type="button" className="btn-action btn-action-xlsx" onClick={importFile}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 10V3M5 6l3-3 3 3" stroke="#16A34A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="btn-file-pill-label">Загрузить</span>
-            <span style={{color:"#16A34A",fontSize:11,fontWeight:700,letterSpacing:"0.5px"}}>XLSX</span>
+            <span className="btn-action-label">Загрузить</span>
+            <span className="btn-action-format btn-action-format-xlsx">XLSX</span>
           </button>
-          <button className="btn-file-pill btn-file-xlsx" onClick={exportVendorForm} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 18px",borderRadius:20,border:"1.5px solid #BBF7D0",background:"#F0FDF4",color:"#334155",fontSize:13,fontWeight:500,cursor:"pointer",whiteSpace:"nowrap"}}>
+          <button type="button" className="btn-action btn-action-xlsx" onClick={exportVendorForm}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7M5 8l3 3 3-3" stroke="#16A34A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="btn-file-pill-label">Скачать</span>
-            <span style={{color:"#16A34A",fontSize:11,fontWeight:700,letterSpacing:"0.5px"}}>XLSX</span>
+            <span className="btn-action-label">Скачать</span>
+            <span className="btn-action-format btn-action-format-xlsx">XLSX</span>
           </button>
         </div>
       </div>
