@@ -527,8 +527,8 @@ export default function App(){
     },500);
   },[sections,vendors]);
 
-  const setSectionName=(si,name)=>{const n=sections.map((s,i)=>i===si?{...s,n:name}:s);setSections(n);};
-  const addSection=()=>{
+  const setSectionName=useCallback((si,name)=>{const n=sections.map((s,i)=>i===si?{...s,n:name}:s);setSections(n);},[sections,setSections]);
+  const addSection=useCallback(()=>{
     const newSection={n:"Новый раздел",items:[{n:"Параметр 1",w:2}]};
     const insertAt=itemCount;
     const blockLen=newSection.items.length;
@@ -542,8 +542,8 @@ export default function App(){
       images.splice(insertAt,0,...Array(blockLen).fill(null));
       return {...v,scores,notes,images};
     }));
-  };
-  const rmSection=(si)=>{
+  },[itemCount,sections,setSections,setVendors]);
+  const rmSection=useCallback((si)=>{
     if(sections.length<=1)return;
     const absIdx=SEC_OFF[si];
     const blockLen=sections[si].items.length;
@@ -558,10 +558,10 @@ export default function App(){
       images.splice(absIdx,blockLen);
       return {...v,scores,notes,images};
     }));
-  };
-  const setItemName=(si,ii,name)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,n:name}:it)}:s);setSections(n);};
-  const setItemWeight=(si,ii,w)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,w}:it)}:s);setSections(n);};
-  const addItem=(si,ii)=>{
+  },[sections,SEC_OFF,setSections,setVendors]);
+  const setItemName=useCallback((si,ii,name)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,n:name}:it)}:s);setSections(n);},[sections,setSections]);
+  const setItemWeight=useCallback((si,ii,w)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,w}:it)}:s);setSections(n);},[sections,setSections]);
+  const addItem=useCallback((si,ii)=>{
     const insertIdx=ii==null?sections[si].items.length-1:ii;
     const absIdx=SEC_OFF[si]+insertIdx+1;
     const n=sections.map((s,i)=>i===si?{...s,items:[...s.items.slice(0,insertIdx+1),{n:"Новый параметр",w:2},...s.items.slice(insertIdx+1)]}:s);
@@ -575,8 +575,8 @@ export default function App(){
       images.splice(absIdx,0,null);
       return {...v,scores,notes,images};
     }));
-  };
-  const rmItem=(si,ii)=>{
+  },[sections,SEC_OFF,setSections,setVendors]);
+  const rmItem=useCallback((si,ii)=>{
     if(sections[si].items.length<=1)return;
     const absIdx=SEC_OFF[si]+ii;
     const n=sections.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s);
@@ -590,7 +590,7 @@ export default function App(){
       images.splice(absIdx,1);
       return {...v,scores,notes,images};
     }));
-  };
+  },[sections,SEC_OFF,setSections,setVendors]);
 
   const resetHeatmapPrintScroll=useCallback(()=>{
     if(typeof document==="undefined")return;
@@ -615,12 +615,12 @@ export default function App(){
     window.print();
   },[resetHeatmapPrintScroll]);
 
-  const getTechReq=(secName,itemName)=>{
+  const getTechReq=useCallback((secName,itemName)=>{
     const sec=techSpecs.find(s=>s.n===secName);
     const item=sec?.items?.find(x=>x.n===itemName);
     return item?.n2||"";
-  };
-  const moveSection=(si,dir)=>{
+  },[techSpecs]);
+  const moveSection=useCallback((si,dir)=>{
     const newIdx=si+dir;
     if(newIdx<0||newIdx>=sections.length)return;
     const oldOffs=mkOff(sections);
@@ -643,8 +643,8 @@ export default function App(){
       }
       return{...v,scores:sc,notes:nt,images:im};
     }));
-  };
-  const moveItem=(si,ii,dir)=>{
+  },[sections,setSections,setVendors]);
+  const moveItem=useCallback((si,ii,dir)=>{
     const newIdx=ii+dir;
     if(newIdx<0||newIdx>=sections[si].items.length)return;
     setSections(p=>p.map((s,i)=>i===si?{...s,items:(()=>{const a=[...s.items];[a[ii],a[newIdx]]=[a[newIdx],a[ii]];return a;})()}:s));
@@ -656,68 +656,76 @@ export default function App(){
       sc.splice(insertIdx,0,ms);nt.splice(insertIdx,0,mn);im.splice(insertIdx,0,mi??null);
       return{...v,scores:sc,notes:nt,images:im};
     }));
-  };
-  const moveTechSection=(si,dir)=>{
+  },[sections,SEC_OFF,setSections,setVendors]);
+  const moveTechSection=useCallback((si,dir)=>{
     const newIdx=si+dir;
     if(newIdx<0||newIdx>=techSpecs.length)return;
     setTechSpecs(p=>{const a=[...p];[a[si],a[newIdx]]=[a[newIdx],a[si]];return a;});
-  };
-  const moveTechItem=(si,ii,dir)=>{
+  },[techSpecs,setTechSpecs]);
+  const moveTechItem=useCallback((si,ii,dir)=>{
     const newIdx=ii+dir;
     if(newIdx<0||newIdx>=techSpecs[si].items.length)return;
     setTechSpecs(p=>p.map((s,i)=>i===si?{...s,items:(()=>{const a=[...s.items];[a[ii],a[newIdx]]=[a[newIdx],a[ii]];return a;})()}:s));
-  };
+  },[techSpecs,setTechSpecs]);
+  const closeNotePopup=useCallback(()=>setNotePopup(null),[setNotePopup]);
+  const closeResetModal=useCallback(()=>setShowReset(false),[setShowReset]);
+  const closeApplyConfirmModal=useCallback(()=>setShowApplyConfirm(false),[setShowApplyConfirm]);
+  const stopModalPropagation=useCallback((e)=>e.stopPropagation(),[]);
+  const navigateToInput=useCallback(()=>setView("input"),[setView]);
+  const showResetModal=useCallback(()=>setShowReset(true),[setShowReset]);
+  const navigateDashboard=useCallback(()=>setView("dashboard"),[setView]);
+  const applyTechSpecsToEditor=useCallback(()=>{
+    const newSections = techSpecs.map(sec => ({
+      n: sec.n,
+      items: sec.items.map(it => {
+        const existing = sections.find(s=>s.n===sec.n)?.items?.find(x=>x.n===it.n);
+        return { n: it.n, w: existing?.w ?? 0 };
+      })
+    }));
+    const totalItems = newSections.reduce((a,s)=>a+s.items.length,0);
+    setSections(newSections);
+    setVendors(v => v.map(vnd => ({
+      ...vnd,
+      scores: Array(totalItems).fill(null),
+      notes: Array(totalItems).fill(""),
+      images: Array(totalItems).fill(null)
+    })));
+    setShowApplyConfirm(false);
+    setTechSpecsEditMode(false);
+  },[techSpecs,sections,setSections,setVendors,setShowApplyConfirm,setTechSpecsEditMode]);
   return <div style={{minHeight:"100vh",background:B.bg,fontFamily:"Inter, system-ui, sans-serif",position:"relative",overflowX:"hidden"}}>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet"/>
 
     
 
-    <NotePopup note={notePopup} onClose={()=>setNotePopup(null)}/>
+    <NotePopup note={notePopup} onClose={closeNotePopup}/>
 
     {/* Reset confirmation modal */}
-    {showReset&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999}} onClick={()=>setShowReset(false)}>
-      <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:20,padding:"28px 32px",maxWidth:380,width:"90%",boxShadow:"0 20px 60px rgba(0,0,0,0.2)",textAlign:"center"}}>
+    {showReset&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999}} onClick={closeResetModal}>
+      <div onClick={stopModalPropagation} style={{background:"#fff",borderRadius:20,padding:"28px 32px",maxWidth:380,width:"90%",boxShadow:"0 20px 60px rgba(0,0,0,0.2)",textAlign:"center"}}>
         <div style={{width:48,height:48,borderRadius:"50%",background:"#FEE2E2",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/></svg>
         </div>
         <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Сбросить всё?</div>
         <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Все вендоры, оценки и примечания будут удалены. Останется один пустой «Вендор 1». Структура разделов сохранится.</div>
         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-          <button className="btn-secondary" onClick={()=>setShowReset(false)} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer"}}>Отмена</button>
+          <button className="btn-secondary" onClick={closeResetModal} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer"}}>Отмена</button>
           <button className="btn-primary" onClick={doReset} style={{padding:"10px 28px",borderRadius:12,border:"none",background:"#EF4444",color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer"}}>Да, сбросить</button>
         </div>
       </div>
     </div>}
 
     {showApplyConfirm && (
-      <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999}} onClick={()=>setShowApplyConfirm(false)}>
-        <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:20,padding:"28px 32px",maxWidth:400,width:"90%",boxShadow:"0 20px 60px rgba(0,0,0,0.2)",textAlign:"center"}}>
+      <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999}} onClick={closeApplyConfirmModal}>
+        <div onClick={stopModalPropagation} style={{background:"#fff",borderRadius:20,padding:"28px 32px",maxWidth:400,width:"90%",boxShadow:"0 20px 60px rgba(0,0,0,0.2)",textAlign:"center"}}>
           <div style={{width:48,height:48,borderRadius:"50%",background:"#DBEAFE",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke={B.blue} strokeWidth="2" strokeLinecap="round"/></svg>
           </div>
           <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Применить в редактор?</div>
           <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Разделы и параметры в редакторе будут обновлены из тех. условий. Веса новых параметров будут установлены как «Преимущество». Существующие веса сохранятся.</div>
           <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-            <button type="button" className="btn-secondary" onClick={()=>setShowApplyConfirm(false)} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>Отмена</button>
-            <button type="button" className="btn-primary" onClick={()=>{
-              const newSections = techSpecs.map(sec => ({
-                n: sec.n,
-                items: sec.items.map(it => {
-                  const existing = sections.find(s=>s.n===sec.n)?.items?.find(x=>x.n===it.n);
-                  return { n: it.n, w: existing?.w ?? 0 };
-                })
-              }));
-              const totalItems = newSections.reduce((a,s)=>a+s.items.length,0);
-              setSections(newSections);
-              setVendors(v => v.map(vnd => ({
-                ...vnd,
-                scores: Array(totalItems).fill(null),
-                notes: Array(totalItems).fill(""),
-                images: Array(totalItems).fill(null)
-              })));
-              setShowApplyConfirm(false);
-              setTechSpecsEditMode(false);
-            }} style={{padding:"10px 28px",borderRadius:12,border:"none",background:B.blue,color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+            <button type="button" className="btn-secondary" onClick={closeApplyConfirmModal} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>Отмена</button>
+            <button type="button" className="btn-primary" onClick={applyTechSpecsToEditor} style={{padding:"10px 28px",borderRadius:12,border:"none",background:B.blue,color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
               Применить
             </button>
           </div>
@@ -755,7 +763,7 @@ export default function App(){
       onItemNameChange={setItemName}
       onItemWeightChange={setItemWeight}
       onMoveItem={moveItem}
-      onNavigateToInput={()=>setView("input")}
+      onNavigateToInput={navigateToInput}
     />}
 
     {/* ═══ INPUT ═══ */}
@@ -799,11 +807,11 @@ export default function App(){
       onVendorNameChange={setName}
       onExportVendorPDF={exportVendorPDF}
       onImport={importFile}
-      onShowReset={()=>setShowReset(true)}
+      onShowReset={showResetModal}
       infoPopup={infoPopup}
       setInfoPopup={setInfoPopup}
       getTechReq={getTechReq}
-      onNavigateDashboard={()=>setView("dashboard")}
+      onNavigateDashboard={navigateDashboard}
     />}
 
     {/* DASHBOARD */}
