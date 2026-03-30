@@ -25,7 +25,33 @@ function RichNote({value,onChange}){
 
   const exec=(c)=>{
     ref.current?.focus();
-    document.execCommand(c,false,null);
+    try{
+      // NOTE: For contentEditable editors there is still no single interoperable replacement
+      // for semantic commands (especially undo-aware rich text formatting), so we keep
+      // execCommand as primary behavior to preserve current UX and history handling.
+      document.execCommand(c,false,null);
+    }catch(err){
+      if(c==="bold"){
+        // Fallback: preserve basic bold behavior via Selection/Range when execCommand fails.
+        const sel=window.getSelection();
+        if(sel&&sel.rangeCount>0){
+          const range=sel.getRangeAt(0);
+          if(!range.collapsed){
+            const strong=document.createElement("strong");
+            try{
+              range.surroundContents(strong);
+            }catch(fallbackErr){
+              console.warn("RichNote: bold fallback failed.",fallbackErr);
+            }
+          }
+        }else{
+          console.warn("RichNote: no selection for bold fallback.");
+        }
+      }else{
+        // TODO: If execCommand support degrades further, replace command path with explicit Range-based transforms.
+        console.warn(`RichNote: execCommand('${c}') failed.`,err);
+      }
+    }
     onChange(ref.current?.innerHTML||"");
     updateFmts();
   };
@@ -51,7 +77,12 @@ function RichNote({value,onChange}){
     }
     /* Wrap selection in list */
     const listCmd=tag==="UL"?"insertUnorderedList":"insertOrderedList";
-    document.execCommand(listCmd,false,null);
+    try{
+      document.execCommand(listCmd,false,null);
+    }catch(err){
+      // TODO: List transforms with Range API are fragile for nested blocks; keep current behavior until safe replacement is implemented.
+      console.warn(`RichNote: execCommand('${listCmd}') failed.`,err);
+    }
     onChange(ref.current?.innerHTML||"");
     updateFmts();
   };
