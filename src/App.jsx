@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useStorage, loadSaved } from "./hooks/useStorage";
 
 import { B, VC, ICO, SM, WC } from "./constants";
 import { DEF_SECTIONS, PDU_DEFAULT, mkAll, mkOff } from "./sections";
@@ -31,40 +32,24 @@ const [IconNo,IconMid,IconYes]=ICO;
   - hasFail: any Требование (w>=1) with score===0
 */
 
-function loadSaved(storageKey){
-  try{
-    const raw=localStorage.getItem(storageKey);
-    if(!raw)return null;
-    return JSON.parse(raw);
-  }catch{return null;}
-}
-
 const EQ_TYPES=["стойка","pdu"];
 
 
 export default function App(){
-  const [eqType,setEqType]=useState(()=>localStorage.getItem("rack_eq_type")||"стойка");
+  const [eqType,setEqType]=useStorage("rack_eq_type","стойка");
   const STORAGE_KEY=`rack_scoring_data_${eqType}`;
-  const [sections,setSections]=useState(()=>{
-    const eq=localStorage.getItem("rack_eq_type")||"стойка";
-    const s=loadSaved(`rack_scoring_data_${eq}`);
-    if(s?.sections)return s.sections;
-    return eq==="pdu"?PDU_DEFAULT:DEF_SECTIONS;
+  const [scoringData,setScoringData]=useStorage(STORAGE_KEY,()=>{
+    const defSecs=eqType==="pdu"?PDU_DEFAULT:DEF_SECTIONS;
+    const defN=mkAll(defSecs).length;
+    return{sections:defSecs,vendors:[{name:"Вендор 1",scores:Array(defN).fill(null),notes:Array(defN).fill(""),images:Array(defN).fill(null)}]};
   });
+  const sections=scoringData?.sections??(eqType==="pdu"?PDU_DEFAULT:DEF_SECTIONS);
+  const vendors=scoringData?.vendors??(()=>{const n=mkAll(sections).length;return[{name:"Вендор 1",scores:Array(n).fill(null),notes:Array(n).fill(""),images:Array(n).fill(null)}];})();
+  const setSections=useCallback(ns=>setScoringData(p=>({...p,sections:typeof ns==="function"?ns(p.sections):ns})),[setScoringData]);
+  const setVendors=useCallback(nv=>setScoringData(p=>({...p,vendors:typeof nv==="function"?nv(p.vendors):nv})),[setScoringData]);
   const ALL=useMemo(()=>mkAll(sections),[sections]);
   const SEC_OFF=useMemo(()=>mkOff(sections),[sections]);
   const itemCount=ALL.length;
-
-  const [vendors,setVendors]=useState(()=>{
-    const eq=localStorage.getItem("rack_eq_type")||"стойка";
-    const s=loadSaved(`rack_scoring_data_${eq}`);
-    const initialSections=s?.sections||(eq==="pdu"?PDU_DEFAULT:DEF_SECTIONS);
-    const initialItemCount=mkAll(initialSections).length;
-    if(s?.vendors){
-      return s.vendors.map(v=>({...v,images:v.images||Array(initialItemCount).fill(null)}));
-    }
-    return [{name:"Вендор 1",scores:Array(initialItemCount).fill(null),notes:Array(initialItemCount).fill(""),images:Array(initialItemCount).fill(null)}];
-  });
   const [act,setAct]=useState(0);
   const [view,setView]=useState("editor");
   const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
@@ -77,17 +62,9 @@ export default function App(){
   const [heatmapSort,setHeatmapSort]=useState({col:null,label:null});
   const [heatmapSelectedVendor, setHeatmapSelectedVendor] = useState(null);
   const techSpecsStorageKey=`rack_tech_specs_${eqType}`;
-  const [techSpecs,setTechSpecs]=useState(()=>{
-    const eq=localStorage.getItem("rack_eq_type")||"стойка";
-    try{
-      const raw=localStorage.getItem(`rack_tech_specs_${eq}`);
-      if(raw)return JSON.parse(raw);
-    }catch{}
-    return eq==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT;
-  });
+  const [techSpecs,setTechSpecs]=useStorage(techSpecsStorageKey,()=>eqType==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT);
   const [techSpecsEditMode,setTechSpecsEditMode]=useState(false);
   const techSpecsSnapshot=useRef(null);
-  useEffect(()=>{try{localStorage.setItem(techSpecsStorageKey,JSON.stringify(techSpecs));}catch{}},[techSpecs,techSpecsStorageKey]);
   useEffect(() => {
     const handler = () => setIsPortrait(window.innerHeight > window.innerWidth);
     window.addEventListener('resize', handler);
@@ -95,36 +72,21 @@ export default function App(){
     return () => { window.removeEventListener('resize', handler); window.removeEventListener('orientationchange', handler); };
   }, []);
 
-  useEffect(()=>{
-    try{localStorage.setItem("rack_eq_type",eqType);}catch{}
-  },[eqType]);
-
-  /* Auto-save to localStorage on every change */
-  useEffect(()=>{
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify({sections,vendors}));}catch{}
-  },[STORAGE_KEY,sections,vendors]);
-
   const switchEqType=useCallback((newType)=>{
     if(newType===eqType)return;
-    localStorage.setItem("rack_eq_type",newType);
     setEqType(newType);
-    try{
-      const raw=localStorage.getItem(`rack_scoring_data_${newType}`);
-      if(raw){
-        const d=JSON.parse(raw);
-        if(d.sections)setSections(d.sections);
-        if(d.vendors)setVendors(d.vendors.map(v=>({...v,images:v.images||Array(mkAll(d.sections||[]).length).fill(null)})));
-      }else{
-        const defSecs=newType==="pdu"?PDU_DEFAULT:DEF_SECTIONS;
-        setSections(defSecs);
-        setVendors([{name:"Вендор 1",scores:Array(mkAll(defSecs).length).fill(null),notes:Array(mkAll(defSecs).length).fill(""),images:Array(mkAll(defSecs).length).fill(null)}]);
-      }
-    }catch{}
-    try{
-      const raw=localStorage.getItem(`rack_tech_specs_${newType}`);
-      if(raw)setTechSpecs(JSON.parse(raw));
-      else setTechSpecs(newType==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT);
-    }catch{setTechSpecs(TECH_SPECS_DEFAULT);}
+    const savedScoring=loadSaved(`rack_scoring_data_${newType}`);
+    if(savedScoring?.sections&&savedScoring?.vendors){
+      const n=mkAll(savedScoring.sections).length;
+      setScoringData({sections:savedScoring.sections,vendors:savedScoring.vendors.map(v=>({...v,images:v.images||Array(n).fill(null)}))});
+    }else{
+      const defSecs=newType==="pdu"?PDU_DEFAULT:DEF_SECTIONS;
+      const defN=mkAll(defSecs).length;
+      setScoringData({sections:defSecs,vendors:[{name:"Вендор 1",scores:Array(defN).fill(null),notes:Array(defN).fill(""),images:Array(defN).fill(null)}]});
+    }
+    const savedTech=loadSaved(`rack_tech_specs_${newType}`);
+    if(savedTech)setTechSpecs(savedTech);
+    else setTechSpecs(newType==="pdu"?PDU_TECH_SPECS_DEFAULT:TECH_SPECS_DEFAULT);
     setAct(0);
     setNoteOpen(null);
   },[eqType]);
