@@ -244,6 +244,38 @@ button {
 }
 .btn-action:active { background-color: #dbeafe !important; }
 
+/* File action pills: PDF/XLSX */
+.btn-file-pill {
+  padding: 8px 15px !important;
+  border-radius: 18px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  gap: 6px !important;
+}
+.btn-file-pill svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+.btn-file-pill span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+.btn-file-pdf:hover {
+  background-color: #FEE2E2 !important;
+  border-color: #FCA5A5 !important;
+}
+.btn-file-pdf:active {
+  background-color: #FECACA !important;
+}
+.btn-file-xlsx:hover {
+  background-color: #DCFCE7 !important;
+  border-color: #86EFAC !important;
+}
+.btn-file-xlsx:active {
+  background-color: #BBF7D0 !important;
+}
+
 /* Equipment type toggle buttons (Стойка / PDU) */
 .btn-eq-type {
   padding: 6px 16px;
@@ -392,6 +424,23 @@ button {
 
 /* Mobile portrait — stack vertically */
 @media (max-width: 600px) and (orientation: portrait) {
+  .btn-file-pill-label {
+    display: none !important;
+  }
+  .btn-file-pill {
+    padding: 7px 12px !important;
+    border-radius: 16px !important;
+    font-size: 11px !important;
+    gap: 5px !important;
+  }
+  .btn-file-pill svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .btn-file-pill span {
+    font-size: 9px !important;
+    letter-spacing: 0.35px !important;
+  }
   .ts-item-row {
     flex-wrap: wrap !important;
     position: relative !important;

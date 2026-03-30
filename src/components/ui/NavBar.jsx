@@ -89,21 +89,26 @@ function NavBar({
       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
         {view === "dashboard" && (
           <button
-            className="btn-add-vendor"
+            className="btn-file-pill btn-file-pdf"
             onClick={onExportPdf}
             style={{
-              padding: "6px 14px",
-              borderRadius: 12,
-              border: "1.5px dashed #CBD5E1",
-              background: "#F8FAFC",
-              color: "#7B97B2",
-              fontSize: 11,
-              fontWeight: 600,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "9px 18px",
+              borderRadius: 20,
+              border: "1.5px solid #FECACA",
+              background: "#FEF2F2",
+              color: "#334155",
+              fontSize: 13,
+              fontWeight: 500,
               cursor: "pointer",
               whiteSpace: "nowrap",
             }}
           >
-            PDF
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7M5 8l3 3 3-3" stroke="#DC2626" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <span className="btn-file-pill-label">Отчёт</span>
+            <span style={{ color: "#DC2626", fontSize: 11, fontWeight: 700, letterSpacing: "0.5px" }}>PDF</span>
           </button>
         )}
       </div>
