@@ -134,7 +134,7 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
   };
 
   const titleStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 14, align: "center" });
-  const topLabelStyle = makeStyle({ bold: true, size: 12, align: "center" });
+  const topLabelStyle = makeStyle({ bold: true, size: 12, align: "center", border: thinBorderGray });
   const headerStyle = makeStyle({
     fill: "334155",
     color: "FFFFFF",
@@ -143,7 +143,14 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
     align: "center",
     border: thinBorderDark,
   });
-  const sectionStyle = makeStyle({ fill: "334155", color: "FFFFFF", bold: true, size: 10, align: "left" });
+  const sectionStyle = makeStyle({
+    fill: "334155",
+    color: "FFFFFF",
+    bold: true,
+    size: 10,
+    align: "left",
+    border: thinBorderGray,
+  });
   const dataNumberStyle = makeStyle({ size: 10, align: "center", border: thinBorderGray });
   const dataTextStyle = makeStyle({ size: 10, align: "left", border: thinBorderGray });
   const dataScoreStyle = makeStyle({ size: 10, align: "center", border: thinBorderGray });
@@ -169,7 +176,7 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
     color: "FFFFFF",
     bold: true,
     size: 10,
-    align: "left",
+    align: "right",
     border: thinBorderGray,
   });
   const totalValueStyle = makeStyle({
