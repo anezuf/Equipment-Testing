@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { loadSaved } from "./hooks/useStorage";
 import { useVendors } from "./hooks/useVendors";
 
 import { B, EQ_TYPES } from "./constants";
-import { DEF_SECTIONS, PDU_DEFAULT, mkAll, mkOff } from "./sections";
+import { mkAll, mkOff } from "./sections";
 import { calcTotal, calcSec } from "./scoring";
 import { fmt } from "./utils";
 import { exportTechSpecsXlsx } from "./utils/exportTechSpecs";
@@ -32,17 +32,42 @@ import * as XLSX from "xlsx";
 */
 
 export default function App(){
-  const defaultSectionsByEqType = useCallback((type) => (type === "pdu" ? PDU_DEFAULT : DEF_SECTIONS), []);
+  const deriveSectionsFromTechSpecs = useCallback((specs, weightsMap) => (
+    (Array.isArray(specs) ? specs : []).map((sec) => ({
+      n: sec?.n || "",
+      items: (Array.isArray(sec?.items) ? sec.items : []).map((item) => {
+        const name = item?.n || "";
+        const rawWeight = weightsMap?.[name];
+        const w = rawWeight === 0 || rawWeight === 1 || rawWeight === 2 ? rawWeight : 2;
+        return { n: name, w, sec: sec?.n || "" };
+      }),
+    }))
+  ), []);
+  const getEditorWeightsKey = useCallback((type) => `rack_editor_weights_${type === "pdu" ? "pdu" : "стойка"}`, []);
+  const loadWeightsByType = useCallback((type) => {
+    try {
+      const raw = loadSaved(getEditorWeightsKey(type));
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+      return Object.entries(raw).reduce((acc, [key, value]) => {
+        if (value === 0 || value === 1 || value === 2) acc[key] = value;
+        return acc;
+      }, {});
+    } catch {
+      return {};
+    }
+  }, [getEditorWeightsKey]);
   const createDefaultScoringData = useCallback((type) => {
-    const defSecs = defaultSectionsByEqType(type);
-    const defN = mkAll(defSecs).length;
-    return { sections: defSecs, vendors: [{ name: "Вендор 1", scores: Array(defN).fill(null), notes: Array(defN).fill(""), images: Array(defN).fill(null) }] };
-  }, [defaultSectionsByEqType]);
+    const defaults = type === "pdu" ? PDU_TECH_SPECS_DEFAULT : TECH_SPECS_DEFAULT;
+    const defaultSections = deriveSectionsFromTechSpecs(defaults, {});
+    const itemCount = mkAll(defaultSections).length;
+    return { sections: defaultSections, vendors: [{ name: "Вендор 1", scores: Array(itemCount).fill(null), notes: Array(itemCount).fill(""), images: Array(itemCount).fill(null) }] };
+  }, [deriveSectionsFromTechSpecs]);
   const normalizeScoringData = useCallback((type, raw) => {
-    if (!raw?.sections || !Array.isArray(raw?.vendors)) return createDefaultScoringData(type);
-    const n = mkAll(raw.sections).length;
+    const fallback = createDefaultScoringData(type);
+    if (!Array.isArray(raw?.vendors)) return fallback;
+    const n = mkAll(fallback.sections).length;
     return {
-      sections: raw.sections,
+      sections: fallback.sections,
       vendors: raw.vendors.map((v) => ({
         ...v,
         scores: Array.isArray(v.scores) ? [...v.scores.slice(0, n), ...Array(Math.max(0, n - v.scores.length)).fill(null)] : Array(n).fill(null),
@@ -67,25 +92,23 @@ export default function App(){
     стойка: normalizeTechSpecs(loadSaved("rack_tech_specs_стойка") || TECH_SPECS_DEFAULT),
     pdu: normalizeTechSpecs(loadSaved("rack_tech_specs_pdu") || PDU_TECH_SPECS_DEFAULT),
   }));
+  const [editorWeightsByType, setEditorWeightsByType] = useState(() => ({
+    стойка: loadWeightsByType("стойка"),
+    pdu: loadWeightsByType("pdu"),
+  }));
 
-  const editorScoringData = scoringDataByType[editorEqType] || createDefaultScoringData(editorEqType);
   const scoringData = scoringDataByType[scoringEqType] || createDefaultScoringData(scoringEqType);
-  const sections = editorScoringData.sections;
-  const scoringSections = scoringData.sections;
-  const setSections = useCallback((ns) => {
-    setScoringDataByType((prev) => {
-      const current = prev[editorEqType] || createDefaultScoringData(editorEqType);
-      const nextSections = typeof ns === "function" ? ns(current.sections) : ns;
-      return { ...prev, [editorEqType]: { ...current, sections: nextSections } };
-    });
-  }, [createDefaultScoringData, editorEqType]);
-  const setScoringSections = useCallback((ns) => {
-    setScoringDataByType((prev) => {
-      const current = prev[scoringEqType] || createDefaultScoringData(scoringEqType);
-      const nextSections = typeof ns === "function" ? ns(current.sections) : ns;
-      return { ...prev, [scoringEqType]: { ...current, sections: nextSections } };
-    });
-  }, [createDefaultScoringData, scoringEqType]);
+  const editorTechSpecs = techSpecsByType[editorEqType] || (editorEqType === "pdu" ? PDU_TECH_SPECS_DEFAULT : TECH_SPECS_DEFAULT);
+  const scoringTechSpecsByType = useMemo(() => ({
+    стойка: techSpecsByType["стойка"] || TECH_SPECS_DEFAULT,
+    pdu: techSpecsByType["pdu"] || PDU_TECH_SPECS_DEFAULT,
+  }), [techSpecsByType]);
+  const sectionsByType = useMemo(() => ({
+    стойка: deriveSectionsFromTechSpecs(scoringTechSpecsByType["стойка"], editorWeightsByType["стойка"] || {}),
+    pdu: deriveSectionsFromTechSpecs(scoringTechSpecsByType.pdu, editorWeightsByType.pdu || {}),
+  }), [deriveSectionsFromTechSpecs, editorWeightsByType, scoringTechSpecsByType]);
+  const sections = sectionsByType[editorEqType] || [];
+  const scoringSections = sectionsByType[scoringEqType] || [];
 
   const setScoringData = useCallback((updater) => {
     setScoringDataByType((prev) => {
@@ -103,19 +126,6 @@ export default function App(){
       return { ...prev, [scoringEqType]: next };
     });
   }, [scoringEqType]);
-  const {
-    vendors: editorVendors,
-    setVendors: setEditorVendors,
-    ALL: editorALL,
-    SEC_OFF: editorSEC_OFF,
-    itemCount: editorItemCount,
-  } = useVendors({ scoringData: editorScoringData, setScoringData: (updater) => {
-    setScoringDataByType((prev) => {
-      const current = prev[editorEqType] || createDefaultScoringData(editorEqType);
-      const nextValue = typeof updater === "function" ? updater(current) : updater;
-      return { ...prev, [editorEqType]: nextValue };
-    });
-  }, sections, act: 0, setAct: () => {} });
   const {
     vendors,
     setVendors,
@@ -188,12 +198,39 @@ export default function App(){
       try { localStorage.setItem(`rack_tech_specs_${type}`, JSON.stringify(techSpecsByType[type])); } catch {}
     });
   }, [techSpecsByType]);
+  useEffect(() => {
+    setScoringDataByType((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      EQ_TYPES.forEach((type) => {
+        const typeSections = sectionsByType[type] || [];
+        const targetCount = mkAll(typeSections).length;
+        const current = prev[type] || createDefaultScoringData(type);
+        const resizedVendors = (current.vendors || []).map((v) => ({
+          ...v,
+          scores: Array.isArray(v.scores) ? [...v.scores.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.scores.length)).fill(null)] : Array(targetCount).fill(null),
+          notes: Array.isArray(v.notes) ? [...v.notes.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.notes.length)).fill("")] : Array(targetCount).fill(""),
+          images: Array.isArray(v.images) ? [...v.images.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.images.length)).fill(null)] : Array(targetCount).fill(null),
+        }));
+        const oldVendors = current.vendors || [];
+        const vendorsChanged = oldVendors.length !== resizedVendors.length || oldVendors.some((v, idx) => {
+          const n = resizedVendors[idx];
+          return v.scores?.length !== n.scores.length || v.notes?.length !== n.notes.length || v.images?.length !== n.images.length;
+        });
+        const sectionsChanged = current.sections !== typeSections;
+        if (vendorsChanged || sectionsChanged) {
+          changed = true;
+          next[type] = { ...current, sections: typeSections, vendors: resizedVendors };
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [createDefaultScoringData, sectionsByType]);
 
-  const contextSections = view === "editor" ? sections : scoringSections;
-  const contextVendors = view === "editor" ? editorVendors : vendors;
-  const contextItemCount = view === "editor" ? editorItemCount : itemCount;
-  const contextSetSections = view === "editor" ? setSections : setScoringSections;
-  const contextSetVendors = view === "editor" ? setEditorVendors : setVendors;
+  const contextSections = scoringSections;
+  const contextVendors = vendors;
+  const contextItemCount = itemCount;
+  const contextSetVendors = setVendors;
 
   /* Export to Excel (same format as template) */
   const exportExcelFile=useCallback(async()=>{
@@ -314,8 +351,7 @@ export default function App(){
         reader.onload=ev=>{
           try{
             const d=JSON.parse(ev.target.result);
-            if(d.sections&&Array.isArray(d.sections)){contextSetSections(d.sections);}
-            if(d.vendors&&Array.isArray(d.vendors)){contextSetVendors(d.vendors.map(v=>({...v,images:v.images||Array(mkAll(d.sections||contextSections).length).fill(null)})));}
+            if(d.vendors&&Array.isArray(d.vendors)){contextSetVendors(d.vendors.map(v=>({...v,images:v.images||Array(contextItemCount).fill(null)})));}
             setAct(0);setView("editor");
           }catch{alert("Ошибка чтения JSON");}
         };
@@ -463,7 +499,6 @@ export default function App(){
           return{name:vn.name,scores,notes,images};
         });
 
-        contextSetSections(newSections);
         contextSetVendors(newVendors);
         setAct(0);setView("input");
       }catch(err){
@@ -472,7 +507,7 @@ export default function App(){
       }
     };
     input.click();
-  },[contextSections,contextItemCount,contextVendors.length,contextSetSections,contextSetVendors,setAct]);
+  },[contextSections,contextItemCount,contextVendors.length,contextSetVendors,setAct]);
 
   const exportTechSpecs=useCallback(async()=>{
     try{
@@ -545,33 +580,13 @@ export default function App(){
           return;
         }
         setTechSpecs(normalizeTechSpecs(validSpecs));
-        // Auto-sync sections from loaded tech specs, preserving weights from current defaults
-        const defaultSecs = editorEqType === "pdu" ? PDU_DEFAULT : DEF_SECTIONS;
-        const syncedSections = validSpecs.map(sec => {
-          const defSec = defaultSecs.find(s => s.n === sec.n);
-          return {
-            n: sec.n,
-            items: sec.items.map(it => {
-              const defItem = defSec?.items?.find(x => x.n === it.n);
-              return { n: it.n, w: defItem?.w ?? 1 };
-            })
-          };
-        });
-        const totalItems = syncedSections.reduce((a,s) => a + s.items.length, 0);
-        setSections(syncedSections);
-        setEditorVendors(v => v.map(vnd => ({
-          ...vnd,
-          scores: Array(totalItems).fill(null),
-          notes: Array(totalItems).fill(""),
-          images: Array(totalItems).fill(null)
-        })));
         alert(`✓ Загружено: разделов ${validSpecs.length}, параметров ${validSpecs.reduce((a,s)=>a+s.items.length,0)}`);
       }catch(err){
         alert("Ошибка чтения XLSX: "+err.message);
       }
     };
     input.click();
-  },[editorEqType, setSections, setEditorVendors, setTechSpecs]);
+  },[setTechSpecs]);
 
   /* Reset vendor scores and notes (keeps sections/structure) */
   const doReset=useCallback(()=>{
@@ -695,70 +710,18 @@ export default function App(){
     exportVendorForm({ vendor, sections: scoringSections, eqType: scoringEqType, ALL });
   }, [vendors, act, scoringSections, scoringEqType, ALL]);
 
-  const setSectionName=useCallback((si,name)=>{const n=sections.map((s,i)=>i===si?{...s,n:name}:s);setSections(n);},[sections,setSections]);
-  const addSection=useCallback(()=>{
-    const newSection={n:"Новый раздел",items:[{n:"Параметр 1",w:2}]};
-    const insertAt=editorItemCount;
-    const blockLen=newSection.items.length;
-    setSections([...sections,newSection]);
-    setEditorVendors(prev=>prev.map(v=>{
-      const scores=[...v.scores];
-      const notes=[...v.notes];
-      const images=[...(v.images||[])];
-      scores.splice(insertAt,0,...Array(blockLen).fill(null));
-      notes.splice(insertAt,0,...Array(blockLen).fill(""));
-      images.splice(insertAt,0,...Array(blockLen).fill(null));
-      return {...v,scores,notes,images};
-    }));
-  },[editorItemCount,sections,setSections,setEditorVendors]);
-  const rmSection=useCallback((si)=>{
-    if(sections.length<=1)return;
-    const absIdx=editorSEC_OFF[si];
-    const blockLen=sections[si].items.length;
-    const n=sections.filter((_,i)=>i!==si);
-    setSections(n);
-    setEditorVendors(prev=>prev.map(v=>{
-      const scores=[...v.scores];
-      const notes=[...v.notes];
-      const images=[...(v.images||[])];
-      scores.splice(absIdx,blockLen);
-      notes.splice(absIdx,blockLen);
-      images.splice(absIdx,blockLen);
-      return {...v,scores,notes,images};
-    }));
-  },[sections,editorSEC_OFF,setSections,setEditorVendors]);
-  const setItemName=useCallback((si,ii,name)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,n:name}:it)}:s);setSections(n);},[sections,setSections]);
-  const setItemWeight=useCallback((si,ii,w)=>{const n=sections.map((s,i)=>i===si?{...s,items:s.items.map((it,j)=>j===ii?{...it,w}:it)}:s);setSections(n);},[sections,setSections]);
-  const addItem=useCallback((si,ii)=>{
-    const insertIdx=ii==null?sections[si].items.length-1:ii;
-    const absIdx=editorSEC_OFF[si]+insertIdx+1;
-    const n=sections.map((s,i)=>i===si?{...s,items:[...s.items.slice(0,insertIdx+1),{n:"Новый параметр",w:2},...s.items.slice(insertIdx+1)]}:s);
-    setSections(n);
-    setEditorVendors(prev=>prev.map(v=>{
-      const scores=[...v.scores];
-      const notes=[...v.notes];
-      const images=[...(v.images||[])];
-      scores.splice(absIdx,0,null);
-      notes.splice(absIdx,0,"");
-      images.splice(absIdx,0,null);
-      return {...v,scores,notes,images};
-    }));
-  },[sections,editorSEC_OFF,setSections,setEditorVendors]);
-  const rmItem=useCallback((si,ii)=>{
-    if(sections[si].items.length<=1)return;
-    const absIdx=editorSEC_OFF[si]+ii;
-    const n=sections.map((s,i)=>i===si?{...s,items:s.items.filter((_,j)=>j!==ii)}:s);
-    setSections(n);
-    setEditorVendors(prev=>prev.map(v=>{
-      const scores=[...v.scores];
-      const notes=[...v.notes];
-      const images=[...(v.images||[])];
-      scores.splice(absIdx,1);
-      notes.splice(absIdx,1);
-      images.splice(absIdx,1);
-      return {...v,scores,notes,images};
-    }));
-  },[sections,editorSEC_OFF,setSections,setEditorVendors]);
+  const setItemWeight = useCallback((si, ii, w) => {
+    const itemName = editorTechSpecs?.[si]?.items?.[ii]?.n;
+    if (!itemName) return;
+    const safeWeight = w === 0 || w === 1 || w === 2 ? w : 2;
+    setEditorWeightsByType((prev) => {
+      const current = prev[editorEqType] || {};
+      const nextForType = { ...current, [itemName]: safeWeight };
+      const next = { ...prev, [editorEqType]: nextForType };
+      try { localStorage.setItem(getEditorWeightsKey(editorEqType), JSON.stringify(nextForType)); } catch {}
+      return next;
+    });
+  }, [editorEqType, editorTechSpecs, getEditorWeightsKey]);
 
   const resetHeatmapPrintScroll=useCallback(()=>{
     if(typeof document==="undefined")return;
@@ -795,43 +758,6 @@ export default function App(){
     }
     return "";
   },[scoringTechSpecs]);
-  const moveSection=useCallback((si,dir)=>{
-    const newIdx=si+dir;
-    if(newIdx<0||newIdx>=sections.length)return;
-    const oldOffs=mkOff(sections);
-    const newSections=(()=>{const a=[...sections];[a[si],a[newIdx]]=[a[newIdx],a[si]];return a;})();
-    setSections(newSections);
-    setEditorVendors(prev=>prev.map(v=>{
-      const sc=[],nt=[],im=[];
-      for(let i=0;i<newSections.length;i++){
-        const sec=newSections[i];
-        let origIdx=-1;
-        for(let j=0;j<sections.length;j++){
-          if(sections[j]===sec){
-            origIdx=j;
-            break;
-          }
-        }
-        if(origIdx<0)continue;
-        const off=oldOffs[origIdx];
-        for(let k=0;k<sec.items.length;k++){sc.push(v.scores[off+k]??null);nt.push(v.notes[off+k]??"");im.push(v.images?.[off+k]??null);}
-      }
-      return{...v,scores:sc,notes:nt,images:im};
-    }));
-  },[sections,setSections,setEditorVendors]);
-  const moveItem=useCallback((si,ii,dir)=>{
-    const newIdx=ii+dir;
-    if(newIdx<0||newIdx>=sections[si].items.length)return;
-    setSections(p=>p.map((s,i)=>i===si?{...s,items:(()=>{const a=[...s.items];[a[ii],a[newIdx]]=[a[newIdx],a[ii]];return a;})()}:s));
-    const off=editorSEC_OFF[si];
-    setEditorVendors(prev=>prev.map(v=>{
-      const sc=[...v.scores];const nt=[...v.notes];const im=[...(v.images||[])];
-      const[ms]=sc.splice(off+ii,1);const[mn]=nt.splice(off+ii,1);const[mi]=im.splice(off+ii,1);
-      const insertIdx=off+(newIdx>ii?newIdx-1:newIdx);
-      sc.splice(insertIdx,0,ms);nt.splice(insertIdx,0,mn);im.splice(insertIdx,0,mi??null);
-      return{...v,scores:sc,notes:nt,images:im};
-    }));
-  },[sections,editorSEC_OFF,setSections,setEditorVendors]);
   const moveTechSection=useCallback((si,dir)=>{
     const newIdx=si+dir;
     if(newIdx<0||newIdx>=techSpecs.length)return;
@@ -846,28 +772,16 @@ export default function App(){
   const closeResetModal=useCallback(()=>setShowReset(false),[setShowReset]);
   const closeApplyConfirmModal=useCallback(()=>setShowApplyConfirm(false),[setShowApplyConfirm]);
   const stopModalPropagation=useCallback((e)=>e.stopPropagation(),[]);
-  const navigateToInput=useCallback(()=>setView("input"),[setView]);
+  const navigateToInput=useCallback(()=>{
+    setScoringEqType(editorEqType);
+    setView("input");
+  },[editorEqType, setScoringEqType, setView]);
   const showResetModal=useCallback(()=>setShowReset(true),[setShowReset]);
   const navigateDashboard=useCallback(()=>setView("dashboard"),[setView]);
   const applyTechSpecsToEditor=useCallback(()=>{
-    const newSections = techSpecs.map(sec => ({
-      n: sec.n,
-      items: sec.items.map(it => {
-        const existing = sections.find(s=>s.n===sec.n)?.items?.find(x=>x.n===it.n);
-        return { n: it.n, w: existing?.w ?? 0 };
-      })
-    }));
-    const totalItems = newSections.reduce((a,s)=>a+s.items.length,0);
-    setSections(newSections);
-    setEditorVendors(v => v.map(vnd => ({
-      ...vnd,
-      scores: Array(totalItems).fill(null),
-      notes: Array(totalItems).fill(""),
-      images: Array(totalItems).fill(null)
-    })));
     setShowApplyConfirm(false);
     setTechSpecsEditMode(false);
-  },[techSpecs,sections,setSections,setEditorVendors,setShowApplyConfirm,setTechSpecsEditMode]);
+  },[setShowApplyConfirm,setTechSpecsEditMode]);
   return <div style={{minHeight:"100vh",background:B.bg,fontFamily:"Inter, system-ui, sans-serif",position:"relative",overflowX:"hidden"}}>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet"/>
 
@@ -897,7 +811,7 @@ export default function App(){
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke={B.blue} strokeWidth="2" strokeLinecap="round"/></svg>
           </div>
           <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Применить в редактор?</div>
-          <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Разделы и параметры в редакторе будут обновлены из тех. условий. Веса новых параметров будут установлены как «Преимущество». Существующие веса сохранятся.</div>
+          <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Разделы и параметры в редакторе будут обновлены из тех. условий. Новые параметры получат вес «Требование!». Существующие веса сохранятся.</div>
           <div style={{display:"flex",gap:10,justifyContent:"center"}}>
             <button type="button" className="btn-secondary" onClick={closeApplyConfirmModal} style={{padding:"10px 28px",borderRadius:12,border:`1.5px solid ${B.border}`,background:"#fff",color:B.graphite,fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>Отмена</button>
             <button type="button" className="btn-primary" onClick={applyTechSpecsToEditor} style={{padding:"10px 28px",borderRadius:12,border:"none",background:B.blue,color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
@@ -921,21 +835,11 @@ export default function App(){
     {/* ═══ EDITOR ═══ */}
     {view==="editor"&&<ChecklistEditor
       sections={sections}
-      SEC_OFF={editorSEC_OFF}
+      techSpecs={editorTechSpecs}
       eqType={editorEqType}
       isPortrait={isPortrait}
-      onImport={importFile}
-      onExport={exportExcelFile}
       onSwitchEqType={setEditorEqType}
-      onAddSection={addSection}
-      onRemoveSection={rmSection}
-      onSectionNameChange={setSectionName}
-      onMoveSection={moveSection}
-      onAddItem={addItem}
-      onRemoveItem={rmItem}
-      onItemNameChange={setItemName}
       onItemWeightChange={setItemWeight}
-      onMoveItem={moveItem}
       onNavigateToInput={navigateToInput}
     />}
 
@@ -952,9 +856,6 @@ export default function App(){
       EQ_TYPES={EQ_TYPES}
       switchEqType={setTechSpecsEqType}
       eqType={techSpecsEqType}
-      sections={sections}
-      setSections={setSections}
-      setVendors={setEditorVendors}
       moveTechSection={moveTechSection}
       moveTechItem={moveTechItem}
     />}

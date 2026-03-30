@@ -14,9 +14,6 @@ export default function TechSpecs({
   EQ_TYPES,
   switchEqType,
   eqType,
-  sections,
-  setSections,
-  setVendors,
   moveTechSection,
   moveTechItem,
 }) {
