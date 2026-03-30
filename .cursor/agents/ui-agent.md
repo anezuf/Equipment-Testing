@@ -85,11 +85,11 @@ Import arrow (up):   d="M3 12h10M8 10V3M5 6l3-3 3 3"
 
 Where used:
 
-| Location | PDF | XLSX export | XLSX import |
+| Location | PDF | Export (green ↓, `btn-action-xlsx-export`) | Import (blue ↑, `btn-action-xlsx-import`) |
 |---|---|---|---|
-| NavBar | dashboard view | — | — |
-| ScoreEditor | Yes | Yes | Yes |
-| TechSpecs | — | edit mode | edit mode |
+| NavBar | dashboard only | JSON backup (label «JSON», не XLSX) | JSON restore (label «JSON», не XLSX) |
+| ScoreEditor | Yes | XLSX (vendor form) | XLSX |
+| TechSpecs | — | XLSX, только в режиме редактирования | XLSX, только в режиме редактирования |
 
 ## Key UI patterns
 
