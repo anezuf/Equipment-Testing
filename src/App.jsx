@@ -5,7 +5,7 @@ import { useVendors } from "./hooks/useVendors";
 import { B, EQ_TYPES } from "./constants";
 import { mkAll, mkOff } from "./sections";
 import { calcTotal, calcSec } from "./scoring";
-import { fmt } from "./utils";
+import { fmt, downloadJsonFile, sanitizeEditorWeightsMap } from "./utils";
 import { TECH_SPECS_DEFAULT, PDU_TECH_SPECS_DEFAULT, normalizeTechSpecs } from "./data/techSpecs";
 import { EDITOR_DEFAULT_WEIGHTS } from "./data/editorDefaultWeights";
 import { useImportExportHandlers } from "./hooks/useImportExportHandlers";
@@ -396,6 +396,63 @@ export default function App(){
     window.print();
   },[resetHeatmapPrintScroll]);
 
+  const handleBackupSession = useCallback(() => {
+    try {
+      const date = new Date().toISOString().slice(0, 10);
+      downloadJsonFile(`rack-audit-backup-${date}.json`, {
+        scoringDataByType,
+        editorWeightsByType,
+        techSpecsByType,
+        scoringEqType,
+      });
+    } catch (e) {
+      alert(e?.message || String(e));
+    }
+  }, [scoringDataByType, editorWeightsByType, techSpecsByType, scoringEqType]);
+
+  const handleRestoreBackupFileChange = useCallback(async (e) => {
+    const input = e.target;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== "object" || parsed.scoringDataByType == null || typeof parsed.scoringDataByType !== "object") {
+        alert("Неверный файл резервной копии: отсутствует или повреждён ключ scoringDataByType.");
+        return;
+      }
+      const sdt = parsed.scoringDataByType;
+      setScoringDataByType({
+        стойка: normalizeScoringData("стойка", sdt["стойка"]),
+        pdu: normalizeScoringData("pdu", sdt["pdu"]),
+      });
+      if (parsed.editorWeightsByType && typeof parsed.editorWeightsByType === "object") {
+        const nextEw = {
+          стойка: sanitizeEditorWeightsMap(parsed.editorWeightsByType["стойка"]),
+          pdu: sanitizeEditorWeightsMap(parsed.editorWeightsByType["pdu"]),
+        };
+        setEditorWeightsByType(nextEw);
+        EQ_TYPES.forEach((type) => {
+          try {
+            localStorage.setItem(getEditorWeightsKey(type), JSON.stringify(nextEw[type]));
+          } catch { /* ignored */ }
+        });
+      }
+      if (parsed.techSpecsByType && typeof parsed.techSpecsByType === "object") {
+        setTechSpecsByType({
+          стойка: normalizeTechSpecs(parsed.techSpecsByType["стойка"] ?? TECH_SPECS_DEFAULT),
+          pdu: normalizeTechSpecs(parsed.techSpecsByType["pdu"] ?? PDU_TECH_SPECS_DEFAULT),
+        });
+      }
+      if (parsed.scoringEqType === "pdu" || parsed.scoringEqType === "стойка") {
+        setScoringEqType(parsed.scoringEqType);
+      }
+    } catch (err) {
+      alert(err?.message || "Не удалось загрузить резервную копию.");
+    }
+  }, [getEditorWeightsKey, normalizeScoringData, setScoringDataByType, setEditorWeightsByType, setTechSpecsByType, setScoringEqType]);
+
   const scoringTechSpecs = techSpecsByType[scoringEqType] || [];
   const getTechReq=useCallback((secName,itemName)=>{
     void secName;
@@ -475,6 +532,8 @@ export default function App(){
       onImport={importFile}
       onReset={doReset}
       onExportPdf={exportPDF}
+      onBackupSession={handleBackupSession}
+      onRestoreBackupFileChange={handleRestoreBackupFileChange}
     />
 
     {/* ═══ EDITOR ═══ */}
