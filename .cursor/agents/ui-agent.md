@@ -21,110 +21,111 @@ Never invent new UI patterns — always reuse existing ones from this document.
 - No business logic in pure UI components (src/components/ui/)
 - No <style> tags inside components
 - No native HTML5 drag-and-drop
-- Inline styles only for dynamic values — static styles go to index.css
+- Inline styles only for dynamic values — static styles go to src/index.css
 - Never hardcode vendor colors — always use VC[index % VC.length]
-- Never create a new button style — pick from the existing list below
-
-## What NOT to do
-
-- Never use a background pill for PDF/XLSX format badges — use colored text only (`btn-action-format` + `btn-action-format-pdf` / `btn-action-format-xlsx`).
-- Never use transform:scale on hover for buttons.
-
-## Export button pattern (PDF / XLSX)
-
-Used in NavBar and action bars for file export/import.
-
-**PDF button (red tint)** — classes: `btn-action btn-action-pdf`
-
-- border: `1.5px solid #FECACA`
-- background: `#FEF2F2`
-- label text: `#334155` (class `btn-action-label`)
-- format badge: plain colored text `#DC2626`, 11px bold — `btn-action-format btn-action-format-pdf`
-
-**XLSX button (green tint)** — classes: `btn-action btn-action-xlsx`
-
-- border: `1.5px solid #BBF7D0`
-- background: `#F0FDF4`
-- label text: `#334155` (`btn-action-label`)
-- format badge: `#16A34A`, 11px bold — `btn-action-format btn-action-format-xlsx`
-
-**Structure:** icon (14px, stroke matches tint: red `#DC2626` / green `#16A34A`) + label + format badge.  
-**Border radius:** `20px` (pill).  
-**className:** always include `btn-action` plus `btn-action-pdf` or `btn-action-xlsx`.  
-Static layout lives in `src/index.css` (`.btn-action`, modifiers); do not duplicate long inline style blocks.
-
-**Mobile portrait:** `btn-action-label` is hidden — only icon + `PDF` / `XLSX` badge remain visible.
+- Never create a new button variant — pick from the list below
+- Never use a background pill for PDF/XLSX format badges — use colored text only
 
 ## Colors (import B and VC from src/constants.jsx)
 
 | Token | Hex | Use |
 |---|---|---|
-| B.blue | #2F9AFF | Primary accent, active states |
+| B.blue | #2F9AFF | Primary accent, active states, XLSX import |
 | B.steel | #7B97B2 | Secondary text, inactive buttons |
 | B.graphite | #334155 | Dark text, section headers |
 | B.border | #E5EAF0 | All borders and dividers |
 | B.neon | #3045E6 | Gradient end (paired with B.blue) |
 | VC[] | 10 colors | Vendor colors — always VC[i % VC.length] |
 
-## Button classes (always add className, defined in index.css)
+## Button classes (defined in index.css)
 
 | Class | Use case |
 |---|---|
-| btn-primary | Main CTA, solid blue bg |
+| btn-primary | Main CTA, solid / gradient blue |
 | btn-secondary | White/outline secondary |
-| btn-danger | Destructive actions (Сбросить) |
+| btn-danger | Destructive (Сбросить, Отменить) |
 | btn-nav | NavBar tab buttons |
 | btn-score | Weight/score toggles |
 | btn-icon | Icon buttons (expand, collapse) |
-| btn-icon-close | × close icons — turns red on hover |
+| btn-icon-close | × close — turns red on hover |
 | btn-icon-rm | × delete attachment — red bg on hover |
 | btn-file-upload | File upload — dashed → solid blue |
 | btn-add-vendor | Add vendor — dashed → solid blue |
-| btn-action | File export/import pills — use with `btn-action-pdf` or `btn-action-xlsx` (see below) |
+| btn-action | File action pills — combine with modifier below |
 | vendor-rm | × on vendor pill — red bg on hover |
 
-Every button must have:
+Every button: type="button", display inline-flex, alignItems center, justifyContent center.
 
-    display: "inline-flex", alignItems: "center", justifyContent: "center"
+## Export/import pills (btn-action + modifier)
+
+### PDF — btn-action btn-action-pdf
+- Border: 1.5px solid #FECACA, background: #FEF2F2
+- Label: #334155, icon + badge: #DC2626
+- Arrow icon: down ↓
+
+### XLSX export — btn-action btn-action-xlsx-export
+- Border: 1.5px solid #BBF7D0, background: #F0FDF4
+- Label: #334155, icon + badge: #16A34A
+- Arrow icon: down ↓ (outbound)
+
+### XLSX import — btn-action btn-action-xlsx-import
+- Border: 1.5px solid #BFDBFE, background: #EFF6FF
+- Label: #334155, icon + badge: #2F9AFF
+- Arrow icon: up ↑ (inbound)
+
+Structure: icon 14×14 + label text + format badge (11px bold colored text)
+Border radius: 20px. strokeWidth 1.6, strokeLinecap round.
+
+Export arrow (down): d="M3 12h10M8 3v7M5 8l3 3 3-3"
+Import arrow (up):   d="M3 12h10M8 10V3M5 6l3-3 3 3"
+
+Where used:
+
+| Location | PDF | XLSX export | XLSX import |
+|---|---|---|---|
+| NavBar | dashboard view | — | — |
+| ScoreEditor | Yes | Yes | Yes |
+| TechSpecs | — | edit mode | edit mode |
 
 ## Key UI patterns
 
-**Стойка/PDU toggle** — pill buttons with blue active state, border 1.5px, borderRadius 12, gap 6
+**Стойка/PDU toggle** — pill buttons, border 1.5px, borderRadius 12, gap 6, active = blue border + #EFF6FF bg
 
-**ⓘ Info button** — 18×18 circle, border B.border, color B.steel, fontSize 10, shows inline expanded block below the row (NOT a modal)
+**ⓘ Info button** — 18×18 circle, B.border, B.steel, expands inline block below row (not a modal)
 
-**Weight toggles** — ! critical (28×28, red when active), ★/☆ pill (padding 4px 10px, uses WC[] from constants)
+**Weight toggles** — ! critical (28×28, red when active), ★/☆ pills using WC[] from constants
 
-**Score buttons** — uses SM[] from constants for colors (Нет/Частично/Да)
+**Score buttons** — SM[] colors: Нет #EF4444 / Частично #F59E0B / Да #10B981
 
-**Nav tabs** — inside #F1F5F9 pill container, active=B.blue bg, inactive=transparent
+**Nav tabs** — #F1F5F9 pill container, active = B.blue bg, inactive = transparent
 
-**Vendor pills** — blue border when active, × zone on right with vendor-rm class
+**Vendor pills** — colored border when active, × zone uses vendor-rm class
 
 **Tooltip (hover)** — absolute, bottom calc(100%+7px), #334155 bg, triangle arrow, zIndex 99
 
-**Section header** — B.graphite bg, borderRadius 12px top, left border 3px VC[si%VC.length], content area white with B.border
+**Section header** — B.graphite bg, borderRadius 12px top, left border 3px VC[si%VC.length], content area white + B.border
 
-**Primary CTA** — gradient(B.blue→B.neon), borderRadius 20, boxShadow blue glow
+**Primary CTA** — gradient(B.blue→B.neon), borderRadius 20, blue glow shadow
 
 **Modal popup** — fixed overlay rgba(0,0,0,0.4), white card maxWidth 420, dark header B.graphite
 
-## Reusable components (import, don't rewrite)
+## Reusable components
 
-| Component | Location | Use for |
+| Component | Path | Use for |
 |---|---|---|
-| Gauge | src/components/ui/Gauge.jsx | Score display 0-10, circular SVG |
-| SegBar | src/components/ui/SegBar.jsx | Section score bar with tooltips |
-| RichNote | src/components/ui/RichNote.jsx | All multi-line note inputs |
+| Gauge | src/components/ui/Gauge.jsx | Score 0–10 circular gauge |
+| SegBar | src/components/ui/SegBar.jsx | Section bar with tooltips |
+| RichNote | src/components/ui/RichNote.jsx | Rich text note fields |
 | AutoSizeTextarea | src/components/ui/AutoSizeTextarea.jsx | Growing text inputs |
 | NotePopup | src/components/ui/NotePopup.jsx | Note + photo viewer modal |
-| HeatmapTh | src/components/ui/HeatmapTh.jsx | Sortable table header with tooltip |
+| HeatmapTh | src/components/ui/HeatmapTh.jsx | Sortable heatmap header |
 | Logo | src/components/ui/Logo.jsx | App logo SVG |
+| NavBar | src/components/ui/NavBar.jsx | Top navigation |
 
 ## Component placement rules
-- Pure UI, no state → src/components/ui/
-- Has business logic or data → src/components/features/
-- Used in one feature only → keep inside that feature file until reused
+- Pure UI, no app state → src/components/ui/
+- Feature views with logic/data → src/components/features/
+- Used in one feature only → keep in that feature file until reused
 
 ## For every task return
 - What was changed

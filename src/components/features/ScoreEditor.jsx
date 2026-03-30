@@ -79,14 +79,14 @@ export default function ScoreEditor({
             <span className="btn-action-label">Отчёт</span>
             <span className="btn-action-format btn-action-format-pdf">PDF</span>
           </button>
-          <button type="button" className="btn-action btn-action-xlsx" onClick={importFile}>
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 10V3M5 6l3-3 3 3" stroke="#16A34A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="btn-action-label">Загрузить</span>
-            <span className="btn-action-format btn-action-format-xlsx">XLSX</span>
+          <button type="button" className="btn-action btn-action-xlsx-import" onClick={importFile}>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 10V3M5 6l3-3 3 3" stroke="#2F9AFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <span className="btn-action-label">Импорт</span>
+            <span className="btn-action-format btn-action-format-xlsx-import">XLSX</span>
           </button>
-          <button type="button" className="btn-action btn-action-xlsx" onClick={exportVendorForm}>
+          <button type="button" className="btn-action btn-action-xlsx-export" onClick={exportVendorForm}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7M5 8l3 3 3-3" stroke="#16A34A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="btn-action-label">Скачать</span>
+            <span className="btn-action-label">Экспорт</span>
             <span className="btn-action-format btn-action-format-xlsx">XLSX</span>
           </button>
         </div>
@@ -161,7 +161,7 @@ export default function ScoreEditor({
                               <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{im.name}</span>
                             </span>
                         }
-                        <a href={im.data} download={im.name} title="Скачать" style={{padding:"4px 6px",background:"none",border:"none",borderLeft:`1px solid ${B.border}`,cursor:"pointer",color:B.blue,display:"flex",alignItems:"center",textDecoration:"none"}}>
+                        <a href={im.data} download={im.name} title="Экспорт" style={{padding:"4px 6px",background:"none",border:"none",borderLeft:`1px solid ${B.border}`,cursor:"pointer",color:B.blue,display:"flex",alignItems:"center",textDecoration:"none"}}>
                           <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 8l3 3 3-3M2 13h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                         </a>
                         <button className="btn-icon-rm" onClick={()=>{rmImage(idx,imIdx);setExpImgs(p=>{const n={...p};delete n[key];return n;});}} style={{padding:"4px 6px",background:"none",border:"none",borderLeft:`1px solid ${B.border}`,cursor:"pointer",color:"#EF4444",fontSize:13,lineHeight:1,display:"flex",alignItems:"center"}} title="Удалить">×</button>

@@ -268,6 +268,9 @@ button {
 .btn-action-format-xlsx {
   color: #16a34a;
 }
+.btn-action-format-xlsx-import {
+  color: #2f9aff;
+}
 .btn-action-pdf {
   border-color: #fecaca;
   background: #fef2f2;
@@ -279,16 +282,29 @@ button {
 .btn-action-pdf:active {
   background-color: #fecaca !important;
 }
-.btn-action-xlsx {
+/* XLSX export (green) — arrow down in SVG */
+.btn-action-xlsx-export {
   border-color: #bbf7d0;
   background: #f0fdf4;
 }
-.btn-action-xlsx:hover {
+.btn-action-xlsx-export:hover {
   background-color: #dcfce7 !important;
   border-color: #86efac !important;
 }
-.btn-action-xlsx:active {
+.btn-action-xlsx-export:active {
   background-color: #bbf7d0 !important;
+}
+/* XLSX import (blue) — arrow up in SVG */
+.btn-action-xlsx-import {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+.btn-action-xlsx-import:hover {
+  background-color: #dbeafe !important;
+  border-color: #93c5fd !important;
+}
+.btn-action-xlsx-import:active {
+  background-color: #bfdbfe !important;
 }
 
 /* Equipment type toggle buttons (Стойка / PDU) */

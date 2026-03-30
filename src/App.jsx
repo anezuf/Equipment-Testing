@@ -642,7 +642,7 @@ export default function App(){
       @media print{body{padding:16px}.pdf-btn{display:none!important}}
     </style></head><body>`;
 
-    html+=`<button class="pdf-btn" onclick="window.print()">Сохранить в PDF</button>`;
+    html+=`<button class="pdf-btn" onclick="window.print()">Экспорт PDF</button>`;
     html+=`<h1>${esc(v.name)}</h1>`;
     const tColor=total!=null&&total>=7?"#10B981":total!=null&&total>=4?"#F59E0B":"#7B97B2";
     html+=`<div class="total" style="background:${tColor}">${fmt(total)} / 10</div>`;

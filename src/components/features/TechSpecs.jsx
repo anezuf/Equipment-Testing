@@ -21,14 +21,12 @@ export default function TechSpecs({
 
   return (
     <div className="view-section-pad" style={{ maxWidth: 920, margin: "0 auto", padding: "20px 16px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8, paddingBottom: 12, borderBottom: `1px solid ${B.border}` }}>
-        <div style={{ textAlign: "left" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 12, paddingBottom: 12, borderBottom: `1px solid ${B.border}` }}>
+        <div style={{ textAlign: "left", flex: "1 1 auto", minWidth: 0 }}>
           <div style={{ fontSize: 16, fontWeight: 700, color: B.graphite }}>Технические условия (Стандарт качества)</div>
           <div style={{ fontSize: 12, color: B.steel, marginTop: 2 }}>Критерии подбора оборудования — только для справки, не влияет на расчёты</div>
-        </div>
-        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-          {techSpecsEditMode ? (
-            <>
+          {techSpecsEditMode && (
+            <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
               <button className="btn-danger" onClick={() => { setTechSpecs(techSpecsSnapshot.current); setTechSpecsEditMode(false); }} style={{ padding: "6px 14px", borderRadius: 10, border: "1.5px solid #EF4444", background: "#fff", color: "#EF4444", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                 Отменить
               </button>
@@ -36,13 +34,21 @@ export default function TechSpecs({
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 Применить
               </button>
-              <button className="btn-secondary" onClick={exportTechSpecs} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.border}`, background: "#fff", color: B.steel, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 10V2M5 5l3-3 3 3M3 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                Сохранить
+            </div>
+          )}
+        </div>
+        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", flexShrink: 0, marginLeft: "auto" }}>
+          {techSpecsEditMode ? (
+            <>
+              <button type="button" className="btn-action btn-action-xlsx-export" onClick={exportTechSpecs}>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7M5 8l3 3 3-3" stroke="#16A34A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span className="btn-action-label">Экспорт</span>
+                <span className="btn-action-format btn-action-format-xlsx">XLSX</span>
               </button>
-              <button className="btn-secondary" onClick={importTechSpecs} style={{ padding: "6px 14px", borderRadius: 10, border: `1.5px solid ${B.border}`, background: "#fff", color: B.steel, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 10V3M5 6l3-3 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                Загрузить
+              <button type="button" className="btn-action btn-action-xlsx-import" onClick={importTechSpecs}>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 10V3M5 6l3-3 3 3" stroke="#2F9AFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span className="btn-action-label">Импорт</span>
+                <span className="btn-action-format btn-action-format-xlsx-import">XLSX</span>
               </button>
             </>
           ) : (
