@@ -479,7 +479,7 @@ export default function App(){
       ws.getColumn(2).width=36;
       ws.getColumn(3).width=60;
 
-      ws.addRow(["Технические условия"]);
+      ws.addRow(["Технические условия (Стандарт качества)"]);
       ws.mergeCells(1,1,1,3);
       const t=ws.getCell(1,1);
       t.fill=fill("#334155");t.font=fnt("#FFFFFF",true,13);t.alignment=CENTER;
@@ -554,50 +554,42 @@ export default function App(){
         const ws=wb.Sheets[wsName];
         const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
 
-        const hdrRow=data[1];
-        const badHdr=!Array.isArray(hdrRow)||hdrRow.length<3;
-        const h0=String(hdrRow?.[0]??"").trim();
-        const h1=String(hdrRow?.[1]??"").trim();
-        const h2=String(hdrRow?.[2]??"").trim();
-        if(badHdr||!h0||!h1||!h2){
-          alert("Неверный формат файла. Ожидается таблица с колонками: # | Параметр | Требуемые характеристики");
-          return;
-        }
-
         const newSpecs=[];
         let curSec=null;
-        for(let r=2;r<data.length;r++){
-          const row=data[r];
-          if(!row||row.every(c=>c===""||c==null))continue;
-          const colA=row[0];
-          const colB=String(row[1]||"").trim();
-          const colC=String(row[2]||"").trim();
-          const aNum=Number(colA);
+        for(let r=0;r<data.length;r++){
+          const row=Array.isArray(data[r])?data[r]:[];
+          const col0Raw=row[0];
+          const col1Raw=row[1];
+          const col2Raw=row[2];
+          const col0=String(col0Raw??"").trim();
+          const col1=String(col1Raw??"").trim();
+          const col2=String(col2Raw??"").trim();
+          const col1Empty=col1===""||Number.isNaN(col1Raw);
+          const col2Empty=col2===""||Number.isNaN(col2Raw);
+          const col0Numeric=col0!==""&&!Number.isNaN(Number(col0));
 
-          if(colA&&isNaN(aNum)&&colB===""){
-            curSec={n:String(colA).trim(),items:[]};
+          if(col0==="#" )continue;
+
+          if(col1Empty&&col0!==""&&col0!=="#"){
+            curSec={n:col0,items:[]};
             newSpecs.push(curSec);
             continue;
           }
 
-          if(!isNaN(aNum)&&aNum>0&&colB){
-            if(!curSec){
-              curSec={n:"Раздел",items:[]};
-              newSpecs.push(curSec);
-            }
-            curSec.items.push({n:colB,n2:colC});
+          if(col0Numeric&&!col1Empty&&curSec){
+            curSec.items.push({n:col1,n2:col2Empty?"":col2});
           }
         }
 
-        const paramCount=newSpecs.reduce((a,s)=>a+(s.items?.length||0),0);
-        if(newSpecs.length===0||paramCount===0){
-          alert("Неверный формат файла. Ожидается таблица с колонками: # | Параметр | Требуемые характеристики");
+        const validSpecs=newSpecs.filter(sec=>Array.isArray(sec.items)&&sec.items.length>0);
+        if(validSpecs.length===0){
+          alert("Не удалось распознать структуру ТУ: в файле не найдено ни одного корректного раздела с параметрами.");
           return;
         }
-        setTechSpecs(normalizeTechSpecs(newSpecs));
+        setTechSpecs(normalizeTechSpecs(validSpecs));
         // Auto-sync sections from loaded tech specs, preserving weights from current defaults
         const defaultSecs = eqType === "pdu" ? PDU_DEFAULT : DEF_SECTIONS;
-        const syncedSections = newSpecs.map(sec => {
+        const syncedSections = validSpecs.map(sec => {
           const defSec = defaultSecs.find(s => s.n === sec.n);
           return {
             n: sec.n,
@@ -615,7 +607,7 @@ export default function App(){
           notes: Array(totalItems).fill(""),
           images: Array(totalItems).fill(null)
         })));
-        alert(`✓ Загружено: разделов ${newSpecs.length}, параметров ${newSpecs.reduce((a,s)=>a+s.items.length,0)}`);
+        alert(`✓ Загружено: разделов ${validSpecs.length}, параметров ${validSpecs.reduce((a,s)=>a+s.items.length,0)}`);
       }catch(err){
         alert("Ошибка чтения XLSX: "+err.message);
       }
@@ -1078,7 +1070,7 @@ export default function App(){
     {view==="techspecs"&&<div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8,paddingBottom:12,borderBottom:`1px solid ${B.border}`}}>
         <div style={{textAlign:"left"}}>
-          <div style={{fontSize:16,fontWeight:700,color:B.graphite}}>Технические условия</div>
+          <div style={{fontSize:16,fontWeight:700,color:B.graphite}}>Технические условия (Стандарт качества)</div>
           <div style={{fontSize:12,color:B.steel,marginTop:2}}>Критерии подбора оборудования — только для справки, не влияет на расчёты</div>
         </div>
         <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
