@@ -24,7 +24,7 @@ export default function AutoSizeTextarea({ value, onChange, onFocus, style, minH
         onFocus?.(e);
         resize();
       }}
-      style={{ ...style, minHeight, overflow: "visible", height: "auto" }}
+      style={{ ...style, minHeight, overflow: "hidden", height: "auto" }}
       {...rest}
     />
   );

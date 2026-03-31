@@ -407,6 +407,7 @@ button {
 
 .production-rating-pill {
   color: var(--pill-color) !important;
+  border-color: var(--pill-border) !important;
 }
 
 .production-rating-pill:hover {

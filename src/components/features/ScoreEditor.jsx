@@ -49,10 +49,10 @@ export default function ScoreEditor({
   const exportVendorForm = onExportVendorForm;
   const productionRatingOptions = ["Не оценивалось", "Плохо", "Удовлетворительно", "Хорошо"];
   const productionRatingStyles = {
-    "Не оценивалось": { c: "#7B97B2", bg: "#F8FAFC" },
-    "Плохо": { c: "#EF4444", bg: "#FEF2F2" },
-    "Удовлетворительно": { c: "#F59E0B", bg: "#FFFBEB" },
-    "Хорошо": { c: "#10B981", bg: "#ECFDF5" },
+    "Не оценивалось": { c: "#7B97B2", bg: "#F8FAFC", bd: "#D7E1EC" },
+    "Плохо": { c: "#EF4444", bg: "#FEF2F2", bd: "#FECACA" },
+    "Удовлетворительно": { c: "#F59E0B", bg: "#FFFBEB", bd: "#FDE68A" },
+    "Хорошо": { c: "#10B981", bg: "#ECFDF5", bd: "#A7F3D0" },
   };
   const activeVendor = vendors[act] || {};
 
@@ -122,7 +122,7 @@ export default function ScoreEditor({
                     type="button"
                     className={`btn-eq-type production-rating-pill ${isActive ? "production-rating-pill-active" : ""}`}
                     onClick={() => onProductionRatingChange(option)}
-                    style={{ "--pill-color": palette.c, "--pill-bg": palette.bg }}
+                    style={{ "--pill-color": palette.c, "--pill-bg": palette.bg, "--pill-border": palette.bd }}
                   >
                     {option}
                   </button>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">rack-audit</string>
+    <string name="title_activity_main">rack-audit</string>
+    <string name="package_name">com.nits.rackaudit</string>
+    <string name="custom_url_scheme">com.nits.rackaudit</string>
+</resources>
