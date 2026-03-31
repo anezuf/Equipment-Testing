@@ -1,5 +1,6 @@
 import { B, VC, ICO, SM, WC, EQ_TYPES } from "../../constants";
 import RichNote from "../RichNote";
+import Logo from "../Logo";
 
 const [IconNo, IconMid, IconYes] = ICO;
 
@@ -55,8 +56,29 @@ export default function ScoreEditor({
     "Хорошо": { c: "#10B981", bg: "#ECFDF5", bd: "#A7F3D0" },
   };
   const activeVendor = vendors[act] || {};
+  const printDate = new Date().toLocaleDateString("ru-RU");
 
   return <div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
+      <div
+        data-print-header=""
+        style={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "1px solid #E5EAF0",
+          paddingBottom: 8,
+          marginBottom: 12,
+        }}
+      >
+        <div style={{display:"inline-flex",alignItems:"center"}}>
+          <Logo h={22} />
+        </div>
+        <div style={{fontSize:12,fontWeight:600,color:B.graphite,textAlign:"center"}}>
+          Отчёт по тестированию оборудования
+        </div>
+        <div style={{fontSize:11,color:"#7B97B2",whiteSpace:"nowrap"}}>
+          {printDate}
+        </div>
+      </div>
       <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {EQ_TYPES.map((t) => (

@@ -311,6 +311,11 @@ export default function App(){
       }
       *{margin:0;padding:0;box-sizing:border-box}
       body{font-family:Inter,system-ui,sans-serif;color:#334155;padding:32px;max-width:800px;margin:0 auto;font-size:13px;line-height:1.5}
+      .print-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E5EAF0;padding-bottom:8px;margin-bottom:12px;gap:12px}
+      .print-header-logo{display:inline-flex;align-items:center}
+      .print-header-title{font-size:12px;font-weight:600;color:#334155;text-align:center;flex:1}
+      .print-header-date{font-size:11px;color:#7B97B2;white-space:nowrap}
+      .print-logo{height:22px;display:block;flex-shrink:0}
       h1{font-size:22px;font-weight:800;margin-bottom:16px}
       .total{display:inline-block;padding:8px 20px;border-radius:12px;font-size:20px;font-weight:800;color:#fff;margin-bottom:28px}
       .sec{background:#334155;color:#fff;padding:8px 14px;font-size:12px;font-weight:700;border-radius:8px 8px 0 0;margin-top:14px}
@@ -331,12 +336,23 @@ export default function App(){
       .pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 24px;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;border:1.5px solid #FECACA;background:#FEF2F2;font-family:Inter,system-ui,sans-serif}
       .pdf-btn:hover{background:#FEE2E2;border-color:#FCA5A5}
       .pdf-btn:active{background:#FECACA}
-      .sec-block{break-inside:avoid}
+      .sec-block{break-inside:auto;page-break-inside:auto}
       .row{break-inside:avoid}
       @media print{body{padding:16px}.pdf-btn{display:none!important}}
     </style></head><body>`;
 
     html+=`<button class="pdf-btn" onclick="window.print()"><span style="font-size:14px;line-height:1;color:#DC2626">↓</span><span>report</span><span style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#DC2626">PDF</span></button>`;
+    html+=`<div class="print-header">
+      <div class="print-header-logo">
+        <svg class="print-logo" viewBox="195 230 1530 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#2F9AFF" d="M416.3,825.4c-114.3,0-207.3-93-207.3-207.3S301.9,411,416.1,410.9C446.5,300.5,560.7,235.7,671,266.1c70.4,19.4,125.4,74.4,144.8,144.9c45.4-9,145-17,238.8,53.3c10.2,7.6,12.2,22.1,4.6,32.2c-7.6,10.2-22.1,12.2-32.2,4.6l0,0c-43.4-32.6-93.6-49.3-149.2-49.7c-42.3-0.3-71.9,9.4-72.2,9.5c-12.1,4-25.2-2.5-29.2-14.6c-0.4-1.3-0.7-2.6-0.9-3.9c-11.4-78.5-80-137.7-159.5-137.7c-78.6-0.2-145.8,56.5-158.9,134c-2,11.9-12.9,20.2-24.9,19.1c-5.3-0.5-10.6-0.8-15.9-0.8c-88.9,0-161.2,72.3-161.2,161.2s72.3,161.2,161.2,161.2c29.3,0,58.1-8,83.2-23.1c10.9-6.6,25-3.1,31.6,7.8s3.1,25-7.8,31.6C491,815.1,454,825.4,416.3,825.4z"/>
+          <path fill="#1E1E1E" d="M580.1,654.2v53.3h-37.8V530.3H612c24.5,0,42.5,5.8,54.1,17.4c11.6,11.6,17.4,26.7,17.4,45.4c0,14.8-3.6,27.1-10.8,37s-16,16.8-26.5,20.7c-10.5,3.9-22.2,5.9-35.3,5.9S587.6,655.9,580.1,654.2z M580.1,563.4v59.7c5.4,1.1,13.9,1.7,25.5,1.7c25.6,0,38.4-10.8,38.4-32.5c0-19.2-11.4-28.9-34.2-28.9H580.1z"/><path fill="#1E1E1E" d="M689.1,563.4v-33.1h148.5v33.1h-56v144.1h-36.5V563.4H689.1z"/><path fill="#1E1E1E" d="M859,707.4V530.3h37.8V604h8.7l61.7-73.7h44.3l-73.2,85.5l81.8,91.7h-49.4L906,632.9h-9.3v74.5H859z"/><path fill="#1E1E1E" d="M1093,655.9h-86.6v-35.6h86.6V655.9z"/><path fill="#1E1E1E" d="M1237.6,673.8V530.3h37.8v143.5h26.6v66.7h-36.4v-33.1h-140.1V530.3h37.8v143.5H1237.6z"/><path fill="#1E1E1E" d="M1414.4,712.5c-27.8,0-50.4-8.6-67.7-25.8s-26.1-39.5-26.5-67c0.4-27.5,9.2-49.7,26.5-66.8s39.8-25.6,67.7-25.7c28,0,50.6,8.5,67.7,25.5c17.1,17,25.9,39.3,26.2,67c-0.4,27.5-9.1,49.8-26.2,67C1465,703.9,1442.5,712.5,1414.4,712.5z M1375.4,661.6c10.1,10.4,23.1,15.6,39,15.6c15.9,0,28.9-5.2,39.1-15.6c10.2-10.4,15.3-24.3,15.3-41.9s-5.1-31.6-15.3-42c-10.2-10.5-23.2-15.7-39.1-15.7s-28.9,5.2-39,15.7c-10.1,10.5-15.1,24.5-15.1,42C1360.3,637.2,1365.4,651.2,1375.4,661.6z"/><path fill="#1E1E1E" d="M1523.7,740.5v-66.7h16.5c7.2-16.7,12.3-34.1,15.4-52c3.2-18.2,4.8-42,4.8-71.3v-20.2h127.8v143.5h20.7v66.7h-35.6v-33.1h-114.1v33.1H1523.7z M1650.7,563.9h-54.4V583c0,33.6-5.6,63.9-16.8,90.8h71.2V563.9z"/>
+          <path fill="#7B98B3" d="M336.9,552.5c0-12.7,10.3-23,23-23h113.4c12.7,0,23,10.3,23,23c0,12.7-10.3,23-23,23H359.9C347.2,575.5,336.9,565.2,336.9,552.5z"/><path fill="#7B98B3" d="M336.9,685.1c0-12.7,10.3-23,23-23h113.4c12.7,0,23,10.3,23,23c0,12.7-10.3,23-23,23H359.9C347.2,708.2,336.9,697.9,336.9,685.1z"/><path fill="#7B98B3" d="M336.9,618.9c0-12.7,10.3-23,23-23h113.4c12.7,0,23,10.3,23,23c0,12.7-10.3,23-23,23H359.9C347.2,641.9,336.9,631.6,336.9,618.9z"/>
+        </svg>
+      </div>
+      <div class="print-header-title">Отчёт по тестированию оборудования</div>
+      <div class="print-header-date">${new Date().toLocaleDateString("ru-RU")}</div>
+    </div>`;
     html+=`<h1>${esc(v.name)}</h1>`;
     const tColor=total!=null&&total>=7?"#10B981":total!=null&&total>=4?"#F59E0B":"#7B97B2";
     html+=`<div class="total" style="background:${tColor}">${fmt(total)} / 10</div>`;

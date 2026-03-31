@@ -429,6 +429,10 @@ button {
   border-left-color: transparent !important;
 }
 
+[data-print-header] {
+  display: none;
+}
+
 /* ── Mobile responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
   /* NAV: reduce padding, stack logo row + tabs vertically */
@@ -696,6 +700,26 @@ button {
   label {
     display: none !important;
   }
+  [data-no-print] {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  button {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+  }
+  .vendor-tabs-wrap {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 
   /* Header (single-vendor PDF-like blocks) */
   h1 {
@@ -873,7 +897,22 @@ button {
 
   /* Existing dashboard print tuning */
   [data-dash] { padding: 8px !important; max-width: 100% !important; margin: 0 auto !important; }
+  [data-print-header] {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #E5EAF0;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
   [data-production-info] { display: flex !important; }
+  [data-production-info] {
+    margin-bottom: 6px !important;
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
   .section-header,
   [data-section-header] { border-radius: 6px !important; }
   .production-panel,
@@ -883,6 +922,10 @@ button {
   [data-heatmap],
   [data-bottom-cards] > div { border-radius: 8px !important; }
   [data-score-badge] { border-radius: 20px !important; }
+  .view-section-pad {
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
   [data-gauges] { gap: 8px !important; margin-bottom: 12px !important; justify-content: center !important; }
   [data-gauges] > div { padding: 8px !important; min-width: 90px !important; }
   [data-heatmap] { break-inside: avoid; page-break-inside: avoid !important; }
