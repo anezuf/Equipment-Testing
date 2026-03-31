@@ -76,9 +76,23 @@ export default function App(){
   const normalizeScoringData = useCallback((type, raw) => {
     const fallback = createDefaultScoringData(type);
     if (!Array.isArray(raw?.vendors)) return fallback;
-    const n = mkAll(fallback.sections).length;
+    const rawSections =
+      Array.isArray(raw?.sections) &&
+      raw.sections.every((sec) => Array.isArray(sec?.items))
+        ? raw.sections
+        : fallback.sections;
+    const sectionsCount = mkAll(rawSections).length;
+    const maxVendorLength = raw.vendors.reduce((maxLen, v) => (
+      Math.max(
+        maxLen,
+        Array.isArray(v?.scores) ? v.scores.length : 0,
+        Array.isArray(v?.notes) ? v.notes.length : 0,
+        Array.isArray(v?.images) ? v.images.length : 0
+      )
+    ), 0);
+    const n = Math.max(sectionsCount, maxVendorLength);
     return {
-      sections: fallback.sections,
+      sections: rawSections,
       vendors: raw.vendors.map((v) => ({
         ...v,
         scores: Array.isArray(v.scores) ? [...v.scores.slice(0, n), ...Array(Math.max(0, n - v.scores.length)).fill(null)] : Array(n).fill(null),
@@ -304,13 +318,14 @@ export default function App(){
     let html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(v.name)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
     <style>
+      @page{size:A4;margin:15mm 12mm 15mm 12mm}
       *{
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
       }
       *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:Inter,system-ui,sans-serif;color:#334155;padding:32px;max-width:800px;margin:0 auto;font-size:13px;line-height:1.5}
+      body{font-family:Inter,system-ui,sans-serif;color:#334155;padding:24px;max-width:700px;margin:0 auto;font-size:13px;line-height:1.5}
       .print-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E5EAF0;padding-bottom:8px;margin-bottom:12px;gap:12px}
       .print-header-logo{display:inline-flex;align-items:center}
       .print-header-title{font-size:12px;font-weight:600;color:#334155;text-align:center;flex:1}
@@ -318,12 +333,18 @@ export default function App(){
       .print-logo{height:22px;display:block;flex-shrink:0}
       h1{font-size:22px;font-weight:800;margin-bottom:16px}
       .total{display:inline-block;padding:8px 20px;border-radius:12px;font-size:20px;font-weight:800;color:#fff;margin-bottom:28px}
-      .sec{background:#334155;color:#fff;padding:8px 14px;font-size:12px;font-weight:700;border-radius:8px 8px 0 0;margin-top:14px}
-      .items{border:1px solid #E5EAF0;border-top:none;border-radius:0 0 8px 8px;margin-bottom:2px}
-      .row{padding:8px 14px;border-bottom:1px solid #F1F5F9}
+      .sec{background:#334155;color:#fff;padding:8px 14px;font-size:12px;font-weight:700;border-radius:8px 8px 0 0;break-after:avoid-page;page-break-after:avoid}
+      .items{border:1px solid #E5EAF0;border-top:none;border-radius:0 0 8px 8px;margin-bottom:2px;break-inside:auto;page-break-inside:auto}
+      .sec-first-pack{break-inside:avoid-page;page-break-inside:avoid}
+      .items-first{margin-bottom:0}
+      .items-first.has-rest{border-radius:0}
+      .items-first.has-rest .row:last-child{border-bottom:1px solid #F1F5F9}
+      .items-first.single{border-radius:0 0 8px 8px;margin-bottom:2px}
+      .items-rest{border-top:none;border-radius:0 0 8px 8px;margin-bottom:2px}
+      .row{padding:8px 14px;border-bottom:1px solid #F1F5F9;break-inside:avoid-page;page-break-inside:avoid}
       .row:last-child{border-bottom:none}
       .rhead{display:flex;gap:10px;align-items:baseline}
-      .rname{flex:1;font-size:12px;font-weight:500}
+      .rname{flex:1;font-size:12px;font-weight:500;padding-left:1px}
       .rtype{font-size:10px;font-weight:700}
       .rscore{font-size:12px;font-weight:700;flex-shrink:0;text-align:right}
       .note{display:block;background:#F5F8FB;border-radius:6px;padding:4px 10px;font-size:11px;color:#7B97B2;margin-top:4px;white-space:pre-wrap;display:block;text-align:left}.note ul{list-style:disc;padding-left:18px;margin:4px 0}.note ol{list-style:decimal;padding-left:18px;margin:4px 0}.note li{margin:2px 0}.note strong{font-weight:700}.note em{font-style:italic}.note s{text-decoration:line-through}
@@ -336,9 +357,21 @@ export default function App(){
       .pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 24px;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;border:1.5px solid #FECACA;background:#FEF2F2;font-family:Inter,system-ui,sans-serif}
       .pdf-btn:hover{background:#FEE2E2;border-color:#FCA5A5}
       .pdf-btn:active{background:#FECACA}
-      .sec-block{break-inside:auto;page-break-inside:auto}
-      .row{break-inside:avoid}
-      @media print{body{padding:16px}.pdf-btn{display:none!important}}
+      .sec-block{break-inside:auto;page-break-inside:auto;margin-top:14px}
+      .force-page-break{break-before:page;page-break-before:always}
+      .sec.force-page-break{break-before:page;page-break-before:always}
+      .sec + .items{break-before:avoid-page;page-break-before:avoid}
+      @media print{
+        body{padding:12px}
+        .pdf-btn{display:none!important}
+        .sec-block{break-inside:auto!important;page-break-inside:auto!important}
+        .force-page-break{break-before:page!important;page-break-before:always!important}
+        .sec.force-page-break{break-before:page!important;page-break-before:always!important}
+        .sec{break-after:avoid-page!important;page-break-after:avoid!important}
+        .sec-first-pack{break-inside:avoid-page!important;page-break-inside:avoid!important}
+        .sec + .items{break-before:avoid-page!important;page-break-before:avoid!important}
+        .row{break-inside:avoid-page!important;page-break-inside:avoid!important}
+      }
     </style></head><body>`;
 
     html+=`<button class="pdf-btn" onclick="window.print()"><span style="font-size:14px;line-height:1;color:#DC2626">↓</span><span>report</span><span style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#DC2626">PDF</span></button>`;
@@ -376,7 +409,7 @@ export default function App(){
 
     let gi=0;
     scoringSections.forEach((sec)=>{
-      html+=`<div class="sec-block"><div class="sec">${esc(sec.n)}</div><div class="items">`;
+      const rowHtmlList = [];
       sec.items.forEach((it)=>{
         const sc=v.scores[gi];
         const nt=v.notes[gi]||"";
@@ -388,17 +421,26 @@ export default function App(){
         if(sc!=null){
           scoreLabel=sl[sc];scoreColor=sc_colors[sc];
         }
-        html+=`<div class="row"><div class="rhead">${star}<span class="rname">${esc(it.n)}</span><span class="rscore" style="color:${scoreColor}">${scoreLabel}</span></div>`;
-        if(nt)html+=`<div class="note">${nt}</div>`;
+        let rowHtml=`<div class="row"><div class="rhead">${star}<span class="rname">${esc(it.n)}</span><span class="rscore" style="color:${scoreColor}">${scoreLabel}</span></div>`;
+        if(nt)rowHtml+=`<div class="note">${nt}</div>`;
         if(imgs&&imgs.length){
-          html+=`<div class="photos">`;
-          imgs.forEach(im=>{html+=`<img src="${im.data}" alt="${esc(im.name||"")}">`;});
-          html+=`</div>`;
+          rowHtml+=`<div class="photos">`;
+          imgs.forEach(im=>{rowHtml+=`<img src="${im.data}" alt="${esc(im.name||"")}">`;});
+          rowHtml+=`</div>`;
         }
-        html+=`</div>`;
+        rowHtml+=`</div>`;
+        rowHtmlList.push(rowHtml);
         gi++;
       });
-      html+=`</div></div>`;
+      const [firstRowHtml = "", ...restRowHtml] = rowHtmlList;
+      const hasRestRows = restRowHtml.length > 0;
+      html+=`<div class="sec-block">
+        <div class="sec-first-pack">
+          <div class="sec">${esc(sec.n)}</div>
+          <div class="items items-first ${hasRestRows ? "has-rest" : "single"}">${firstRowHtml}</div>
+        </div>
+        ${hasRestRows ? `<div class="items items-rest">${restRowHtml.join("")}</div>` : ""}
+      </div>`;
     });
 
     html+=`<div class="summary" style="break-inside:avoid">`;
@@ -408,7 +450,77 @@ export default function App(){
       html+=`<div class="srow"><span class="sn">${esc(sec.n)}</span><span class="sv">${fmt(val)}</span></div>`;
     });
     html+=`<div class="srow" style="border-top:2px solid #E5EAF0;font-weight:700"><span>ИТОГО</span><span style="color:${tColor}">${fmt(total)}</span></div>`;
-    html+=`</div></body></html>`;
+    html+=`</div>
+    <script>
+      (function(){
+        const PX_PER_MM = 96 / 25.4;
+        const PRINTABLE_WIDTH_MM = 210 - 12 - 12;
+        const PRINTABLE_HEIGHT_MM = 297 - 15 - 15;
+        const printableWidthPx = PRINTABLE_WIDTH_MM * PX_PER_MM;
+        const printableHeightPx = PRINTABLE_HEIGHT_MM * PX_PER_MM;
+        const EXTRA_SAFE_SPACE = 10;
+        window.__adjustPrintLayout = function(){
+          const blocks = Array.from(document.querySelectorAll('.sec-block'));
+          if(!blocks.length) return;
+          const bodyWidth = document.body.getBoundingClientRect().width || printableWidthPx;
+          const scale = Math.min(1, printableWidthPx / bodyWidth);
+          const pageHeightCss = printableHeightPx / scale;
+          blocks.forEach((b)=>{
+            b.classList.remove('force-page-break');
+            const h = b.querySelector('.sec');
+            if(h) h.classList.remove('force-page-break');
+          });
+          for(const block of blocks){
+            const header = block.querySelector('.sec');
+            const firstRow = block.querySelector('.row');
+            if(!header || !firstRow) continue;
+            const headerTop = header.getBoundingClientRect().top + window.scrollY;
+            const firstRowTop = firstRow.getBoundingClientRect().top + window.scrollY;
+            const pageStart = Math.floor(headerTop / pageHeightCss) * pageHeightCss;
+            const pageEnd = pageStart + pageHeightCss;
+            const headerPage = Math.floor(headerTop / pageHeightCss);
+            const rowPage = Math.floor(firstRowTop / pageHeightCss);
+            const firstRowHeight = firstRow.getBoundingClientRect().height;
+            const needed = (firstRowTop - headerTop) + firstRowHeight + EXTRA_SAFE_SPACE;
+            const remaining = pageEnd - headerTop;
+            if(rowPage !== headerPage || remaining < needed){
+              header.classList.add('force-page-break');
+            }
+          }
+        };
+        window.__waitForPrintMedia = function(){
+          const media = Array.from(document.querySelectorAll('img, video'));
+          if (!media.length) return Promise.resolve();
+          const waiters = media.map((el) => new Promise((resolve) => {
+            if (el.tagName === 'IMG') {
+              if (el.complete) { resolve(); return; }
+              const done = () => resolve();
+              el.addEventListener('load', done, { once: true });
+              el.addEventListener('error', done, { once: true });
+              return;
+            }
+            if (el.tagName === 'VIDEO') {
+              if (el.readyState >= 2) { resolve(); return; }
+              const done = () => resolve();
+              el.addEventListener('loadeddata', done, { once: true });
+              el.addEventListener('error', done, { once: true });
+              return;
+            }
+            resolve();
+          }));
+          return Promise.race([
+            Promise.all(waiters),
+            new Promise((resolve) => setTimeout(resolve, 2000)),
+          ]);
+        };
+        window.addEventListener('beforeprint', () => {
+          if (typeof window.__adjustPrintLayout === 'function') {
+            window.__adjustPrintLayout();
+          }
+        });
+      })();
+    </script>
+    </body></html>`;
 
     const w=window.open("","_blank");
     if(!w){
@@ -421,14 +533,28 @@ export default function App(){
     w.focus();
     const closePrintWindow=()=>{try{w.close();}catch{/* ignored */}};
     w.onafterprint=closePrintWindow;
-    setTimeout(()=>{
+    setTimeout(async ()=>{
       try{
+        const waitForLayout = () => new Promise((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(resolve));
+        });
+        if(typeof w.__waitForPrintMedia==="function"){
+          await w.__waitForPrintMedia();
+        }
+        await waitForLayout();
+        if(typeof w.__adjustPrintLayout==="function"){
+          w.__adjustPrintLayout();
+        }
+        await waitForLayout();
+        if(typeof w.__adjustPrintLayout==="function"){
+          w.__adjustPrintLayout();
+        }
         w.focus();
         w.print();
       }catch{
         closePrintWindow();
       }
-    },500);
+    },300);
   },[scoringSections,vendors]);
 
   const setItemWeight = useCallback((si, ii, w) => {

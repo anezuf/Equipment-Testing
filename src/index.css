@@ -915,6 +915,21 @@ button {
   }
   .section-header,
   [data-section-header] { border-radius: 6px !important; }
+  /* Section header must stay with at least first item of its section */
+  [data-section-header],
+  .section-header {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+  /* Each parameter row should not break in the middle */
+  [data-param-row] {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  /* Section as a whole — try to keep header + first item together */
+  [data-section-block] {
+    break-inside: avoid-page !important;
+  }
   .production-panel,
   .items,
   .summary,
