@@ -24,7 +24,7 @@ export default function TechSpecs({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 12, paddingBottom: 12, borderBottom: `1px solid ${B.border}` }}>
         <div style={{ textAlign: "left", flex: "1 1 auto", minWidth: 0 }}>
           <div style={{ fontSize: 16, fontWeight: 700, color: B.graphite }}>Технические условия (Стандарт качества)</div>
-          <div style={{ fontSize: 12, color: B.steel, marginTop: 2 }}>Критерии подбора оборудования — только для справки, не влияет на расчёты</div>
+          <div style={{ fontSize: 12, color: B.steel, marginTop: 2 }}>Критерии подбора оборудования — только для справки, не влияет на расчеты</div>
           {techSpecsEditMode && (
             <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
               <button className="btn-danger" onClick={() => { setTechSpecs(techSpecsSnapshotRef.current); setTechSpecsEditMode(false); }} style={{ padding: "6px 14px", borderRadius: 10, border: "1.5px solid #EF4444", background: "#fff", color: "#EF4444", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 4 }}>

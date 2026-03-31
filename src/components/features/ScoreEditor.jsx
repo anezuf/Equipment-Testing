@@ -85,7 +85,7 @@ export default function ScoreEditor({
         <div style={{marginLeft:"auto",display:"flex",gap:6}}>
           <button type="button" className="btn-action btn-action-pdf" onClick={()=>exportVendorPDF(act)}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7M5 8l3 3 3-3" stroke="#DC2626" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="btn-action-label">Отчёт</span>
+            <span className="btn-action-label">Отчет</span>
             <span className="btn-action-format btn-action-format-pdf">PDF</span>
           </button>
           <button type="button" className="btn-action btn-action-xlsx-import" onClick={importFile}>

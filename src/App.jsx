@@ -328,14 +328,15 @@ export default function App(){
       .srow{display:flex;justify-content:space-between;padding:6px 14px;font-size:12px}
       .srow:nth-child(even){background:#F5F8FB}
       .sn{color:#7B97B2}.sv{font-weight:700}
-      .pdf-btn{display:block;margin:0 auto 24px;padding:10px 20px;border-radius:12px;border:1.5px dashed #CBD5E1;background:#F8FAFC;color:#7B97B2;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,system-ui,sans-serif;transition:all 0.2s ease}
-      .pdf-btn:hover{border:1.5px solid #2F9AFF;background:#EFF6FF;color:#2F9AFF}
+      .pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 24px;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;border:1.5px solid #FECACA;background:#FEF2F2;font-family:Inter,system-ui,sans-serif}
+      .pdf-btn:hover{background:#FEE2E2;border-color:#FCA5A5}
+      .pdf-btn:active{background:#FECACA}
       .sec-block{break-inside:avoid}
       .row{break-inside:avoid}
       @media print{body{padding:16px}.pdf-btn{display:none!important}}
     </style></head><body>`;
 
-    html+=`<button class="pdf-btn" onclick="window.print()">Экспорт PDF</button>`;
+    html+=`<button class="pdf-btn" onclick="window.print()"><span style="font-size:14px;line-height:1;color:#DC2626">↓</span><span>report</span><span style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#DC2626">PDF</span></button>`;
     html+=`<h1>${esc(v.name)}</h1>`;
     const tColor=total!=null&&total>=7?"#10B981":total!=null&&total>=4?"#F59E0B":"#7B97B2";
     html+=`<div class="total" style="background:${tColor}">${fmt(total)} / 10</div>`;
@@ -477,7 +478,7 @@ export default function App(){
       const text = await file.text();
       const parsed = JSON.parse(text);
       if (!parsed || typeof parsed !== "object" || parsed.scoringDataByType == null || typeof parsed.scoringDataByType !== "object") {
-        alert("Неверный файл резервной копии: отсутствует или повреждён ключ scoringDataByType.");
+        alert("Неверный файл резервной копии: отсутствует или поврежден ключ scoringDataByType.");
         return;
       }
       const sdt = parsed.scoringDataByType;
@@ -555,7 +556,7 @@ export default function App(){
         <div style={{width:48,height:48,borderRadius:"50%",background:"#FEE2E2",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/></svg>
         </div>
-        <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Сбросить всё?</div>
+        <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Сбросить все?</div>
         <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Все данные будут сброшены к дефолтам из кода: вендоры, оценки, тех. условия и веса редактора для «Стойка» и «PDU».</div>
         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
           <button className="btn-danger" onClick={closeResetModal} style={{padding:"10px 28px",borderRadius:12,border:"1.5px solid #EF4444",background:"#fff",color:"#EF4444",fontSize:14,fontWeight:600,cursor:"pointer"}}>Отмена</button>

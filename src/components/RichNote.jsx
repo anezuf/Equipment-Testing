@@ -116,7 +116,7 @@ function RichNote({value,onChange}){
         </RichNoteBtn>
         <div style={{width:1,height:16,background:"#E5EAF0",margin:"0 2px"}}/>
         <button type="button" onMouseDown={e=>{e.preventDefault();if(ref.current){ref.current.innerHTML="";onChange("");ref.current.focus();}}}
-          title="Очистить всё"
+          title="Очистить все"
           style={{width:26,height:26,borderRadius:5,border:"1px solid #E5EAF0",background:"#fff",color:"#7B97B2",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,transition:"all 0.15s"}}>
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 13l10-10M8 3l5 5-4 4H6l-3-3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
