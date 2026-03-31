@@ -111,7 +111,7 @@ export default function ScoreEditor({
       <div className="production-panel" style={{background:"#fff",border:"1px solid #E5EAF0",borderRadius:12,padding:16,marginBottom:16}}>
         <div className="production-panel-grid" style={{display:"flex",gap:24,justifyContent:"space-between"}}>
           <div className="production-panel-left" style={{flex:"1 1 auto",minWidth:0,display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
-            <div style={{fontSize:12,fontWeight:600,color:B.graphite,marginBottom:10,textAlign:"left"}}>Оценка производства</div>
+            <div className="production-panel-title production-panel-title-left" style={{fontSize:12,fontWeight:600,color:B.graphite,marginBottom:10,textAlign:"left"}}>Оценка производства</div>
             <div className="production-rating-options" style={{display:"flex",gap:8,flexWrap:"nowrap",justifyContent:"center"}}>
               {productionRatingOptions.map((option) => {
                 const isActive = activeVendor.productionRating === option;
@@ -132,8 +132,8 @@ export default function ScoreEditor({
           </div>
           <div className="production-panel-divider" style={{width:1,background:"#E5EAF0",flexShrink:0}} />
           <div className="production-panel-right" style={{flex:"0 0 auto",minWidth:0,display:"flex",flexDirection:"column",alignItems:"flex-end"}}>
-            <div style={{fontSize:12,fontWeight:600,color:B.graphite,marginBottom:10,textAlign:"right"}}>Производственная мощность</div>
-            <div style={{display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end"}}>
+            <div className="production-panel-title production-panel-title-right" style={{fontSize:12,fontWeight:600,color:B.graphite,marginBottom:10,textAlign:"right"}}>Производственная мощность</div>
+            <div className="production-capacity-row" style={{display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end"}}>
               <div className="production-capacity-note-like">
                 <input
                   type="text"

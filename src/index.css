@@ -474,6 +474,12 @@ button {
   .production-panel-right {
     align-items: flex-start !important;
   }
+  .production-panel-title-right {
+    text-align: left !important;
+  }
+  .production-capacity-row {
+    justify-content: flex-start !important;
+  }
   .production-rating-options {
     flex-wrap: wrap !important;
     white-space: normal !important;
@@ -542,6 +548,26 @@ button {
   .nav-left-group { flex-direction: row !important; align-items: center !important; gap: 8px !important; width: auto !important; }
   .nav-tabs { width: auto !important; }
   .btn-nav { flex: none !important; padding: 10px 10px !important; font-size: 11px !important; }
+  .production-panel-grid {
+    flex-direction: row !important;
+    gap: 24px !important;
+  }
+  .production-panel-left {
+    align-items: flex-start !important;
+  }
+  .production-panel-right {
+    align-items: flex-end !important;
+  }
+  .production-panel-title-right {
+    text-align: right !important;
+  }
+  .production-capacity-row {
+    justify-content: flex-end !important;
+  }
+  .production-panel-divider {
+    width: 1px !important;
+    height: auto !important;
+  }
 }
 
 /* Hide НИТС label on very small screens */
