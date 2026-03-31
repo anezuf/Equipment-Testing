@@ -6,7 +6,7 @@ const getEqTitle = (eqType) => (eqType === "стойка" ? "СЕРВЕРНАЯ 
 const getCategory = (weight) => {
   if (weight >= 2) return "ПП";
   if (weight === 1) return "ОП";
-  return "";
+  return "П";
 };
 
 const normalizeScore = (score) => (score === 0 || score === 1 || score === 2 ? score : "");

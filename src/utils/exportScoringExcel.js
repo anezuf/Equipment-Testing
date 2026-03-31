@@ -54,7 +54,7 @@ export async function exportScoringExcel({ sections, vendors }) {
       rowNum += 1;
 
       sec.items.forEach((it) => {
-        const typeStr = it.w === 2 ? "★! Требование" : it.w === 1 ? "★ Требование" : "☆ Преимущество";
+        const typeStr = it.w === 2 ? "ПП" : it.w === 1 ? "ОП" : "П";
         const isReq = it.w >= 1;
         const altBg = gi % 2 === 0 ? "#F5F8FB" : "#FFFFFF";
         const cleanNote = (str) => {

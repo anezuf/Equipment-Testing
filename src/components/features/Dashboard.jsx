@@ -163,7 +163,7 @@ function Dashboard({
       {sortedIdx.filter(i=>advantagesByVendor[i].length>0).map(i=>{const v=vendors[i];const advs=advantagesByVendor[i];
         return <div key={i} style={{flex:"1 1 280px",minWidth:0,background:"#fff",borderRadius:16,padding:16,border:`1px solid ${B.border}`,borderTop:`3px solid ${VC[i%VC.length]}`}}>
           <div style={{fontSize:13,fontWeight:700,color:VC[i%VC.length],marginBottom:10,wordBreak:"break-word",textAlign:"left"}}>{v.name}</div>
-          <div style={{fontSize:9,fontWeight:700,color:B.blue,textTransform:"uppercase",letterSpacing:1,marginBottom:6,textAlign:"left"}}>☆ Преимущества</div>
+          <div style={{fontSize:9,fontWeight:700,color:B.blue,textTransform:"uppercase",letterSpacing:1,marginBottom:6,textAlign:"left"}}>П</div>
           {advs.map((a,j)=><div key={j} style={{display:"flex",alignItems:"center",gap:6,padding:"3px 0",fontSize:11}}><IconYes c="#10B981" s={12} style={{flexShrink:0}}/><span style={{color:B.graphite,wordBreak:"break-word"}}>{a.n}</span></div>)}
         </div>;
       })}

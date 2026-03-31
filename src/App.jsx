@@ -367,7 +367,7 @@ export default function App(){
         const imgs=v.images?.[gi]||null;
         const isReq=it.w>=1;
         const isCrit=it.w===2;
-        const star=isCrit?`<span class="rtype" style="color:#DC2626">★!</span>`:isReq?`<span class="rtype" style="color:#DC2626">★</span>`:`<span class="rtype" style="color:#2F9AFF">☆</span>`;
+        const star=isCrit?`<span class="rtype" style="color:#DC2626">ПП</span>`:isReq?`<span class="rtype" style="color:#DC2626">ОП</span>`:`<span class="rtype" style="color:#2F9AFF">П</span>`;
         let scoreLabel="—";let scoreColor="#CBD5E1";
         if(sc!=null){
           scoreLabel=sl[sc];scoreColor=sc_colors[sc];
@@ -572,7 +572,7 @@ export default function App(){
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke={B.blue} strokeWidth="2" strokeLinecap="round"/></svg>
           </div>
           <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Применить в редактор?</div>
-          <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Разделы и параметры в редакторе будут обновлены из тех. условий. Новые параметры получат вес «Требование!». Существующие веса сохранятся.</div>
+          <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Разделы и параметры в редакторе будут обновлены из тех. условий. Новые параметры получат вес «ПП». Существующие веса сохранятся.</div>
           <div style={{display:"flex",gap:10,justifyContent:"center"}}>
             <button type="button" className="btn-danger" onClick={closeApplyConfirmModal} style={{padding:"10px 28px",borderRadius:12,border:"1.5px solid #EF4444",background:"#fff",color:"#EF4444",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>Отмена</button>
             <button type="button" className="btn-primary" onClick={applyTechSpecsToEditor} style={{padding:"10px 28px",borderRadius:12,border:"none",background:B.blue,color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>

@@ -5,7 +5,6 @@ export default function ChecklistEditor({
   sections,
   techSpecs,
   eqType,
-  isPortrait,
   onSwitchEqType,
   onItemWeightChange,
 }) {
@@ -63,14 +62,11 @@ export default function ChecklistEditor({
                 ) : null}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
-                <button type="button" className="btn-score btn-score-critical" onClick={()=>onItemWeightChange(si,ii,it.w===2?1:2)} style={{width:28,height:28,boxSizing:"border-box",borderRadius:8,border:it.w===2?"2px solid #DC2626":"2px solid #E5EAF0",background:it.w===2?"#FEE2E2":"#fff",cursor:"pointer",fontSize:13,fontWeight:800,color:it.w===2?"#DC2626":"#7B97B2",display:"inline-flex",alignItems:"center",justifyContent:"center",transition:"background-color 0.15s,border-color 0.15s,color 0.15s",visibility:it.w>=1?"visible":"hidden"}} title="Критичный параметр (×2)">!</button>
-                {[{w:1},{w:0}].map(({w:wv})=>{
-                  const on=wv===0?it.w===0:(it.w>=1);
-                  const wc=WC[wv];
-                  const star=wv===0?"☆":"★";
-                  return <button type="button" className={`btn-score ${wv===1?"btn-score-req":"btn-score-adv"}`} key={wv} onClick={()=>onItemWeightChange(si,ii,wv===0?0:1)} style={{padding:"4px 10px",boxSizing:"border-box",borderRadius:8,border:on?`2px solid ${wc.bc}`:"2px solid #E5EAF0",background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:"#7B97B2",transition:"background-color 0.15s,border-color 0.15s,color 0.15s",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",gap:2,flexShrink:0}}>
-                    <span>{star}</span>
-                    {isPortrait ? null : <span className="editor-btn-label"> {wv===1 ? "Требование" : "Преимущество"}</span>}
+                {[{w:2,label:"ПП",cls:"btn-score-critical",title:"ПП (Приоритетный параметр)"},{w:1,label:"ОП",cls:"btn-score-req"},{w:0,label:"П",cls:"btn-score-adv"}].map(({w:wv,label,cls,title})=>{
+                  const on=it.w===wv;
+                  const wc=WC[wv] || WC[1];
+                  return <button type="button" className={`btn-score ${cls}`} key={wv} onClick={()=>{if(it.w===wv)return;onItemWeightChange(si,ii,wv);}} style={{width:44,height:28,boxSizing:"border-box",borderRadius:8,border:on?`2px solid ${wc.bc}`:"2px solid #E5EAF0",background:on?wc.bg:"#fff",cursor:"pointer",fontSize:10,fontWeight:700,color:on?wc.c:"#7B97B2",transition:"background-color 0.15s,border-color 0.15s,color 0.15s",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",justifyContent:"center",gap:2,flexShrink:0}} title={title}>
+                    <span className="editor-btn-label"> {label}</span>
                   </button>;
                 })}
               </div>

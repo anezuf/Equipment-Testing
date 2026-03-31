@@ -74,9 +74,9 @@ export default function ScoreEditor({
           <span style={{color:B.border,margin:"0 4px"}}>│</span>
           <IconYes c="#10B981" s={13}/><span style={{fontSize:11,color:"#10B981",fontWeight:600}}>Да</span>
           <span style={{color:B.border,margin:"0 8px 0 4px"}}>│</span>
-          <span style={{fontSize:10,color:B.steel}}>★ требование</span>
-          <span style={{fontSize:10,color:B.steel,marginLeft:4}}>★! критичное</span>
-          <span style={{fontSize:10,color:B.steel,marginLeft:4}}>☆ преимущество</span>
+          <span style={{fontSize:10,color:B.steel}}>ПП</span>
+          <span style={{fontSize:10,color:B.steel,marginLeft:4}}>ОП</span>
+          <span style={{fontSize:10,color:B.steel,marginLeft:4}}>П</span>
         </div>
       </div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,alignItems:"center"}}>
@@ -160,7 +160,7 @@ export default function ScoreEditor({
                   <div style={{flex:"1 1 150px",minWidth:0}}>
                     <div className="input-item-name" style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}>
                       <span style={{fontSize:12,color:B.graphite,whiteSpace:"normal",wordBreak:"break-word",lineHeight:"1.4",textAlign:"left",minWidth:0}}>{it.n}</span>
-                      <span style={wbBadge(it.w)}>{it.w===2?"★!":it.w===1?"★":"☆"}</span>
+                      <span style={wbBadge(it.w)}>{it.w===2?"ПП":it.w===1?"ОП":"П"}</span>
                       {techReq&&<div style={{position:"relative",display:"inline-flex"}}>
                         {infoPopup===idx&&(
                           <div style={{position:"absolute",bottom:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",zIndex:300,background:"#334155",color:"#fff",fontSize:11,fontWeight:500,padding:"8px 12px",borderRadius:8,width:240,lineHeight:"1.5",boxShadow:"0 4px 16px rgba(0,0,0,0.22)",pointerEvents:"none",whiteSpace:"pre-wrap",wordBreak:"break-word",textAlign:"left"}}>

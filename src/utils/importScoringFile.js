@@ -143,8 +143,8 @@ export async function importScoringFile({ file, sections, vendorsLength, itemCou
       }
 
       if (!Number.isNaN(aNum) && aNum > 0) {
-        const colC = String(row[2] || "");
-        const w = colC.includes("!") ? 2 : colC.includes("★") ? 1 : 0;
+        const colC = String(row[2] || "").toUpperCase();
+        const w = colC.includes("ПП") || colC.includes("!") ? 2 : colC.includes("ОП") || colC.includes("★") ? 1 : 0;
         if (!curSec) {
           curSec = { n: "Раздел", items: [] };
           newSections.push(curSec);
