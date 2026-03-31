@@ -106,6 +106,15 @@ export default function ScoreEditor({
   };
   const activeVendor = vendors[act] || {};
   const printDate = new Date().toLocaleDateString("ru-RU");
+  const sanitizeCapacityValue = (value) => String(value ?? "").replace(/\D/g, "").slice(0, 4);
+  const parsedCapacity = Number.parseInt(sanitizeCapacityValue(activeVendor.productionCapacity), 10);
+  const currentCapacity = Number.isFinite(parsedCapacity) ? parsedCapacity : 0;
+  const canDecreaseCapacity = currentCapacity > 0;
+  const canIncreaseCapacity = currentCapacity < 9999;
+  const stepProductionCapacity = (step) => {
+    const nextValue = Math.max(0, Math.min(9999, currentCapacity + step));
+    onProductionCapacityChange(String(nextValue));
+  };
 
   return <div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
       <div
@@ -213,8 +222,38 @@ export default function ScoreEditor({
                   maxLength={4}
                   className="production-capacity-input"
                   value={activeVendor.productionCapacity ?? ""}
-                  onChange={(e) => onProductionCapacityChange(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  onChange={(e) => onProductionCapacityChange(sanitizeCapacityValue(e.target.value))}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowUp") {
+                      e.preventDefault();
+                      if (canIncreaseCapacity) stepProductionCapacity(1);
+                    }
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      if (canDecreaseCapacity) stepProductionCapacity(-1);
+                    }
+                  }}
                 />
+              </div>
+              <div className="production-capacity-stepper">
+                <button
+                  type="button"
+                  className="btn-capacity-step"
+                  onClick={() => stepProductionCapacity(1)}
+                  disabled={!canIncreaseCapacity}
+                  aria-label="Increase production capacity by 1"
+                >
+                  {"\u25B2"}
+                </button>
+                <button
+                  type="button"
+                  className="btn-capacity-step"
+                  onClick={() => stepProductionCapacity(-1)}
+                  disabled={!canDecreaseCapacity}
+                  aria-label="Decrease production capacity by 1"
+                >
+                  {"\u25BC"}
+                </button>
               </div>
               <span style={{fontSize:12,color:B.steel,whiteSpace:"nowrap"}}>ед./мес.</span>
             </div>
