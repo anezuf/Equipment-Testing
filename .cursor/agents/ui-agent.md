@@ -97,7 +97,10 @@ Where used:
 
 **ⓘ Info button** — 18×18 circle, B.border, B.steel, expands inline block below row (not a modal)
 
-**Weight toggles (редактор чек-листа)** — ! критичное (28×28), ★ требование / ☆ преимущество, цвета WC[]. Веса по умолчанию из форм ТУ: **ПП → 2**, **ОП → 1**, **П → 0** (данные в `src/data/editorDefaultWeights.js`; переопределения — `rack_editor_weights_*` в localStorage). При смене подписей пунктов в tech specs ключи весов — по полю `n` параметра.
+**Weight toggles (редактор чек-листа)**
+ Three mutually exclusive pills: ПП (w=2) / ОП (w=1) / П (w=0)
+Active: blue border + #EFF6FF bg + #2F9AFF text
+All independent — only one active at a time
 
 **Score buttons** — SM[] colors: Нет #EF4444 / Частично #F59E0B / Да #10B981
 

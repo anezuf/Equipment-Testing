@@ -62,7 +62,9 @@ alwaysApply: true
 ## localStorage rules
 - Always wrap localStorage calls in try/catch — it can throw in private browsing
 - Never read localStorage directly inside components — use loadSaved() from hooks/useStorage.js
-- Storage keys: rack_scoring_data_{eqType}, rack_tech_specs_{eqType}, rack_eq_type
+- Storage keys: rack_scoring_data_{eqType}, rack_tech_specs_{eqType}, 
+  rack_editor_weights_{eqType}, rack_techspecs_eq_type, 
+  rack_editor_eq_type, rack_scoring_eq_type, rack_active_view
 - Never store image binary data in localStorage — store only references or base64 with size check
 
 ## Images
@@ -86,7 +88,7 @@ alwaysApply: true
 ## Scoring logic
 - Never rewrite or inline scoring calculations — always import from src/scoring.js
 - calcTotal(), calcSec(), hasFail() are the only scoring functions — do not create alternatives
-- Weight: 0 = Преимущество (excluded from score), 1 = Требование, 2 = Требование!
+- Weight: 0 = П (excluded from score), 1 = ОП, 2 = ПП (double weight)
 - Unfilled item (null) = 0 earned points but still counts toward maxPts
 
 ## Vendors

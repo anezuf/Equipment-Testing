@@ -81,9 +81,9 @@ When Tech Specs parameters change:
 
 | Value | Label | Effect |
 |---|---|---|
-| 0 | Преимущество ☆ | Excluded from score calculation |
-| 1 | Требование ★ | Base weight 1 |
-| 2 | Критичное требование ★! | Base weight 2 |
+| 0 | П | Excluded from score calculation |
+| 1 | ОП | Base weight 1 |
+| 2 | ПП | Base weight 2 (double weight) |
 
 ## Scoring formulas (src/scoring.js — never rewrite, never inline)
 

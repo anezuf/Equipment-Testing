@@ -5,7 +5,7 @@ Single-page web app for **comparing rack and PDU vendors** against a customizabl
 ## Features
 
 - **Tech specs** — Structured checklist parameters (with optional detail text for scoring hints). Separate **Стойка** / **PDU** datasets; each tab remembers its own equipment type toggle.
-- **Editor** — Per-parameter weight: Преимущество (excluded from score), Требование, or Критичное требование. Weights merge with tech specs to build the scoring checklist.
+- **Editor** — Per-parameter weight: П (excluded from score), ОП, or ПП. Weights merge with tech specs to build the scoring checklist.
 - **Scoring** — Multiple vendors (up to 10), per-item score, rich-text notes, image attachments. Scoring formulas live in `src/scoring.js` (single source of truth).
 - **Dashboard** — Section and total scores, heatmap-style view, charts.
 - **Export** — Excel export for tech specs and vendor forms (text data; images are not embedded in sheets).
@@ -67,7 +67,7 @@ Open the URL shown in the terminal (usually `http://localhost:5173`).
 ### Возможности
 
 - **Технические характеристики** — структурированный чеклист параметров (при необходимости — поясняющий текст для подсказок при скоринге). Отдельные наборы для **стойки** и **PDU**; у каждой основной вкладки свой переключатель типа оборудования.
-- **Редактор** — вес каждого параметра: Преимущество (не входит в баллы), Требование или Критичное требование. Веса объединяются с техспеками в итоговый чеклист для оценки.
+- **Редактор** — вес каждого параметра: П (не входит в баллы), ОП или ПП. Веса объединяются с техспеками в итоговый чеклист для оценки.
 - **Скоринг** — несколько вендоров (до 10), оценка по пунктам, заметки в формате rich text, вложения изображений. Формулы подсчета — только в `src/scoring.js`.
 - **Дашборд** — баллы по разделам и итог, тепловая карта, графики.
 - **Экспорт** — Excel для техспек и анкет вендоров (текст; картинки в файл не вшиваются).

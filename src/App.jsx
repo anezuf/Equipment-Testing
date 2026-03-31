@@ -17,17 +17,17 @@ import TechSpecs from "./components/features/TechSpecs";
 import NavBar from "./components/ui/NavBar";
 
 
-/* Weight: 0=Преимущество (excluded from score), 1=Требование, 2=Требование(!) critical */
+/* Weight: 0=П (excluded from score), 1=ОП, 2=ПП */
 
 /*
   Scoring logic:
-  - Преимущество (w=0): excluded from calculation entirely
-  - Требование (w=1): base=1, Требование! (w=2): base=2
+  - П (w=0): excluded from calculation entirely
+  - ОП (w=1): base=1, ПП (w=2): base=2
   - Coefficients: score 0→0, score 1→0.5, score 2→1
   - Item points = base × coefficient
   - Total = (sum_earned / sum_max_ALL) × 10
-  - sum_max_ALL = sum of base points for ALL Требования items (not just scored)
-  - hasFail: any Требование (w>=1) with score===0
+  - sum_max_ALL = sum of base points for ALL ОП/ПП items (not just scored)
+  - hasFail: any ОП/ПП item (w>=1) with score===0
 */
 
 export default function App(){

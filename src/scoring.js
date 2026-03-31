@@ -2,7 +2,7 @@ export const coeff=[0,0.5,1]; // score 0,1,2 → coefficient
 export function calcTotal(sc,all){
   let earned=0,maxPts=0;
   all.forEach((it,i)=>{
-    if(it.w<1)return; // skip Преимущества
+    if(it.w<1)return; // skip П
     maxPts+=it.w; // always count towards max
     if(sc[i]==null)return; // unfilled = 0 earned
     earned+=it.w*coeff[sc[i]];
