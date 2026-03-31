@@ -108,7 +108,7 @@ export default function ScoreEditor({
           {vendors.length>1&&<span className="vendor-rm" onClick={e=>{e.stopPropagation();rmV(i);}} style={{borderLeft:`1px solid rgba(0,0,0,0.12)`,padding:"0 9px",cursor:"pointer",color:B.steel,fontSize:14,flexShrink:0,display:"flex",alignItems:"center",alignSelf:"stretch",transition:"all 0.15s ease"}}>×</span>}
         </div>;})}
       </div>
-      <div className="production-panel" style={{background:"#fff",border:"1px solid #E5EAF0",borderRadius:12,padding:16,marginBottom:16}}>
+      <div data-production-info="" className="production-panel" style={{background:"#fff",border:"1px solid #E5EAF0",borderRadius:12,padding:16,marginBottom:16}}>
         <div className="production-panel-grid" style={{display:"flex",gap:24,justifyContent:"space-between"}}>
           <div className="production-panel-left" style={{flex:"1 1 auto",minWidth:0,display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
             <div className="production-panel-title production-panel-title-left" style={{fontSize:12,fontWeight:600,color:B.graphite,marginBottom:10,textAlign:"left"}}>Оценка производства</div>

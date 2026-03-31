@@ -642,6 +642,11 @@ button {
 }
 
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   @page {
     size: A4;
     margin: 15mm 12mm 15mm 12mm;
@@ -759,7 +764,7 @@ button {
     background: #334155 !important;
     color: #fff !important;
     padding: 6px 12px !important;
-    border-radius: 0 !important;
+    border-radius: 6px !important;
     margin: 0 !important;
   }
   .items {
@@ -868,6 +873,16 @@ button {
 
   /* Existing dashboard print tuning */
   [data-dash] { padding: 8px !important; max-width: 100% !important; margin: 0 auto !important; }
+  [data-production-info] { display: flex !important; }
+  .section-header,
+  [data-section-header] { border-radius: 6px !important; }
+  .production-panel,
+  .items,
+  .summary,
+  [data-vendor-bars],
+  [data-heatmap],
+  [data-bottom-cards] > div { border-radius: 8px !important; }
+  [data-score-badge] { border-radius: 20px !important; }
   [data-gauges] { gap: 8px !important; margin-bottom: 12px !important; justify-content: center !important; }
   [data-gauges] > div { padding: 8px !important; min-width: 90px !important; }
   [data-heatmap] { break-inside: avoid; page-break-inside: avoid !important; }
