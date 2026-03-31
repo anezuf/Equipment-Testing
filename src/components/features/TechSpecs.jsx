@@ -119,7 +119,7 @@ export default function TechSpecs({
                 {techSpecsEditMode && sec.items.length > 1 && <button type="button" className="btn-icon-close ts-item-delete" onClick={() => setTechSpecs((p) => p.map((s, i) => i === si ? { ...s, items: s.items.filter((_, j) => j !== ii) } : s))} style={{ background: "none", border: "none", color: B.steel, cursor: "pointer", fontSize: 15, padding: "0 2px", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", alignSelf: "center" }}>×</button>}
               </div>,
             )}
-            {techSpecsEditMode && <button type="button" className="btn-secondary" onClick={() => setTechSpecs((p) => p.map((s, i) => i === si ? { ...s, items: [...s.items, { n: "", n2: "" }] } : s))} style={{ width: "100%", padding: "8px", border: "none", borderTop: "1px solid #F1F5F9", background: "none", color: B.blue, fontSize: 12, fontWeight: 600, cursor: "pointer", borderRadius: "0 0 12px 12px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>+ Добавить условие</button>}
+            {techSpecsEditMode && <button type="button" className="btn-tech-add-condition" onClick={() => setTechSpecs((p) => p.map((s, i) => i === si ? { ...s, items: [...s.items, { n: "", n2: "" }] } : s))} style={{ width: "100%", padding: "8px", fontSize: 12, fontWeight: 600, cursor: "pointer", borderRadius: "0 0 12px 12px", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>+ Добавить условие</button>}
           </div>
         </div>,
       )}

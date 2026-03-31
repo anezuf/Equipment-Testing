@@ -259,6 +259,23 @@ button {
 }
 .btn-add-vendor:active { background-color: #dbeafe !important; }
 
+/* Tech specs: neutral add-condition button with visible outline */
+.btn-tech-add-condition {
+  border: 1px solid #E5EAF0;
+  border-top-color: #DCE5EE;
+  background: #F8FAFC;
+  color: #7B97B2;
+}
+.btn-tech-add-condition:hover {
+  border-color: #CBD5E1 !important;
+  background-color: #F1F5F9 !important;
+  color: #64748B !important;
+}
+.btn-tech-add-condition:active {
+  border-color: #CBD5E1 !important;
+  background-color: #E2E8F0 !important;
+}
+
 /* Export / import file buttons (PDF / XLSX) — see .cursor/agents/ui-agent.md */
 .btn-action {
   display: inline-flex !important;
