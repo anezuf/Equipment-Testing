@@ -20,6 +20,8 @@ export default function ScoreEditor({
   onNoteChange,
   onImageAdd,
   onImageRemove,
+  onProductionRatingChange,
+  onProductionCapacityChange,
   isPortrait,
   onAddVendor,
   onRemoveVendor,
@@ -45,6 +47,14 @@ export default function ScoreEditor({
   const exportVendorPDF = onExportVendorPDF;
   const importFile = onImport;
   const exportVendorForm = onExportVendorForm;
+  const productionRatingOptions = ["Не оценивалось", "Плохо", "Удовлетворительно", "Хорошо"];
+  const productionRatingStyles = {
+    "Не оценивалось": { c: "#7B97B2", bg: "#F8FAFC" },
+    "Плохо": { c: "#EF4444", bg: "#FEF2F2" },
+    "Удовлетворительно": { c: "#F59E0B", bg: "#FFFBEB" },
+    "Хорошо": { c: "#10B981", bg: "#ECFDF5" },
+  };
+  const activeVendor = vendors[act] || {};
 
   return <div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
       <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
@@ -97,6 +107,48 @@ export default function ScoreEditor({
           </div>
           {vendors.length>1&&<span className="vendor-rm" onClick={e=>{e.stopPropagation();rmV(i);}} style={{borderLeft:`1px solid rgba(0,0,0,0.12)`,padding:"0 9px",cursor:"pointer",color:B.steel,fontSize:14,flexShrink:0,display:"flex",alignItems:"center",alignSelf:"stretch",transition:"all 0.15s ease"}}>×</span>}
         </div>;})}
+      </div>
+      <div className="production-panel" style={{background:"#fff",border:"1px solid #E5EAF0",borderRadius:12,padding:16,marginBottom:16}}>
+        <div className="production-panel-grid" style={{display:"flex",gap:24,justifyContent:"space-between"}}>
+          <div className="production-panel-left" style={{flex:"1 1 auto",minWidth:0,display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
+            <div style={{fontSize:12,fontWeight:600,color:B.graphite,marginBottom:10,textAlign:"left"}}>Оценка производства</div>
+            <div className="production-rating-options" style={{display:"flex",gap:8,flexWrap:"nowrap",justifyContent:"center"}}>
+              {productionRatingOptions.map((option) => {
+                const isActive = activeVendor.productionRating === option;
+                const palette = productionRatingStyles[option] || productionRatingStyles["Не оценивалось"];
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`btn-eq-type production-rating-pill ${isActive ? "production-rating-pill-active" : ""}`}
+                    onClick={() => onProductionRatingChange(option)}
+                    style={{ "--pill-color": palette.c, "--pill-bg": palette.bg }}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="production-panel-divider" style={{width:1,background:"#E5EAF0",flexShrink:0}} />
+          <div className="production-panel-right" style={{flex:"0 0 auto",minWidth:0,display:"flex",flexDirection:"column",alignItems:"flex-end"}}>
+            <div style={{fontSize:12,fontWeight:600,color:B.graphite,marginBottom:10,textAlign:"right"}}>Производственная мощность</div>
+            <div style={{display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end"}}>
+              <div className="production-capacity-note-like">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={4}
+                  className="production-capacity-input"
+                  value={activeVendor.productionCapacity ?? ""}
+                  onChange={(e) => onProductionCapacityChange(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                />
+              </div>
+              <span style={{fontSize:12,color:B.steel,whiteSpace:"nowrap"}}>ед./мес.</span>
+            </div>
+          </div>
+        </div>
       </div>
       {sections.map((sec,si)=>{const off=SEC_OFF[si];
         return <div key={si} style={{marginBottom:12}}>

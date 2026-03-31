@@ -359,6 +359,68 @@ button {
   background-color: #dbeafe !important;
 }
 
+.production-capacity-input::-webkit-outer-spin-button,
+.production-capacity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.production-capacity-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.production-capacity-note-like {
+  border: 1px solid #E5EAF0;
+  border-radius: 8px;
+  background: #F8FBFF;
+  overflow: hidden;
+  transition: border 0.15s;
+  width: 100%;
+  max-width: 92px;
+}
+
+.production-capacity-note-like:focus-within {
+  border: 1.5px solid #2F9AFF;
+}
+
+.production-capacity-input {
+  width: 100%;
+  min-height: 34px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: Inter, sans-serif;
+  color: #334155;
+  text-align: left;
+}
+
+.production-rating-options {
+  max-width: 100%;
+  margin: 0;
+  white-space: nowrap;
+  justify-content: flex-start !important;
+}
+
+.production-rating-pill {
+  color: var(--pill-color) !important;
+}
+
+.production-rating-pill:hover {
+  border-color: var(--pill-color) !important;
+  background: var(--pill-bg) !important;
+  color: var(--pill-color) !important;
+}
+
+.production-rating-pill-active {
+  border-color: var(--pill-color) !important;
+  background: var(--pill-bg) !important;
+  color: var(--pill-color) !important;
+}
+
 /* Vendor pill × zone */
 .vendor-rm:hover {
   background-color: #EF4444 !important;
@@ -402,6 +464,22 @@ button {
   .vendor-tabs-wrap > div {
     flex-shrink: 0;
     min-width: auto !important;
+  }
+  .production-panel-grid {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .production-panel-left,
+  .production-panel-right {
+    align-items: flex-start !important;
+  }
+  .production-rating-options {
+    flex-wrap: wrap !important;
+    white-space: normal !important;
+  }
+  .production-panel-divider {
+    width: 100% !important;
+    height: 1px !important;
   }
   div[data-vendor-tab-pill] {
     max-width: none !important;
@@ -586,6 +664,13 @@ button {
   [data-bottom-cards] > div > div:first-child { font-size: 11px !important; white-space: normal !important; overflow: visible !important; }
   [data-bottom-cards] span { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
   textarea { border: none !important; background: none !important; resize: none !important; }
+  .production-panel .production-capacity-input {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
   img { max-height: 200px !important; }
   label { display: none !important; }
   [data-footer] { display: none !important; }

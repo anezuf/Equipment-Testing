@@ -61,7 +61,17 @@ export default function App(){
     const defW = type === "pdu" ? EDITOR_DEFAULT_WEIGHTS.pdu : EDITOR_DEFAULT_WEIGHTS.стойка;
     const defaultSections = deriveSectionsFromTechSpecs(defaults, {}, defW);
     const itemCount = mkAll(defaultSections).length;
-    return { sections: defaultSections, vendors: [{ name: "Вендор 1", scores: Array(itemCount).fill(null), notes: Array(itemCount).fill(""), images: Array(itemCount).fill(null) }] };
+    return {
+      sections: defaultSections,
+      vendors: [{
+        name: "Вендор 1",
+        scores: Array(itemCount).fill(null),
+        notes: Array(itemCount).fill(""),
+        images: Array(itemCount).fill(null),
+        productionRating: null,
+        productionCapacity: "",
+      }],
+    };
   }, [deriveSectionsFromTechSpecs]);
   const normalizeScoringData = useCallback((type, raw) => {
     const fallback = createDefaultScoringData(type);
@@ -74,6 +84,8 @@ export default function App(){
         scores: Array.isArray(v.scores) ? [...v.scores.slice(0, n), ...Array(Math.max(0, n - v.scores.length)).fill(null)] : Array(n).fill(null),
         notes: Array.isArray(v.notes) ? [...v.notes.slice(0, n), ...Array(Math.max(0, n - v.notes.length)).fill("")] : Array(n).fill(""),
         images: Array.isArray(v.images) ? [...v.images.slice(0, n), ...Array(Math.max(0, n - v.images.length)).fill(null)] : Array(n).fill(null),
+        productionRating: v?.productionRating ?? null,
+        productionCapacity: String(v?.productionCapacity ?? ""),
       })),
     };
   }, [createDefaultScoringData]);
@@ -140,6 +152,8 @@ export default function App(){
     onNoteChange: setNote,
     onImageAdd: addImage,
     onImageRemove: rmImage,
+    onProductionRatingChange: setProductionRating,
+    onProductionCapacityChange: setProductionCapacity,
     totals,
     allSec,
     sortedIdx,
@@ -212,6 +226,8 @@ export default function App(){
           scores: Array.isArray(v.scores) ? [...v.scores.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.scores.length)).fill(null)] : Array(targetCount).fill(null),
           notes: Array.isArray(v.notes) ? [...v.notes.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.notes.length)).fill("")] : Array(targetCount).fill(""),
           images: Array.isArray(v.images) ? [...v.images.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.images.length)).fill(null)] : Array(targetCount).fill(null),
+          productionRating: v?.productionRating ?? null,
+          productionCapacity: String(v?.productionCapacity ?? ""),
         }));
         const oldVendors = current.vendors || [];
         const vendorsChanged = oldVendors.length !== resizedVendors.length || oldVendors.some((v, idx) => {
@@ -244,13 +260,34 @@ export default function App(){
       act,
     });
 
-  /* Reset vendor scores and notes (keeps sections/structure) */
+  /* Full reset to code defaults for all equipment types */
   const doReset=useCallback(()=>{
-    setVendors([{name:"Вендор 1",scores:Array(itemCount).fill(null),notes:Array(itemCount).fill(""),images:Array(itemCount).fill(null)}]);
+    const resetScoring = EQ_TYPES.reduce((acc, type) => {
+      acc[type] = createDefaultScoringData(type);
+      return acc;
+    }, {});
+    setScoringDataByType(resetScoring);
+    setTechSpecsByType({
+      стойка: normalizeTechSpecs(TECH_SPECS_DEFAULT),
+      pdu: normalizeTechSpecs(PDU_TECH_SPECS_DEFAULT),
+    });
+    setEditorWeightsByType({ стойка: {}, pdu: {} });
+    EQ_TYPES.forEach((type) => {
+      try { localStorage.removeItem(getEditorWeightsKey(type)); } catch { /* ignored */ }
+    });
     setShowReset(false);
     setNoteOpen(null);
     setAct(0);
-  },[itemCount, setAct, setNoteOpen, setVendors]);
+  }, [
+    EQ_TYPES,
+    createDefaultScoringData,
+    getEditorWeightsKey,
+    setAct,
+    setNoteOpen,
+    setScoringDataByType,
+    setTechSpecsByType,
+    setEditorWeightsByType,
+  ]);
 
   /* Export to Excel (CSV with BOM for proper Cyrillic in Excel) */
   /* Generate clean PDF report for a specific vendor */
@@ -399,8 +436,12 @@ export default function App(){
   const handleBackupSession = useCallback(() => {
     try {
       const date = new Date().toISOString().slice(0, 10);
+      const normalizedScoringByType = EQ_TYPES.reduce((acc, type) => {
+        acc[type] = normalizeScoringData(type, scoringDataByType[type]);
+        return acc;
+      }, {});
       downloadJsonFile(`rack-audit-backup-${date}.json`, {
-        scoringDataByType,
+        scoringDataByType: normalizedScoringByType,
         editorWeightsByType,
         techSpecsByType,
         scoringEqType,
@@ -408,7 +449,7 @@ export default function App(){
     } catch (e) {
       alert(e?.message || String(e));
     }
-  }, [scoringDataByType, editorWeightsByType, techSpecsByType, scoringEqType]);
+  }, [EQ_TYPES, editorWeightsByType, normalizeScoringData, scoringDataByType, scoringEqType, techSpecsByType]);
 
   const handleRestoreBackupFileChange = useCallback(async (e) => {
     const input = e.target;
@@ -498,7 +539,7 @@ export default function App(){
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/></svg>
         </div>
         <div style={{fontSize:16,fontWeight:700,color:B.graphite,marginBottom:8}}>Сбросить всё?</div>
-        <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Все вендоры, оценки и примечания будут удалены. Останется один пустой «Вендор 1». Структура разделов сохранится.</div>
+        <div style={{fontSize:13,color:B.steel,marginBottom:24,lineHeight:"1.5"}}>Все данные будут сброшены к дефолтам из кода: вендоры, оценки, тех. условия и веса редактора для «Стойка» и «PDU».</div>
         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
           <button className="btn-danger" onClick={closeResetModal} style={{padding:"10px 28px",borderRadius:12,border:"1.5px solid #EF4444",background:"#fff",color:"#EF4444",fontSize:14,fontWeight:600,cursor:"pointer"}}>Отмена</button>
           <button className="btn-primary" onClick={doReset} style={{padding:"10px 28px",borderRadius:12,border:"none",background:"#EF4444",color:"#fff",fontSize:14,fontWeight:600,cursor:"pointer"}}>Да, сбросить</button>
@@ -580,6 +621,8 @@ export default function App(){
       onNoteChange={setNote}
       onImageAdd={addImage}
       onImageRemove={rmImage}
+      onProductionRatingChange={setProductionRating}
+      onProductionCapacityChange={setProductionCapacity}
       isPortrait={isPortrait}
       onAddVendor={addV}
       onRemoveVendor={rmV}

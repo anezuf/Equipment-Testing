@@ -34,6 +34,9 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
   if (!vendor) return;
 
   const vendorName = String(vendor?.name ?? "").trim() || "Вендор";
+  const productionRating = vendor?.productionRating ?? "";
+  const productionCapacityRaw = String(vendor?.productionCapacity ?? "").trim();
+  const productionCapacity = productionCapacityRaw ? `${productionCapacityRaw} ед./мес.` : "";
   const rows = [];
   const merges = [];
   const sectionRows = [];
@@ -41,13 +44,13 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
 
   rows.push([`${getEqTitle(eqType)} - ${vendorName}`, "", "", "", ""]);
   merges.push({ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } });
-  merges.push({ s: { r: 1, c: 0 }, e: { r: 1, c: 1 } });
-  merges.push({ s: { r: 1, c: 2 }, e: { r: 1, c: 4 } });
-  merges.push({ s: { r: 2, c: 0 }, e: { r: 2, c: 1 } });
-  merges.push({ s: { r: 2, c: 2 }, e: { r: 2, c: 4 } });
+  merges.push({ s: { r: 1, c: 0 }, e: { r: 1, c: 2 } });
+  merges.push({ s: { r: 1, c: 3 }, e: { r: 1, c: 4 } });
+  merges.push({ s: { r: 2, c: 0 }, e: { r: 2, c: 2 } });
+  merges.push({ s: { r: 2, c: 3 }, e: { r: 2, c: 4 } });
 
-  rows.push(["ОЦЕНКА ПРОИЗВОДСТВА", "", "ПРОИЗВОДСТВЕННАЯ МОЩНОСТЬ", "", ""]);
-  rows.push(["Выбрать из списка", "", "Прозведено ед. в мес.", "", ""]);
+  rows.push(["ОЦЕНКА ПРОИЗВОДСТВА", "", "", productionRating, ""]);
+  rows.push(["Производственная мощность", "", "", productionCapacity, ""]);
   rows.push(["№ п. ТУ", "Параметр", "Категория", "Оценка (0/1/2)", "Примечание"]);
 
   let seq = 1;

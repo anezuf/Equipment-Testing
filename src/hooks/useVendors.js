@@ -13,6 +13,8 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
           scores: Array(n).fill(null),
           notes: Array(n).fill(""),
           images: Array(n).fill(null),
+          productionRating: null,
+          productionCapacity: "",
         },
       ];
     })();
@@ -35,6 +37,8 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
         scores: Array(itemCount).fill(null),
         notes: Array(itemCount).fill(""),
         images: Array(itemCount).fill(null),
+        productionRating: null,
+        productionCapacity: "",
       },
     ]);
   }, [itemCount, setVendors, vendors.length]);
@@ -116,6 +120,28 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
     [act, setVendors]
   );
 
+  const onProductionRatingChange = useCallback(
+    (rating) => {
+      setVendors((p) => {
+        const n = [...p];
+        n[act] = { ...n[act], productionRating: rating };
+        return n;
+      });
+    },
+    [act, setVendors]
+  );
+
+  const onProductionCapacityChange = useCallback(
+    (capacity) => {
+      setVendors((p) => {
+        const n = [...p];
+        n[act] = { ...n[act], productionCapacity: capacity };
+        return n;
+      });
+    },
+    [act, setVendors]
+  );
+
   const totals = useMemo(() => vendors.map((v) => calcTotal(v.scores, ALL)), [vendors, ALL]);
   const allSec = useMemo(
     () => vendors.map((v) => sections.map((_, si) => calcSec(v.scores, si, sections, SEC_OFF))),
@@ -153,6 +179,8 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
     onNoteChange,
     onImageAdd,
     onImageRemove,
+    onProductionRatingChange,
+    onProductionCapacityChange,
     totals,
     allSec,
     sortedIdx,
