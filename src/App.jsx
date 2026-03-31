@@ -339,6 +339,23 @@ export default function App(){
     html+=`<h1>${esc(v.name)}</h1>`;
     const tColor=total!=null&&total>=7?"#10B981":total!=null&&total>=4?"#F59E0B":"#7B97B2";
     html+=`<div class="total" style="background:${tColor}">${fmt(total)} / 10</div>`;
+    const hasProductionInfo = Boolean(v.productionRating || String(v.productionCapacity ?? "").trim());
+    if(hasProductionInfo){
+      const ratingText = esc(v.productionRating || "Не оценивалось");
+      const capacityRaw = String(v.productionCapacity ?? "").trim();
+      const capacityText = esc(capacityRaw ? `${capacityRaw} ед./мес.` : "—");
+      html+=`<div style="display:flex;gap:24px;margin-bottom:16px;padding:12px 16px;border:1px solid #E5EAF0;border-radius:12px;background:#fff;break-inside:avoid">
+        <div>
+          <div style="font-size:11px;color:#7B97B2;margin-bottom:4px">Оценка производства</div>
+          <div style="font-size:13px;font-weight:600;color:#334155">${ratingText}</div>
+        </div>
+        <div style="width:1px;background:#E5EAF0"></div>
+        <div>
+          <div style="font-size:11px;color:#7B97B2;margin-bottom:4px">Производственная мощность</div>
+          <div style="font-size:13px;font-weight:600;color:#334155">${capacityText}</div>
+        </div>
+      </div>`;
+    }
 
     let gi=0;
     scoringSections.forEach((sec)=>{
