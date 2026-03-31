@@ -4,6 +4,55 @@ import Logo from "../Logo";
 
 const [IconNo, IconMid, IconYes] = ICO;
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => resolve(ev.target?.result || "");
+    reader.onerror = () => reject(new Error("file_read_failed"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function downscaleDataUrlImage(dataUrl, maxSide = 1600, quality = 0.82) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        if (!w || !h) {
+          resolve(dataUrl);
+          return;
+        }
+        const scale = Math.min(1, maxSide / Math.max(w, h));
+        const tw = Math.max(1, Math.round(w * scale));
+        const th = Math.max(1, Math.round(h * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = tw;
+        canvas.height = th;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, tw, th);
+        const optimized = canvas.toDataURL("image/jpeg", quality);
+        resolve(optimized || dataUrl);
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+async function readAndOptimizeImage(file) {
+  const original = await readFileAsDataUrl(file);
+  const optimized = await downscaleDataUrlImage(original);
+  return optimized;
+}
+
 export default function ScoreEditor({
   eqType,
   onSwitchEqType,
@@ -244,49 +293,49 @@ export default function ScoreEditor({
                       <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       Файл
                       <input type="file" multiple style={{display:"none"}} onChange={e=>{
-                        Array.from(e.target.files).forEach(f=>{
+                        Array.from(e.target.files).forEach((f) => {
+                          void (async () => {
                           const mime=f.type||"";
                           const name=f.name||"";
                           const ext=name.split(".").pop().toLowerCase();
                           const isHeic=ext==="heic"||ext==="heif";
                           const isVid=mime.startsWith("video/");
                           const isImg=mime.startsWith("image/")||isHeic;
-                          const reader=new FileReader();
                           if(isHeic){
                             const blobUrl=URL.createObjectURL(f);
                             const img=new Image();
-                            img.onload=()=>{
+                            img.onload=async ()=>{
                               try{
                                 const c=document.createElement("canvas");
                                 c.width=img.naturalWidth;c.height=img.naturalHeight;
                                 c.getContext("2d").drawImage(img,0,0);
-                                const jpeg=c.toDataURL("image/jpeg",0.9);
+                                const jpeg=c.toDataURL("image/jpeg",0.82);
+                                const optimized = await downscaleDataUrlImage(jpeg);
                                 URL.revokeObjectURL(blobUrl);
-                                addImage(idx,name.replace(/\.(heic|heif)$/i,".jpg"),jpeg,false,true,false);
+                                addImage(idx,name.replace(/\.(heic|heif)$/i,".jpg"),optimized,false,true,false);
                               }catch{
                                 URL.revokeObjectURL(blobUrl);
-                                const fr=new FileReader();
-                                fr.onload=ev2=>addImage(idx,name,ev2.target.result,false,false,false);
-                                fr.readAsDataURL(f);
+                                const fallback = await readFileAsDataUrl(f);
+                                addImage(idx,name,fallback,false,false,false);
                               }
                             };
-                            img.onerror=()=>{
+                            img.onerror=async ()=>{
                               URL.revokeObjectURL(blobUrl);
-                              const fr=new FileReader();
-                              fr.onload=ev2=>addImage(idx,name,ev2.target.result,false,false,false);
-                              fr.readAsDataURL(f);
+                              const fallback = await readFileAsDataUrl(f);
+                              addImage(idx,name,fallback,false,false,false);
                             };
                             img.src=blobUrl;
                           }else if(isVid){
-                            reader.onload=ev=>addImage(idx,name,ev.target.result,false,false,true);
-                            reader.readAsDataURL(f);
+                            const videoData = await readFileAsDataUrl(f);
+                            addImage(idx,name,videoData,false,false,true);
                           }else if(isImg){
-                            reader.onload=ev=>addImage(idx,name,ev.target.result,false,true,false);
-                            reader.readAsDataURL(f);
+                            const optimized = await readAndOptimizeImage(f);
+                            addImage(idx,name,optimized,false,true,false);
                           }else{
-                            reader.onload=ev=>addImage(idx,name,ev.target.result,false,false,false);
-                            reader.readAsDataURL(f);
+                            const fileData = await readFileAsDataUrl(f);
+                            addImage(idx,name,fileData,false,false,false);
                           }
+                          })().catch(() => {});
                         });
                         e.target.value="";
                       }}/>
