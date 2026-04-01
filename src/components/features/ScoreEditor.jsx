@@ -1,8 +1,11 @@
+import { useEffect, useRef } from "react";
 import { B, VC, ICO, SM, WC, EQ_TYPES } from "../../constants";
 import RichNote from "../RichNote";
 import Logo from "../Logo";
 
 const [IconNo, IconMid, IconYes] = ICO;
+const CAPACITY_HOLD_DELAY_MS = 350;
+const CAPACITY_HOLD_INTERVAL_MS = 80;
 
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -109,11 +112,101 @@ export default function ScoreEditor({
   const sanitizeCapacityValue = (value) => String(value ?? "").replace(/\D/g, "").slice(0, 4);
   const parsedCapacity = Number.parseInt(sanitizeCapacityValue(activeVendor.productionCapacity), 10);
   const currentCapacity = Number.isFinite(parsedCapacity) ? parsedCapacity : 0;
+  const currentCapacityRef = useRef(currentCapacity);
+  const onProductionCapacityChangeRef = useRef(onProductionCapacityChange);
+  const capacityHoldTimeoutRef = useRef(null);
+  const capacityHoldIntervalRef = useRef(null);
+  const capacityClickResetTimeoutRef = useRef(null);
+  const suppressCapacityClickRef = useRef(false);
+
+  useEffect(() => {
+    currentCapacityRef.current = currentCapacity;
+  }, [currentCapacity]);
+
+  useEffect(() => {
+    onProductionCapacityChangeRef.current = onProductionCapacityChange;
+  }, [onProductionCapacityChange]);
+
+  useEffect(
+    () => () => {
+      if (capacityHoldTimeoutRef.current != null) {
+        window.clearTimeout(capacityHoldTimeoutRef.current);
+      }
+      if (capacityHoldIntervalRef.current != null) {
+        window.clearInterval(capacityHoldIntervalRef.current);
+      }
+      if (capacityClickResetTimeoutRef.current != null) {
+        window.clearTimeout(capacityClickResetTimeoutRef.current);
+      }
+    },
+    []
+  );
+
   const canDecreaseCapacity = currentCapacity > 0;
   const canIncreaseCapacity = currentCapacity < 9999;
   const stepProductionCapacity = (step) => {
-    const nextValue = Math.max(0, Math.min(9999, currentCapacity + step));
-    onProductionCapacityChange(String(nextValue));
+    const nextValue = Math.max(0, Math.min(9999, currentCapacityRef.current + step));
+    if (nextValue === currentCapacityRef.current) return false;
+    currentCapacityRef.current = nextValue;
+    onProductionCapacityChangeRef.current(String(nextValue));
+    return true;
+  };
+  const stopCapacityStepHold = () => {
+    if (capacityHoldTimeoutRef.current != null) {
+      window.clearTimeout(capacityHoldTimeoutRef.current);
+      capacityHoldTimeoutRef.current = null;
+    }
+    if (capacityHoldIntervalRef.current != null) {
+      window.clearInterval(capacityHoldIntervalRef.current);
+      capacityHoldIntervalRef.current = null;
+    }
+    if (capacityClickResetTimeoutRef.current != null) {
+      window.clearTimeout(capacityClickResetTimeoutRef.current);
+    }
+    capacityClickResetTimeoutRef.current = window.setTimeout(() => {
+      suppressCapacityClickRef.current = false;
+      capacityClickResetTimeoutRef.current = null;
+    }, 0);
+  };
+  const startCapacityStepHold = (step, disabled) => (event) => {
+    if (disabled) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    stopCapacityStepHold();
+    if (capacityClickResetTimeoutRef.current != null) {
+      window.clearTimeout(capacityClickResetTimeoutRef.current);
+      capacityClickResetTimeoutRef.current = null;
+    }
+    suppressCapacityClickRef.current = true;
+
+    if (typeof event.currentTarget.setPointerCapture === "function") {
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Ignore capture failures and fall back to local pointer events.
+      }
+    }
+
+    const didStep = stepProductionCapacity(step);
+    if (!didStep) {
+      suppressCapacityClickRef.current = false;
+      return;
+    }
+
+    capacityHoldTimeoutRef.current = window.setTimeout(() => {
+      capacityHoldIntervalRef.current = window.setInterval(() => {
+        const repeated = stepProductionCapacity(step);
+        if (!repeated) stopCapacityStepHold();
+      }, CAPACITY_HOLD_INTERVAL_MS);
+    }, CAPACITY_HOLD_DELAY_MS);
+  };
+  const handleCapacityStepClick = (step) => (event) => {
+    if (suppressCapacityClickRef.current) {
+      suppressCapacityClickRef.current = false;
+      event.preventDefault();
+      return;
+    }
+    stepProductionCapacity(step);
   };
 
   return <div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
@@ -239,7 +332,12 @@ export default function ScoreEditor({
                 <button
                   type="button"
                   className="btn-capacity-step"
-                  onClick={() => stepProductionCapacity(1)}
+                  onClick={handleCapacityStepClick(1)}
+                  onPointerDown={startCapacityStepHold(1, !canIncreaseCapacity)}
+                  onPointerUp={stopCapacityStepHold}
+                  onPointerCancel={stopCapacityStepHold}
+                  onPointerLeave={stopCapacityStepHold}
+                  onLostPointerCapture={stopCapacityStepHold}
                   disabled={!canIncreaseCapacity}
                   aria-label="Increase production capacity by 1"
                 >
@@ -248,7 +346,12 @@ export default function ScoreEditor({
                 <button
                   type="button"
                   className="btn-capacity-step"
-                  onClick={() => stepProductionCapacity(-1)}
+                  onClick={handleCapacityStepClick(-1)}
+                  onPointerDown={startCapacityStepHold(-1, !canDecreaseCapacity)}
+                  onPointerUp={stopCapacityStepHold}
+                  onPointerCancel={stopCapacityStepHold}
+                  onPointerLeave={stopCapacityStepHold}
+                  onLostPointerCapture={stopCapacityStepHold}
                   disabled={!canDecreaseCapacity}
                   aria-label="Decrease production capacity by 1"
                 >

@@ -393,8 +393,9 @@ button {
   background: #F8FBFF;
   overflow: hidden;
   transition: border 0.15s;
-  width: 100%;
-  max-width: 92px;
+  width: calc(4ch + 24px);
+  min-width: calc(4ch + 24px);
+  max-width: calc(4ch + 24px);
 }
 
 .production-capacity-note-like:focus-within {
@@ -411,6 +412,7 @@ button {
   font-size: 12px;
   line-height: 1.5;
   font-family: Inter, sans-serif;
+  font-variant-numeric: tabular-nums;
   color: #334155;
   text-align: left;
 }
