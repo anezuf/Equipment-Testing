@@ -7,6 +7,11 @@ function normalizeArrayLength(source, itemCount, fallbackValue) {
   return [...arr, ...Array(itemCount - arr.length).fill(fallbackValue)];
 }
 
+function normalizeProductionCapacity(value) {
+  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 4);
+  return digits === "" ? "0" : digits;
+}
+
 function readJsonFile(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -35,6 +40,9 @@ export async function importScoringFile({ file, sections, vendorsLength, itemCou
             scores: normalizeArrayLength(v.scores, itemCount, null).map((score) => (score === 0 || score === 1 || score === 2 ? score : null)),
             notes: normalizeArrayLength(v.notes, itemCount, "").map((note) => String(note ?? "")),
             images: normalizeArrayLength(v.images, itemCount, null),
+            productionRating: v?.productionRating ?? null,
+            productionVerdict: v?.productionVerdict ?? null,
+            productionCapacity: normalizeProductionCapacity(v?.productionCapacity),
           }))
         );
       }
@@ -106,7 +114,15 @@ export async function importScoringFile({ file, sections, vendorsLength, itemCou
         matchedCount += 1;
       }
 
-      const newVendor = { name: vendorName, scores, notes, images };
+      const newVendor = {
+        name: vendorName,
+        scores,
+        notes,
+        images,
+        productionRating: null,
+        productionVerdict: null,
+        productionCapacity: "0",
+      };
       setVendors((prev) => [...prev, newVendor]);
       setAct(vendorsLength);
       setView("input");
@@ -183,7 +199,15 @@ export async function importScoringFile({ file, sections, vendorsLength, itemCou
         idx += 1;
       }
 
-      return { name: vn.name, scores, notes, images };
+      return {
+        name: vn.name,
+        scores,
+        notes,
+        images,
+        productionRating: null,
+        productionVerdict: null,
+        productionCapacity: "0",
+      };
     });
 
     setVendors(newVendors);

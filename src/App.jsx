@@ -33,6 +33,11 @@ import NavBar from "./components/ui/NavBar";
   - hasFail: any ОП/ПП item (w>=1) with score===0
 */
 
+function normalizeProductionCapacity(value) {
+  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 4);
+  return digits === "" ? "0" : digits;
+}
+
 export default function App(){
   useDisableDoubleTapZoom();
   const deriveSectionsFromTechSpecs = useCallback((specs, weightsMap, defaultWeightsMap) => (
@@ -74,7 +79,7 @@ export default function App(){
         images: Array(itemCount).fill(null),
         productionRating: null,
         productionVerdict: null,
-        productionCapacity: "",
+        productionCapacity: "0",
       }],
     };
   }, [deriveSectionsFromTechSpecs]);
@@ -105,7 +110,7 @@ export default function App(){
         images: Array.isArray(v.images) ? [...v.images.slice(0, n), ...Array(Math.max(0, n - v.images.length)).fill(null)] : Array(n).fill(null),
         productionRating: v?.productionRating ?? null,
         productionVerdict: v?.productionVerdict ?? null,
-        productionCapacity: String(v?.productionCapacity ?? ""),
+        productionCapacity: normalizeProductionCapacity(v?.productionCapacity),
       })),
     };
   }, [createDefaultScoringData]);
@@ -266,7 +271,7 @@ export default function App(){
           images: Array.isArray(v.images) ? [...v.images.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.images.length)).fill(null)] : Array(targetCount).fill(null),
           productionRating: v?.productionRating ?? null,
           productionVerdict: v?.productionVerdict ?? null,
-          productionCapacity: String(v?.productionCapacity ?? ""),
+          productionCapacity: normalizeProductionCapacity(v?.productionCapacity),
         }));
         const oldVendors = current.vendors || [];
         const vendorsChanged = oldVendors.length !== resizedVendors.length || oldVendors.some((v, idx) => {

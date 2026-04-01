@@ -115,8 +115,12 @@ export default function ScoreEditor({
   ];
   const activeVendor = vendors[act] || {};
   const printDate = new Date().toLocaleDateString("ru-RU");
-  const sanitizeCapacityValue = (value) => String(value ?? "").replace(/\D/g, "").slice(0, 4);
-  const parsedCapacity = Number.parseInt(sanitizeCapacityValue(activeVendor.productionCapacity), 10);
+  const sanitizeCapacityValue = (value) => {
+    const digits = String(value ?? "").replace(/\D/g, "").slice(0, 4);
+    return digits === "" ? "0" : digits;
+  };
+  const capacityInputValue = sanitizeCapacityValue(activeVendor.productionCapacity);
+  const parsedCapacity = Number.parseInt(capacityInputValue, 10);
   const currentCapacity = Number.isFinite(parsedCapacity) ? parsedCapacity : 0;
   const currentCapacityRef = useRef(currentCapacity);
   const onProductionCapacityChangeRef = useRef(onProductionCapacityChange);
@@ -253,9 +257,9 @@ export default function ScoreEditor({
           <span style={{color:B.border,margin:"0 4px"}}>│</span>
           <IconYes c="#10B981" s={13}/><span style={{fontSize:11,color:"#10B981",fontWeight:600}}>Да</span>
           <span style={{color:B.border,margin:"0 8px 0 4px"}}>│</span>
-          <span style={{fontSize:10,color:B.steel}}>ПП</span>
-          <span style={{fontSize:10,color:B.steel,marginLeft:4}}>ОП</span>
-          <span style={{fontSize:10,color:B.steel,marginLeft:4}}>П</span>
+          <span style={{fontSize:10,color:B.steel,whiteSpace:"nowrap"}}>ПП — приоритетный параметр</span>
+          <span style={{fontSize:10,color:B.steel,marginLeft:8,whiteSpace:"nowrap"}}>ОП — обязательный параметр</span>
+          <span style={{fontSize:10,color:B.steel,marginLeft:8,whiteSpace:"nowrap"}}>П — преимущество</span>
         </div>
       </div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,alignItems:"center"}}>
@@ -338,7 +342,7 @@ export default function ScoreEditor({
                   pattern="[0-9]*"
                   maxLength={4}
                   className="production-capacity-input"
-                  value={activeVendor.productionCapacity ?? ""}
+                  value={capacityInputValue}
                   onChange={(e) => onProductionCapacityChange(sanitizeCapacityValue(e.target.value))}
                   onKeyDown={(e) => {
                     if (e.key === "ArrowUp") {
