@@ -73,6 +73,7 @@ export default function App(){
         notes: Array(itemCount).fill(""),
         images: Array(itemCount).fill(null),
         productionRating: null,
+        productionVerdict: null,
         productionCapacity: "",
       }],
     };
@@ -103,6 +104,7 @@ export default function App(){
         notes: Array.isArray(v.notes) ? [...v.notes.slice(0, n), ...Array(Math.max(0, n - v.notes.length)).fill("")] : Array(n).fill(""),
         images: Array.isArray(v.images) ? [...v.images.slice(0, n), ...Array(Math.max(0, n - v.images.length)).fill(null)] : Array(n).fill(null),
         productionRating: v?.productionRating ?? null,
+        productionVerdict: v?.productionVerdict ?? null,
         productionCapacity: String(v?.productionCapacity ?? ""),
       })),
     };
@@ -172,6 +174,7 @@ export default function App(){
     onImageRemove: rmImage,
     onProductionRatingChange: setProductionRating,
     onProductionCapacityChange: setProductionCapacity,
+    onProductionVerdictChange: setProductionVerdict,
     totals,
     allSec,
     sortedIdx,
@@ -262,6 +265,7 @@ export default function App(){
           notes: Array.isArray(v.notes) ? [...v.notes.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.notes.length)).fill("")] : Array(targetCount).fill(""),
           images: Array.isArray(v.images) ? [...v.images.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.images.length)).fill(null)] : Array(targetCount).fill(null),
           productionRating: v?.productionRating ?? null,
+          productionVerdict: v?.productionVerdict ?? null,
           productionCapacity: String(v?.productionCapacity ?? ""),
         }));
         const oldVendors = current.vendors || [];
@@ -481,6 +485,7 @@ export default function App(){
       onImageRemove={rmImage}
       onProductionRatingChange={setProductionRating}
       onProductionCapacityChange={setProductionCapacity}
+      onProductionVerdictChange={setProductionVerdict}
       isPortrait={isPortrait}
       onAddVendor={addV}
       onRemoveVendor={rmV}

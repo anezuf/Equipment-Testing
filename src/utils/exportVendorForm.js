@@ -30,6 +30,19 @@ const setCellStyle = (ws, rowIndex, colIndex, style) => {
   ws[ref].s = style;
 };
 
+const deriveVerdictIndex = (vendor) => {
+  const explicitVerdict = vendor?.productionVerdict;
+  if (explicitVerdict === "recommended") return 0;
+  if (explicitVerdict === "rework") return 1;
+  if (explicitVerdict === "not_recommended") return 2;
+
+  const rating = vendor?.productionRating;
+  if (rating === "Хорошо") return 0;
+  if (rating === "Удовлетворительно") return 1;
+  if (rating === "Плохо") return 2;
+  return null;
+};
+
 export function exportVendorForm({ vendor, sections, eqType, ALL }) {
   if (!vendor) return;
 
@@ -249,6 +262,14 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
     else if (idx === 1) setCellStyle(ws, rowIndex, 4, verdictMarkWarnStyle);
     else setCellStyle(ws, rowIndex, 4, verdictMarkBadStyle);
   });
+
+  const verdictIndex = deriveVerdictIndex(vendor);
+  if (verdictIndex != null && verdictRowIndexes[verdictIndex] != null) {
+    const markRef = XLSX.utils.encode_cell({ r: verdictRowIndexes[verdictIndex], c: 4 });
+    if (!ws[markRef]) ws[markRef] = { t: "s", v: "" };
+    ws[markRef].v = "✓";
+    ws[markRef].t = "s";
+  }
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Форма");

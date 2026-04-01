@@ -14,6 +14,7 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
           notes: Array(n).fill(""),
           images: Array(n).fill(null),
           productionRating: null,
+          productionVerdict: null,
           productionCapacity: "",
         },
       ];
@@ -38,6 +39,7 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
         notes: Array(itemCount).fill(""),
         images: Array(itemCount).fill(null),
         productionRating: null,
+        productionVerdict: null,
         productionCapacity: "",
       },
     ]);
@@ -142,6 +144,17 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
     [act, setVendors]
   );
 
+  const onProductionVerdictChange = useCallback(
+    (verdict) => {
+      setVendors((p) => {
+        const n = [...p];
+        n[act] = { ...n[act], productionVerdict: verdict };
+        return n;
+      });
+    },
+    [act, setVendors]
+  );
+
   const totals = useMemo(() => vendors.map((v) => calcTotal(v.scores, ALL)), [vendors, ALL]);
   const allSec = useMemo(
     () => vendors.map((v) => sections.map((_, si) => calcSec(v.scores, si, sections, SEC_OFF))),
@@ -181,6 +194,7 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
     onImageRemove,
     onProductionRatingChange,
     onProductionCapacityChange,
+    onProductionVerdictChange,
     totals,
     allSec,
     sortedIdx,

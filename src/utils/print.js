@@ -11,6 +11,30 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function getProductionVerdictText(vendor) {
+  if (vendor?.productionVerdict === "recommended") {
+    return "Рекомендован к включению в список рекомендованных производителей";
+  }
+  if (vendor?.productionVerdict === "rework") {
+    return "Производителю рекомендовано доработать изделие для повторного тестирования";
+  }
+  if (vendor?.productionVerdict === "not_recommended") {
+    return "Не рекомендован к включению в список рекомендованных производителей";
+  }
+
+  const rating = vendor?.productionRating;
+  if (rating === "Хорошо") {
+    return "Рекомендован к включению в список рекомендованных производителей";
+  }
+  if (rating === "Удовлетворительно") {
+    return "Производителю рекомендовано доработать изделие для повторного тестирования";
+  }
+  if (rating === "Плохо") {
+    return "Не рекомендован к включению в список рекомендованных производителей";
+  }
+  return "—";
+}
+
 export function exportVendorPdfReport(vendor, scoringSections) {
   if (!vendor) return;
 
@@ -92,11 +116,16 @@ export function exportVendorPdfReport(vendor, scoringSections) {
   const totalColor = total != null && total >= 7 ? "#10B981" : total != null && total >= 4 ? "#F59E0B" : "#7B97B2";
   html += `<div class="total" style="background:${totalColor}">${fmt(total)} / 10</div>`;
 
-  const hasProductionInfo = Boolean(vendor.productionRating || String(vendor.productionCapacity ?? "").trim());
+  const hasProductionInfo = Boolean(
+    vendor.productionRating ||
+    vendor.productionVerdict ||
+    String(vendor.productionCapacity ?? "").trim()
+  );
   if (hasProductionInfo) {
     const ratingText = escapeHtml(vendor.productionRating || "Не оценивалось");
     const capacityRaw = String(vendor.productionCapacity ?? "").trim();
     const capacityText = escapeHtml(capacityRaw ? `${capacityRaw} ед./мес.` : "—");
+    const verdictText = escapeHtml(getProductionVerdictText(vendor));
     html += `<div style="display:flex;gap:24px;margin-bottom:16px;padding:12px 16px;border:1px solid #E5EAF0;border-radius:12px;background:#fff;break-inside:avoid">
         <div>
           <div style="font-size:11px;color:#7B97B2;margin-bottom:4px">Оценка производства</div>
@@ -106,6 +135,11 @@ export function exportVendorPdfReport(vendor, scoringSections) {
         <div>
           <div style="font-size:11px;color:#7B97B2;margin-bottom:4px">Производственная мощность</div>
           <div style="font-size:13px;font-weight:600;color:#334155">${capacityText}</div>
+        </div>
+        <div style="width:1px;background:#E5EAF0"></div>
+        <div style="flex:1;min-width:220px">
+          <div style="font-size:11px;color:#7B97B2;margin-bottom:4px">Вывод</div>
+          <div style="font-size:13px;font-weight:600;color:#334155">${verdictText}</div>
         </div>
       </div>`;
   }

@@ -75,6 +75,7 @@ export default function ScoreEditor({
   onImageRemove,
   onProductionRatingChange,
   onProductionCapacityChange,
+  onProductionVerdictChange,
   isPortrait,
   onAddVendor,
   onRemoveVendor,
@@ -107,6 +108,11 @@ export default function ScoreEditor({
     "Удовлетворительно": { c: "#F59E0B", bg: "#FFFBEB", bd: "#FDE68A" },
     "Хорошо": { c: "#10B981", bg: "#ECFDF5", bd: "#A7F3D0" },
   };
+  const productionVerdictOptions = [
+    { key: "not_recommended", label: "Не рекомендован", c: "#EF4444", bg: "#FEF2F2", bd: "#FECACA" },
+    { key: "rework", label: "На доработку", c: "#F59E0B", bg: "#FFFBEB", bd: "#FDE68A" },
+    { key: "recommended", label: "Рекомендован", c: "#10B981", bg: "#ECFDF5", bd: "#A7F3D0" },
+  ];
   const activeVendor = vendors[act] || {};
   const printDate = new Date().toLocaleDateString("ru-RU");
   const sanitizeCapacityValue = (value) => String(value ?? "").replace(/\D/g, "").slice(0, 4);
@@ -298,6 +304,24 @@ export default function ScoreEditor({
                     style={{ "--pill-color": palette.c, "--pill-bg": palette.bg, "--pill-border": palette.bd }}
                   >
                     {option}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{fontSize:12,fontWeight:600,color:B.graphite,marginTop:12,marginBottom:8,textAlign:"left"}}>Вывод</div>
+            <div className="production-verdict-options" style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"flex-start"}}>
+              {productionVerdictOptions.map((option) => {
+                const isActive = activeVendor.productionVerdict === option.key;
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    className={`btn-eq-type production-verdict-pill ${isActive ? "production-verdict-pill-active" : ""}`}
+                    onClick={() => onProductionVerdictChange(isActive ? null : option.key)}
+                    style={{ "--pill-color": option.c, "--pill-bg": option.bg, "--pill-border": option.bd }}
+                  >
+                    {isActive ? "\u2713 " : ""}
+                    {option.label}
                   </button>
                 );
               })}
