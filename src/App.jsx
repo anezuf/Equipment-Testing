@@ -335,7 +335,7 @@ export default function App(){
       .total{display:inline-block;padding:8px 20px;border-radius:12px;font-size:20px;font-weight:800;color:#fff;margin-bottom:28px}
       .sec{background:#334155;color:#fff;padding:8px 14px;font-size:12px;font-weight:700;border-radius:8px 8px 0 0;break-after:avoid-page;page-break-after:avoid}
       .items{border:1px solid #E5EAF0;border-top:none;border-radius:0 0 8px 8px;margin-bottom:2px;break-inside:auto;page-break-inside:auto}
-      .sec-first-pack{break-inside:avoid-page;page-break-inside:avoid}
+      .sec-first-pack{break-inside:avoid;page-break-inside:avoid}
       .items-first{margin-bottom:0}
       .items-first.has-rest{border-radius:0}
       .items-first.has-rest .row:last-child{border-bottom:1px solid #F1F5F9}
@@ -358,17 +358,13 @@ export default function App(){
       .pdf-btn:hover{background:#FEE2E2;border-color:#FCA5A5}
       .pdf-btn:active{background:#FECACA}
       .sec-block{break-inside:auto;page-break-inside:auto;margin-top:14px}
-      .force-page-break{break-before:page;page-break-before:always}
-      .sec.force-page-break{break-before:page;page-break-before:always}
       .sec + .items{break-before:avoid-page;page-break-before:avoid}
       @media print{
         body{padding:12px}
         .pdf-btn{display:none!important}
         .sec-block{break-inside:auto!important;page-break-inside:auto!important}
-        .force-page-break{break-before:page!important;page-break-before:always!important}
-        .sec.force-page-break{break-before:page!important;page-break-before:always!important}
         .sec{break-after:avoid-page!important;page-break-after:avoid!important}
-        .sec-first-pack{break-inside:avoid-page!important;page-break-inside:avoid!important}
+        .sec-first-pack{break-inside:avoid!important;page-break-inside:avoid!important}
         .sec + .items{break-before:avoid-page!important;page-break-before:avoid!important}
         .row{break-inside:avoid-page!important;page-break-inside:avoid!important}
       }
@@ -465,28 +461,8 @@ export default function App(){
           const bodyWidth = document.body.getBoundingClientRect().width || printableWidthPx;
           const scale = Math.min(1, printableWidthPx / bodyWidth);
           const pageHeightCss = printableHeightPx / scale;
-          blocks.forEach((b)=>{
-            b.classList.remove('force-page-break');
-            const h = b.querySelector('.sec');
-            if(h) h.classList.remove('force-page-break');
-          });
-          for(const block of blocks){
-            const header = block.querySelector('.sec');
-            const firstRow = block.querySelector('.row');
-            if(!header || !firstRow) continue;
-            const headerTop = header.getBoundingClientRect().top + window.scrollY;
-            const firstRowTop = firstRow.getBoundingClientRect().top + window.scrollY;
-            const pageStart = Math.floor(headerTop / pageHeightCss) * pageHeightCss;
-            const pageEnd = pageStart + pageHeightCss;
-            const headerPage = Math.floor(headerTop / pageHeightCss);
-            const rowPage = Math.floor(firstRowTop / pageHeightCss);
-            const firstRowHeight = firstRow.getBoundingClientRect().height;
-            const needed = (firstRowTop - headerTop) + firstRowHeight + EXTRA_SAFE_SPACE;
-            const remaining = pageEnd - headerTop;
-            if(rowPage !== headerPage || remaining < needed){
-              header.classList.add('force-page-break');
-            }
-          }
+          void EXTRA_SAFE_SPACE;
+          void pageHeightCss;
         };
         window.__waitForPrintMedia = function(){
           const media = Array.from(document.querySelectorAll('img, video'));

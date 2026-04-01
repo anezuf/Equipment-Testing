@@ -833,13 +833,7 @@ button {
 
   /* Sections / rows / page breaks */
   .sec-block {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
     margin-top: 12px !important;
-  }
-  .sec-block + .sec-block {
-    break-before: page;
-    page-break-before: always;
   }
   .sec {
     background: #334155 !important;
