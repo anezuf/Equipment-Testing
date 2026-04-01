@@ -157,6 +157,13 @@ body { background: #F5F8FB; }
 .rich-note em { font-style: italic; }
 .rich-note s { text-decoration: line-through; }
 
+/* Prevent iOS focus zoom in note editor on touch devices */
+@media (max-width: 1024px) and (pointer: coarse) {
+  .rich-note {
+    font-size: 16px !important;
+  }
+}
+
 /* ── Button hover effects ─────────────────────────────────────────── */
 /* No transform:scale anywhere — prevents text/icon movement on hover.
    Darkening uses an inset box-shadow overlay so borders and layout are never disturbed. */

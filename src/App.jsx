@@ -11,6 +11,7 @@ import { useImportExportHandlers } from "./hooks/useImportExportHandlers";
 import { useBackupRestore } from "./hooks/useBackupRestore";
 import { useModals } from "./hooks/useModals";
 import { useTechSpecsEditor } from "./hooks/useTechSpecsEditor";
+import { useDisableDoubleTapZoom } from "./hooks/useDisableDoubleTapZoom";
 import NotePopup from "./components/NotePopup";
 import Dashboard from "./components/features/Dashboard";
 import ScoreEditor from "./components/features/ScoreEditor";
@@ -33,6 +34,7 @@ import NavBar from "./components/ui/NavBar";
 */
 
 export default function App(){
+  useDisableDoubleTapZoom();
   const deriveSectionsFromTechSpecs = useCallback((specs, weightsMap, defaultWeightsMap) => (
     (Array.isArray(specs) ? specs : []).map((sec) => ({
       n: sec?.n || "",
