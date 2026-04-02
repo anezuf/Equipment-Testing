@@ -35,6 +35,43 @@ function getProductionVerdictText(vendor) {
   return "—";
 }
 
+function getProductionRatingPalette(rating) {
+  if (rating === "Хорошо") {
+    return { text: "#047857", bg: "#ECFDF5", border: "#A7F3D0" };
+  }
+  if (rating === "Удовлетворительно") {
+    return { text: "#B45309", bg: "#FFFBEB", border: "#FDE68A" };
+  }
+  if (rating === "Плохо") {
+    return { text: "#B91C1C", bg: "#FEF2F2", border: "#FECACA" };
+  }
+  return { text: "#334155", bg: "#F8FAFC", border: "#D7E1EC" };
+}
+
+function getProductionVerdictPalette(vendor) {
+  if (vendor?.productionVerdict === "recommended") {
+    return { text: "#047857", bg: "#ECFDF5", border: "#A7F3D0" };
+  }
+  if (vendor?.productionVerdict === "rework") {
+    return { text: "#B45309", bg: "#FFFBEB", border: "#FDE68A" };
+  }
+  if (vendor?.productionVerdict === "not_recommended") {
+    return { text: "#B91C1C", bg: "#FEF2F2", border: "#FECACA" };
+  }
+  return getProductionRatingPalette(vendor?.productionRating);
+}
+
+function getProductionCapacityPalette(capacityRaw) {
+  const parsed = Number.parseInt(String(capacityRaw ?? "").replace(/\D/g, ""), 10);
+  if (!Number.isFinite(parsed)) {
+    return { text: "#334155", bg: "#F8FAFC", border: "#D7E1EC" };
+  }
+  if (parsed === 0) {
+    return { text: "#B45309", bg: "#FFFBEB", border: "#FDE68A" };
+  }
+  return { text: "#1D4ED8", bg: "#EFF6FF", border: "#BFDBFE" };
+}
+
 export function exportVendorPdfReport(vendor, scoringSections) {
   if (!vendor) return;
 
@@ -126,20 +163,21 @@ export function exportVendorPdfReport(vendor, scoringSections) {
     const capacityRaw = String(vendor.productionCapacity ?? "").trim();
     const capacityText = escapeHtml(capacityRaw ? `${capacityRaw} ед./мес.` : "—");
     const verdictText = escapeHtml(getProductionVerdictText(vendor));
-    html += `<div style="display:flex;gap:24px;margin-bottom:16px;padding:12px 16px;border:1px solid #E5EAF0;border-radius:12px;background:#fff;break-inside:avoid">
-        <div>
-          <div style="font-size:11px;color:#7B97B2;margin-bottom:4px">Оценка производства</div>
-          <div style="font-size:13px;font-weight:600;color:#334155">${ratingText}</div>
+    const ratingPalette = getProductionRatingPalette(vendor.productionRating);
+    const capacityPalette = getProductionCapacityPalette(capacityRaw);
+    const verdictPalette = getProductionVerdictPalette(vendor);
+    html += `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:16px;padding:12px;border:1px solid #E5EAF0;border-radius:12px;background:#fff;break-inside:avoid">
+        <div style="padding:10px 12px;border-radius:10px;border:1px solid ${ratingPalette.border};background:${ratingPalette.bg}">
+          <div style="font-size:11px;color:#64748B;margin-bottom:4px">Оценка производства</div>
+          <div style="font-size:13px;font-weight:700;color:${ratingPalette.text}">${ratingText}</div>
         </div>
-        <div style="width:1px;background:#E5EAF0"></div>
-        <div>
-          <div style="font-size:11px;color:#7B97B2;margin-bottom:4px">Производственная мощность</div>
-          <div style="font-size:13px;font-weight:600;color:#334155">${capacityText}</div>
+        <div style="padding:10px 12px;border-radius:10px;border:1px solid ${capacityPalette.border};background:${capacityPalette.bg}">
+          <div style="font-size:11px;color:#64748B;margin-bottom:4px">Производственная мощность</div>
+          <div style="font-size:13px;font-weight:700;color:${capacityPalette.text}">${capacityText}</div>
         </div>
-        <div style="width:1px;background:#E5EAF0"></div>
-        <div style="flex:1;min-width:220px">
-          <div style="font-size:11px;color:#7B97B2;margin-bottom:4px">Вывод</div>
-          <div style="font-size:13px;font-weight:600;color:#334155">${verdictText}</div>
+        <div style="grid-column:1 / -1;padding:10px 12px;border-radius:10px;border:1px solid ${verdictPalette.border};background:${verdictPalette.bg}">
+          <div style="font-size:11px;color:#64748B;margin-bottom:4px">Вывод</div>
+          <div style="font-size:13px;font-weight:700;line-height:1.45;color:${verdictPalette.text}">${verdictText}</div>
         </div>
       </div>`;
   }
@@ -294,3 +332,4 @@ export function exportVendorPdfReport(vendor, scoringSections) {
     }
   }, 300);
 }
+
