@@ -332,7 +332,6 @@ export default function ScoreEditor({
                     onClick={() => onProductionVerdictChange(isActive ? null : option.key)}
                     style={{ "--pill-color": option.c, "--pill-bg": option.bg, "--pill-border": option.bd }}
                   >
-                    {isActive ? "\u2713 " : ""}
                     {option.label}
                   </button>
                 );
