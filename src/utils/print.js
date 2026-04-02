@@ -120,14 +120,18 @@ export function exportVendorPdfReport(vendor, scoringSections) {
       .srow{display:flex;justify-content:space-between;padding:6px 14px;font-size:12px}
       .srow:nth-child(even){background:#F5F8FB}
       .sn{color:#7B97B2}.sv{font-weight:700}
-      .pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 24px;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;border:1.5px solid #FECACA;background:#FEF2F2;font-family:Inter,system-ui,sans-serif}
+      .pdf-toolbar{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 auto 24px;flex-wrap:wrap;max-width:700px}
+      .pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;border:1.5px solid #FECACA;background:#FEF2F2;font-family:Inter,system-ui,sans-serif}
       .pdf-btn:hover{background:#FEE2E2;border-color:#FCA5A5}
       .pdf-btn:active{background:#FECACA}
+      .pdf-btn-back{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:500;color:#1E40AF;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;border:1.5px solid #BFDBFE;background:#EFF6FF;font-family:Inter,system-ui,sans-serif}
+      .pdf-btn-back:hover{background:#DBEAFE;border-color:#93C5FD}
+      .pdf-btn-back:active{background:#BFDBFE}
       .sec-block{break-inside:auto;page-break-inside:auto;margin-top:14px}
       .sec + .items{break-before:avoid-page;page-break-before:avoid}
       @media print{
         body{padding:12px}
-        .pdf-btn{display:none!important}
+        .pdf-toolbar{display:none!important}
         .sec-block{break-inside:auto!important;page-break-inside:auto!important}
         .sec{break-after:avoid-page!important;page-break-after:avoid!important}
         .sec-first-pack{break-inside:avoid!important;page-break-inside:avoid!important}
@@ -136,7 +140,10 @@ export function exportVendorPdfReport(vendor, scoringSections) {
       }
     </style></head><body>`;
 
-  html += `<button class="pdf-btn" onclick="window.print()"><span style="font-size:14px;line-height:1;color:#DC2626">↓</span><span>report</span><span style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#DC2626">PDF</span></button>`;
+  html += `<div class="pdf-toolbar">
+      <button type="button" class="pdf-btn-back" onclick="window.close()"><span style="font-size:14px;line-height:1;color:#2563EB" aria-hidden="true">←</span><span>Назад</span></button>
+      <button type="button" class="pdf-btn" onclick="window.print()"><span style="font-size:14px;line-height:1;color:#DC2626">↓</span><span>report</span><span style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#DC2626">PDF</span></button>
+    </div>`;
   html += `<div class="print-header">
       <div class="print-header-logo">
         <svg class="print-logo" viewBox="195 230 1530 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
