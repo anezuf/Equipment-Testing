@@ -529,6 +529,19 @@ button {
 
 /* ── Mobile responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* Touch: no text/icon selection or iOS long-press “copy” on controls */
+  button,
+  label.btn-file-upload {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* iOS Safari zooms the page when focusing inputs with computed font-size < 16px */
+  .production-capacity-input {
+    font-size: 16px;
+  }
+
   /* NAV: reduce padding, stack logo row + tabs vertically */
   [data-nav] {
     padding: 8px 12px !important;
