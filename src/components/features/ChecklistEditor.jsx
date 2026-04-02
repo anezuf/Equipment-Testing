@@ -37,10 +37,10 @@ export default function ChecklistEditor({
                 {techSpecs?.[si]?.items?.[ii]?.n2?.trim() ? (
                   <div style={{position:"relative",display:"inline-flex"}}>
                     {infoPopup?.si===si&&infoPopup?.ii===ii&&(
-                      <div style={{position:"absolute",bottom:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",zIndex:300,background:"#334155",color:"#fff",fontSize:11,fontWeight:500,padding:"8px 12px",borderRadius:8,width:240,lineHeight:"1.5",boxShadow:"0 4px 16px rgba(0,0,0,0.22)",pointerEvents:"none",whiteSpace:"pre-wrap",wordBreak:"break-word",textAlign:"left"}}>
-                        <div style={{fontWeight:700,marginBottom:4,fontSize:12}}>{it.n}</div>
-                        {techSpecs[si].items[ii].n2}
-                        <div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"5px solid transparent",borderRight:"5px solid transparent",borderTop:"5px solid #334155"}}/>
+                      <div className="info-tooltip-box" style={{position:"absolute",bottom:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",zIndex:300,fontSize:11,fontWeight:500,width:240,lineHeight:"1.5",pointerEvents:"none",whiteSpace:"pre-wrap",wordBreak:"break-word",textAlign:"left"}}>
+                        <div className="info-tooltip-title">{it.n}</div>
+                        <div className="info-tooltip-body">{techSpecs[si].items[ii].n2}</div>
+                        <div className="info-tooltip-arrow" aria-hidden />
                       </div>
                     )}
                     <button
