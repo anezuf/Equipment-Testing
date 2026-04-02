@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { B, VC, ICO, SM, WC, EQ_TYPES } from "../../constants";
+import { normalizeProductionCapacityStored, sanitizeProductionCapacityInput } from "../../utils";
 import RichNote from "../RichNote";
 import Logo from "../Logo";
 
@@ -115,12 +116,9 @@ export default function ScoreEditor({
   ];
   const activeVendor = vendors[act] || {};
   const printDate = new Date().toLocaleDateString("ru-RU");
-  const sanitizeCapacityValue = (value) => {
-    const digits = String(value ?? "").replace(/\D/g, "").slice(0, 4);
-    return digits === "" ? "0" : digits;
-  };
-  const capacityInputValue = sanitizeCapacityValue(activeVendor.productionCapacity);
-  const parsedCapacity = Number.parseInt(capacityInputValue, 10);
+  const capacityInputValue = sanitizeProductionCapacityInput(activeVendor.productionCapacity);
+  const parsedCapacity =
+    capacityInputValue === "" ? 0 : Number.parseInt(capacityInputValue, 10);
   const currentCapacity = Number.isFinite(parsedCapacity) ? parsedCapacity : 0;
   const currentCapacityRef = useRef(currentCapacity);
   const onProductionCapacityChangeRef = useRef(onProductionCapacityChange);
@@ -217,6 +215,16 @@ export default function ScoreEditor({
       return;
     }
     stepProductionCapacity(step);
+  };
+
+  const handleProductionCapacityInputChange = (event) => {
+    onProductionCapacityChange(sanitizeProductionCapacityInput(event.target.value));
+  };
+
+  const handleProductionCapacityBlur = () => {
+    if (capacityInputValue === "") {
+      onProductionCapacityChangeRef.current(normalizeProductionCapacityStored(""));
+    }
   };
 
   return <div className="view-section-pad" style={{maxWidth:920,margin:"0 auto",padding:"20px 16px"}}>
@@ -343,7 +351,8 @@ export default function ScoreEditor({
                   maxLength={4}
                   className="production-capacity-input"
                   value={capacityInputValue}
-                  onChange={(e) => onProductionCapacityChange(sanitizeCapacityValue(e.target.value))}
+                  onChange={handleProductionCapacityInputChange}
+                  onBlur={handleProductionCapacityBlur}
                   onKeyDown={(e) => {
                     if (e.key === "ArrowUp") {
                       e.preventDefault();

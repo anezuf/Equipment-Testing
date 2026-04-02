@@ -1,5 +1,16 @@
 export const fmt=(v)=>{if(v==null)return "—";return v%1===0?v.toFixed(0):v.toFixed(1);};
 
+/** Digits only, max 4. May be "" while the field is cleared for editing. */
+export function sanitizeProductionCapacityInput(value) {
+  return String(value ?? "").replace(/\D/g, "").slice(0, 4);
+}
+
+/** Canonical value for load, import, and after blur: "" → "0". */
+export function normalizeProductionCapacityStored(value) {
+  const digits = sanitizeProductionCapacityInput(value);
+  return digits === "" ? "0" : digits;
+}
+
 /** Editor weights map: only 0 | 1 | 2 values kept (same rules as loadSaved weights). */
 export function sanitizeEditorWeightsMap(raw) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};

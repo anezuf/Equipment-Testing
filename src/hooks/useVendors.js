@@ -1,11 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { mkAll, mkOff } from "../sections";
 import { calcTotal, calcSec } from "../scoring";
-
-function normalizeProductionCapacity(value) {
-  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 4);
-  return digits === "" ? "0" : digits;
-}
+import { sanitizeProductionCapacityInput } from "../utils";
 
 export function useVendors({ scoringData, setScoringData, sections, act, setAct }) {
   const vendors =
@@ -142,7 +138,7 @@ export function useVendors({ scoringData, setScoringData, sections, act, setAct 
     (capacity) => {
       setVendors((p) => {
         const n = [...p];
-        n[act] = { ...n[act], productionCapacity: normalizeProductionCapacity(capacity) };
+        n[act] = { ...n[act], productionCapacity: sanitizeProductionCapacityInput(capacity) };
         return n;
       });
     },

@@ -3,6 +3,7 @@ import { loadSaved, useStorage } from "./hooks/useStorage";
 import { useVendors } from "./hooks/useVendors";
 
 import { B, EQ_TYPES } from "./constants";
+import { normalizeProductionCapacityStored } from "./utils";
 import { mkAll } from "./sections";
 import { exportVendorPdfReport } from "./utils/print";
 import { TECH_SPECS_DEFAULT, PDU_TECH_SPECS_DEFAULT, normalizeTechSpecs } from "./data/techSpecs";
@@ -32,11 +33,6 @@ import NavBar from "./components/ui/NavBar";
   - sum_max_ALL = sum of base points for ALL ОП/ПП items (not just scored)
   - hasFail: any ОП/ПП item (w>=1) with score===0
 */
-
-function normalizeProductionCapacity(value) {
-  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 4);
-  return digits === "" ? "0" : digits;
-}
 
 export default function App(){
   useDisableDoubleTapZoom();
@@ -110,7 +106,7 @@ export default function App(){
         images: Array.isArray(v.images) ? [...v.images.slice(0, n), ...Array(Math.max(0, n - v.images.length)).fill(null)] : Array(n).fill(null),
         productionRating: v?.productionRating ?? null,
         productionVerdict: v?.productionVerdict ?? null,
-        productionCapacity: normalizeProductionCapacity(v?.productionCapacity),
+        productionCapacity: normalizeProductionCapacityStored(v?.productionCapacity),
       })),
     };
   }, [createDefaultScoringData]);
@@ -271,7 +267,7 @@ export default function App(){
           images: Array.isArray(v.images) ? [...v.images.slice(0, targetCount), ...Array(Math.max(0, targetCount - v.images.length)).fill(null)] : Array(targetCount).fill(null),
           productionRating: v?.productionRating ?? null,
           productionVerdict: v?.productionVerdict ?? null,
-          productionCapacity: normalizeProductionCapacity(v?.productionCapacity),
+          productionCapacity: normalizeProductionCapacityStored(v?.productionCapacity),
         }));
         const oldVendors = current.vendors || [];
         const vendorsChanged = oldVendors.length !== resizedVendors.length || oldVendors.some((v, idx) => {

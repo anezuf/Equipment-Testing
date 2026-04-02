@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx-js-style";
 import { calcTotal } from "../scoring";
+import { normalizeProductionCapacityStored } from "../utils";
 
 const getEqTitle = (eqType) => (eqType === "стойка" ? "СЕРВЕРНАЯ СТОЙКА" : "PDU");
 
@@ -48,8 +49,8 @@ export function exportVendorForm({ vendor, sections, eqType, ALL }) {
 
   const vendorName = String(vendor?.name ?? "").trim() || "Вендор";
   const productionRating = vendor?.productionRating ?? "";
-  const productionCapacityRaw = String(vendor?.productionCapacity ?? "").trim();
-  const productionCapacity = productionCapacityRaw ? `${productionCapacityRaw} ед./мес.` : "";
+  const productionCapacityRaw = normalizeProductionCapacityStored(vendor?.productionCapacity);
+  const productionCapacity = `${productionCapacityRaw} ед./мес.`;
   const rows = [];
   const merges = [];
   const sectionRows = [];

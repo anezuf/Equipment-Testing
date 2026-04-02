@@ -1,15 +1,11 @@
 import * as XLSX from "xlsx";
 import { mkAll } from "../sections";
+import { normalizeProductionCapacityStored } from "../utils";
 
 function normalizeArrayLength(source, itemCount, fallbackValue) {
   const arr = Array.isArray(source) ? source : [];
   if (arr.length >= itemCount) return arr.slice(0, itemCount);
   return [...arr, ...Array(itemCount - arr.length).fill(fallbackValue)];
-}
-
-function normalizeProductionCapacity(value) {
-  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 4);
-  return digits === "" ? "0" : digits;
 }
 
 function readJsonFile(file) {
@@ -42,7 +38,7 @@ export async function importScoringFile({ file, sections, vendorsLength, itemCou
             images: normalizeArrayLength(v.images, itemCount, null),
             productionRating: v?.productionRating ?? null,
             productionVerdict: v?.productionVerdict ?? null,
-            productionCapacity: normalizeProductionCapacity(v?.productionCapacity),
+            productionCapacity: normalizeProductionCapacityStored(v?.productionCapacity),
           }))
         );
       }

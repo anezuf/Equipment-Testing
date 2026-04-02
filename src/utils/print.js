@@ -1,6 +1,6 @@
 import { mkAll, mkOff } from "../sections";
 import { calcTotal, calcSec } from "../scoring";
-import { fmt } from "../utils";
+import { fmt, normalizeProductionCapacityStored } from "../utils";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -167,8 +167,8 @@ export function exportVendorPdfReport(vendor, scoringSections) {
   );
   if (hasProductionInfo) {
     const ratingText = escapeHtml(vendor.productionRating || "Не оценивалось");
-    const capacityRaw = String(vendor.productionCapacity ?? "").trim();
-    const capacityText = escapeHtml(capacityRaw ? `${capacityRaw} ед./мес.` : "—");
+    const capacityRaw = normalizeProductionCapacityStored(vendor.productionCapacity);
+    const capacityText = escapeHtml(`${capacityRaw} ед./мес.`);
     const verdictText = escapeHtml(getProductionVerdictText(vendor));
     const ratingPalette = getProductionRatingPalette(vendor.productionRating);
     const capacityPalette = getProductionCapacityPalette(capacityRaw);
